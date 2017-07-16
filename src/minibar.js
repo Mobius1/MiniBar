@@ -28,7 +28,7 @@ const defaultConfig = {
  * @param  {Object}   scope      Change the value of this
  * @return {Void}
  */
-function each(collection, callback, scope) {
+const each = (collection, callback, scope) => {
 	if ("[object Object]" === Object.prototype.toString.call(collection)) {
 		for (let d in collection) {
 			if (Object.prototype.hasOwnProperty.call(collection, d)) {
@@ -48,7 +48,7 @@ function each(collection, callback, scope) {
  * @param  {String} event
  * @param  {Function} callback
  */
-function on(target, event, callback) {
+const on = (target, event, callback) => {
 	target.addEventListener(event, callback, false);
 }
 
@@ -58,7 +58,7 @@ function on(target, event, callback) {
  * @param  {String} event
  * @param  {Function} callback
  */
-function off(target, event, callback) {
+const off = (target, event, callback) => {
 	target.removeEventListener(event, callback);
 }
 
@@ -68,7 +68,7 @@ function off(target, event, callback) {
  * @param  {(String|Object)} prop
  * @param  {String} val
  */
-function style(el, prop, val) {
+const style = (el, prop, val) => {
 	const css = el && el.style;
 	const isObj = "[object Object]" === Object.prototype.toString.call(prop);
 
@@ -95,11 +95,11 @@ function style(el, prop, val) {
 	}
 }
 
-function roundUp(val) {
+const roundUp = (val) => {
 	return (val + 0.5) << 0;
 }
 
-function roundDown(val) {
+const roundDown = (val) => {
 	return ~~val;
 }
 
@@ -109,7 +109,7 @@ function roundDown(val) {
  * @param  {Boolean} e 	Include margins
  * @return {Object}   	Formatted DOMRect copy
  */
-function rect(el) {
+const rect = (el) => {
 	const win = window;
 	const doc = document;
 	const body = doc.body;
@@ -129,7 +129,7 @@ function rect(el) {
 	};
 }
 
-function debounce(a, b, c) {
+const debounce = (a, b, c) => {
 	let d;
 	return function() {
 		const e = this;
@@ -180,7 +180,7 @@ const raf =
  * Get native scrollbar width
  * @return {Number} Scrollbar width
  */
-function getScrollBarWidth() {
+const getScrollBarWidth = () => {
 	let width = 0;
 	const div = document.createElement("div");
 
@@ -326,16 +326,12 @@ class MiniBar {
 		let track = this.tracks[axis];
 		let content = this.content;
 
-		// Calculate how far the user's mouse is from the top/left of the scrollbar (minus the dragOffset).
+
 		let offset = axisOffset - o[axis] - track[axis];
-
-		// Convert the mouse position into a percentage of the scrollbar height/width.
 		let ratio = offset / o.prop;
-
-		// Scroll the content by the same percentage.
 		let scroll = ratio * this[o.size];
 
-		// Update scrollTop / scrollLeft
+		// Update scroll position
 		raf(() => {
 			content[o.offset] = scroll;
 		});
