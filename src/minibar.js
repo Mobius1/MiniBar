@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.0.3
+ * MiniBar 0.0.4
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -21,6 +21,36 @@
 		trackClass: "mb-track",
 		barClass: "mb-bar",
 		visibleClass: "mb-visible"
+	};
+
+	/**
+	 * Object.assign polyfill (https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill)
+	 * @param  {Onject} target
+	 * @param  {Onject} varArgs
+	 * @return {Onject}
+	 */
+	var extend = function(target, varArgs) {
+		if (target == null) {
+			// TypeError if undefined or null
+			throw new TypeError('Cannot convert undefined or null to object');
+		}
+
+		var to = Object(target);
+
+		for (var index = 1; index < arguments.length; index++) {
+			var nextSource = arguments[index];
+
+			if (nextSource != null) {
+				// Skip over if undefined or null
+				for (var nextKey in nextSource) {
+					// Avoid bugs when hasOwnProperty is shadowed
+					if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+						to[nextKey] = nextSource[nextKey];
+					}
+				}
+			}
+		}
+		return to;
 	};
 
 	/**
@@ -96,14 +126,6 @@
 		}
 	};
 
-	var roundUp = function roundUp(val) {
-		return val + 0.5 << 0;
-	};
-
-	var roundDown = function roundDown(val) {
-		return ~ ~val;
-	};
-
 	/**
 	 * Get an element's DOMRect relative to the document instead of the viewport.
 	 * @param  {Object} t 	HTMLElement
@@ -121,28 +143,30 @@
 		return {
 			x: r.left + x,
 			y: r.top + y,
-			height: roundUp(r.height),
-			width: roundUp(r.width)
+			height: Math.round(r.height),
+			width: Math.round(r.width)
 		};
 	};
 
-	var debounce = function debounce(a, b, c) {
-		var d = undefined;
-		return function () {
-			var e = this;
-			var f = arguments;
-
-			var g = function g() {
-				d = null;
-				if (!c) a.apply(e, f);
+	/**
+	 * Returns a function, that, as long as it continues to be invoked, will not be triggered.
+	 * @param  {Function} func
+	 * @param  {Number} wait
+	 * @param  {Boolean} immediate
+	 * @return {Function}
+	 */
+	function debounce(func, wait, immediate) {
+		var timeout;
+		return function() {
+			var context = this, args = arguments;
+			var later = function() {
+				timeout = null;
+				if (!immediate) func.apply(context, args);
 			};
-
-			var h = c && !d;
-			clearTimeout(d);
-			d = setTimeout(g, b);
-			if (h) {
-				a.apply(e, f);
-			}
+			var callNow = immediate && !timeout;
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+			if (callNow) func.apply(context, args);
 		};
 	};
 
@@ -171,7 +195,7 @@
 	 * Get native scrollbar width
 	 * @return {Number} Scrollbar width
 	 */
-	var getScrollBarWidth = function getScrollBarWidth() {
+	var getScrollBarWidth = function() {
 		var width = 0;
 		var div = document.createElement("div");
 
@@ -184,6 +208,11 @@
 		return width;
 	};
 
+	/**
+	 * Main Library
+	 * @param {(String|Object)} content CSS3 selector string or node reference
+	 * @param {Object} options 			User defined options
+	 */
 	var MiniBar = function(content, options) {
 
 		this.content = content;
@@ -192,7 +221,7 @@
 			this.content = document.querySelector(content);
 		}
 
-		this.config = this.extend({}, defaultConfig, options);
+		this.config = extend({}, defaultConfig, options);
 
 		this.css = window.getComputedStyle(this.content);
 
@@ -212,6 +241,10 @@
 		this.init();
 	}
 
+	/**
+	 * Init instance
+	 * @return {Void}
+	 */
 	MiniBar.prototype.init = function init() {
 		var that = this;
 
@@ -266,16 +299,28 @@
 		on(document, "DOMContentLoaded", this.events.update);
 	};
 
+	/**
+	 * Scroll callback
+	 * @return {Void}
+	 */
 	MiniBar.prototype.scroll = function scroll() {
 		this.updateScrollBar("x");
 		this.updateScrollBar("y");
 	};
 
+	/**
+	 * Mouseenter callack
+	 * @return {Void}
+	 */
 	MiniBar.prototype.mouseenter = function mouseenter() {
 		this.updateScrollBar("x");
 		this.updateScrollBar("y");
 	};
 
+	/**
+	 * Mousedown callack
+	 * @return {Void}
+	 */
 	MiniBar.prototype.mousedown = function mousedown(e) {
 		e.preventDefault();
 
@@ -308,6 +353,10 @@
 		on(document, "mouseup", this.events.mouseup);
 	};
 
+	/**
+	 * Mousemove callack
+	 * @return {Void}
+	 */
 	MiniBar.prototype.mousemove = function mousemove(e) {
 		e.preventDefault();
 
@@ -327,6 +376,10 @@
 		});
 	};
 
+	/**
+	 * Mouseup callack
+	 * @return {Void}
+	 */
 	MiniBar.prototype.mouseup = function mouseup() {
 		this.origin = {};
 		this.currentAxis = null;
@@ -337,13 +390,17 @@
 		off(document, "mouseup", this.events.mouseup);
 	};
 
+	/**
+	 * Update cached values and recalculate sizes / positions
+	 * @return {Void}
+	 */
 	MiniBar.prototype.update = function update() {
 		var that = this;
 
 		// Cache the dimensions
 		each(this.tracks, function (i, track) {
-			that.extend(track, rect(track.node));
-			that.extend(that.bars[i], rect(that.bars[i].node));
+			extend(track, rect(track.node));
+			extend(that.bars[i], rect(that.bars[i].node));
 		});
 
 		this.rect = rect(this.container);
@@ -353,12 +410,16 @@
 		this.scrollHeight = this.content.scrollHeight;
 		this.scrollWidth = this.content.scrollWidth;
 
+		// Do we need horizontal scrolling?
 		var scrollX = this.scrollWidth > this.rect.width;
+
+		// Do we need vertical scrolling?
 		var scrollY = this.scrollHeight > this.rect.height;
 
 		this.container.classList.toggle("mb-scroll-x", scrollX);
 		this.container.classList.toggle("mb-scroll-y", scrollY);
 
+		// Style the content
 		style(this.content, {
 			overflow: "auto",
 			marginBottom: scrollX ? -this.scrollbarSize : "",
@@ -370,10 +431,15 @@
 		this.scrollX = scrollX;
 		this.scrollY = scrollY;
 
+		// Update scrollbars
 		this.updateScrollBar("x");
 		this.updateScrollBar("y");
 	};
 
+	/**
+	 * Update a scrollbar's size and position
+	 * @return {Void}
+	 */
 	MiniBar.prototype.updateScrollBar = function updateScrollBar() {
 		var that = this;
 
@@ -394,14 +460,18 @@
 		var barRatio = barSize / contentSize;
 		var scrollRatio = scrollOffset / (contentSize - barSize);
 
-		css[d] = Math.max(roundDown(barRatio * barSize), this.config.minBarSize);
-		css[o] = roundDown((barSize - css[d]) * scrollRatio);
+		css[d] = Math.max(Math.floor(barRatio * barSize), this.config.minBarSize);
+		css[o] = Math.floor((barSize - css[d]) * scrollRatio);
 
 		raf(function () {
 			style(that.bars[axis].node, css);
 		});
 	};
 
+	/**
+	 * Destroy instance
+	 * @return {Void}
+	 */
 	MiniBar.prototype.destroy = function destroy() {
 		var that = this;
 
@@ -416,30 +486,6 @@
 		this.content.removeAttribute("style");
 
 		this.container.parentNode.replaceChild(this.content, this.container);
-	};
-
-	MiniBar.prototype.extend = function extend(target, varArgs) {
-		if (target == null) {
-			// TypeError if undefined or null
-			throw new TypeError('Cannot convert undefined or null to object');
-		}
-
-		var to = Object(target);
-
-		for (var index = 1; index < arguments.length; index++) {
-			var nextSource = arguments[index];
-
-			if (nextSource != null) {
-				// Skip over if undefined or null
-				for (var nextKey in nextSource) {
-					// Avoid bugs when hasOwnProperty is shadowed
-					if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-						to[nextKey] = nextSource[nextKey];
-					}
-				}
-			}
-		}
-		return to;
 	};
 
 	root.MiniBar = MiniBar;

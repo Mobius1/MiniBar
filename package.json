@@ -1,6 +1,6 @@
 {
   "name": "minibarjs",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A lightweight, performant and dependency-free scrollbar library written in vanilla javascript.",
   "main": "dist/minibar.min.js",
   "directories": {
