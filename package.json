@@ -1,0 +1,26 @@
+{
+  "name": "minibarjs",
+  "version": "0.0.3",
+  "description": "A lightweight, performant and dependency-free scrollbar library written in vanilla javascript.",
+  "main": "dist/minibar.min.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mobius1/MiniBar.git"
+  },
+  "keywords": [
+    "scrollbar",
+    "javascript"
+  ],
+  "author": "Karl Saunders",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Mobius1/MiniBar/issues"
+  },
+  "homepage": "https://github.com/Mobius1/MiniBar#readme"
+}
