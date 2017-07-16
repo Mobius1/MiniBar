@@ -1,200 +1,191 @@
 /*!
- * MiniBar 0.0.2
+ * MiniBar 0.0.3
  * http://mobius.ovh/
  *
  * Released under the MIT license
  */
+(function(root) {
 
+	"use strict";
 
-/**
- * Default configuration properties
- * @type {Object}
- */
-const defaultConfig = {
-	minBarSize: 50,
-	alwaysShowBars: false,
+	/**
+	 * Default configuration properties
+	 * @type {Object}
+	 */
+	var defaultConfig = {
+		minBarSize: 50,
+		alwaysShowBars: false,
 
-	containerClass: "mb-container",
-	contentClass: "mb-content",
-	trackClass: "mb-track",
-	barClass: "mb-bar",
-	visibleClass: "mb-visible"
-};
+		containerClass: "mb-container",
+		contentClass: "mb-content",
+		trackClass: "mb-track",
+		barClass: "mb-bar",
+		visibleClass: "mb-visible"
+	};
 
-/**
- * Iterator helper
- * @param  {(Array|Object)}   collection Any object, array or array-like collection.
- * @param  {Function} callback   The callback function
- * @param  {Object}   scope      Change the value of this
- * @return {Void}
- */
-const each = (collection, callback, scope) => {
-	if ("[object Object]" === Object.prototype.toString.call(collection)) {
-		for (let d in collection) {
-			if (Object.prototype.hasOwnProperty.call(collection, d)) {
-				callback.call(scope, d, collection[d]);
-			}
-		}
-	} else {
-		for (let e = 0, f = collection.length; e < f; e++) {
-			callback.call(scope, e, collection[e]);
-		}
-	}
-}
-
-/**
- * Add event listener to target
- * @param  {Object} target
- * @param  {String} event
- * @param  {Function} callback
- */
-const on = (target, event, callback) => {
-	target.addEventListener(event, callback, false);
-}
-
-/**
- * Remove event listener to target
- * @param  {Object} target
- * @param  {String} event
- * @param  {Function} callback
- */
-const off = (target, event, callback) => {
-	target.removeEventListener(event, callback);
-}
-
-/**
- * Mass assign style properties
- * @param  {Object} el
- * @param  {(String|Object)} prop
- * @param  {String} val
- */
-const style = (el, prop, val) => {
-	const css = el && el.style;
-	const isObj = "[object Object]" === Object.prototype.toString.call(prop);
-
-	if (css) {
-		if (val === void 0 && !isObj) {
-			val = window.getComputedStyle(el);
-			return prop === void 0 ? val : val[prop];
-		} else {
-			if (isObj) {
-				each(prop, (p, v) => {
-					if (!(p in css)) {
-						p = `-webkit-${p}`;
-					}
-					css[p] = v + (typeof v === "string" ? "" : p === "opacity" ? "" : "px");
-				});
-			} else {
-				if (!(prop in css)) {
-					prop = `-webkit-${prop}`;
+	/**
+	 * Iterator helper
+	 * @param  {(Array|Object)}   collection Any object, array or array-like collection.
+	 * @param  {Function} callback   The callback function
+	 * @param  {Object}   scope      Change the value of this
+	 * @return {Void}
+	 */
+	var each = function each(collection, callback, scope) {
+		if ("[object Object]" === Object.prototype.toString.call(collection)) {
+			for (var d in collection) {
+				if (Object.prototype.hasOwnProperty.call(collection, d)) {
+					callback.call(scope, d, collection[d]);
 				}
-				css[prop] =
-					val + (typeof val === "string" ? "" : prop === "opacity" ? "" : "px");
+			}
+		} else {
+			for (var e = 0, f = collection.length; e < f; e++) {
+				callback.call(scope, e, collection[e]);
 			}
 		}
-	}
-}
-
-const roundUp = (val) => {
-	return (val + 0.5) << 0;
-}
-
-const roundDown = (val) => {
-	return ~~val;
-}
-
-/**
- * Get an element's DOMRect relative to the document instead of the viewport.
- * @param  {Object} t 	HTMLElement
- * @param  {Boolean} e 	Include margins
- * @return {Object}   	Formatted DOMRect copy
- */
-const rect = (el) => {
-	const win = window;
-	const doc = document;
-	const body = doc.body;
-	const r = el.getBoundingClientRect();
-	const x = win.pageXOffset !== undefined ?
-		win.pageXOffset :
-		(doc.documentElement || body.parentNode || body).scrollLeft;
-	const y = win.pageYOffset !== undefined ?
-		win.pageYOffset :
-		(doc.documentElement || body.parentNode || body).scrollTop;
-
-	return {
-		x: r.left + x,
-		y: r.top + y,
-		height: roundUp(r.height),
-		width: roundUp(r.width)
 	};
-}
 
-const debounce = (a, b, c) => {
-	let d;
-	return function() {
-		const e = this;
-		const f = arguments;
+	/**
+	 * Add event listener to target
+	 * @param  {Object} target
+	 * @param  {String} event
+	 * @param  {Function} callback
+	 */
+	var on = function on(target, event, callback) {
+		target.addEventListener(event, callback, false);
+	};
 
-		const g = () => {
-			d = null;
-			if (!c) a.apply(e, f);
-		};
+	/**
+	 * Remove event listener to target
+	 * @param  {Object} target
+	 * @param  {String} event
+	 * @param  {Function} callback
+	 */
+	var off = function off(target, event, callback) {
+		target.removeEventListener(event, callback);
+	};
 
-		const h = c && !d;
-		clearTimeout(d);
-		d = setTimeout(g, b);
-		if (h) {
-			a.apply(e, f);
+	/**
+	 * Mass assign style properties
+	 * @param  {Object} el
+	 * @param  {(String|Object)} prop
+	 * @param  {String} val
+	 */
+	var style = function style(el, prop, val) {
+		var css = el && el.style;
+		var isObj = "[object Object]" === Object.prototype.toString.call(prop);
+
+		if (css) {
+			if (val === void 0 && !isObj) {
+				val = window.getComputedStyle(el);
+				return prop === void 0 ? val : val[prop];
+			} else {
+				if (isObj) {
+					each(prop, function (p, v) {
+						if (!(p in css)) {
+							p = "-webkit-" + p;
+						}
+						css[p] = v + (typeof v === "string" ? "" : p === "opacity" ? "" : "px");
+					});
+				} else {
+					if (!(prop in css)) {
+						prop = "-webkit-" + prop;
+					}
+					css[prop] = val + (typeof val === "string" ? "" : prop === "opacity" ? "" : "px");
+				}
+			}
 		}
 	};
-}
 
-/**
- * requestAnimationFrame Polyfill
- */
-const raf =
-	window.requestAnimationFrame ||
-	(() => {
-		let timeLast = 0;
+	var roundUp = function roundUp(val) {
+		return val + 0.5 << 0;
+	};
 
-		return (
-			window.webkitRequestAnimationFrame ||
-			window.mozRequestAnimationFrame ||
-			(callback => {
-				const timeCurrent = new Date().getTime();
-				let timeDelta;
+	var roundDown = function roundDown(val) {
+		return ~ ~val;
+	};
 
-				/* Dynamically set the delay on a per-tick basis to more closely match 60fps. */
-				/* Technique by Erik Moller. MIT license: https://gist.github.com/paulirish/1579671. */
-				timeDelta = Math.max(0, 16 - (timeCurrent - timeLast));
-				timeLast = timeCurrent + timeDelta;
+	/**
+	 * Get an element's DOMRect relative to the document instead of the viewport.
+	 * @param  {Object} t 	HTMLElement
+	 * @param  {Boolean} e 	Include margins
+	 * @return {Object}   	Formatted DOMRect copy
+	 */
+	var rect = function rect(el) {
+		var win = window;
+		var doc = document;
+		var body = doc.body;
+		var r = el.getBoundingClientRect();
+		var x = win.pageXOffset !== undefined ? win.pageXOffset : (doc.documentElement || body.parentNode || body).scrollLeft;
+		var y = win.pageYOffset !== undefined ? win.pageYOffset : (doc.documentElement || body.parentNode || body).scrollTop;
 
-				return setTimeout(() => {
-					callback(timeCurrent + timeDelta);
-				}, timeDelta);
-			})
-		);
-	})();
+		return {
+			x: r.left + x,
+			y: r.top + y,
+			height: roundUp(r.height),
+			width: roundUp(r.width)
+		};
+	};
 
-/**
- * Get native scrollbar width
- * @return {Number} Scrollbar width
- */
-const getScrollBarWidth = () => {
-	let width = 0;
-	const div = document.createElement("div");
+	var debounce = function debounce(a, b, c) {
+		var d = undefined;
+		return function () {
+			var e = this;
+			var f = arguments;
 
-	div.style.cssText = `width: 100; height: 100; overflow: scroll; position: absolute; top: -9999;`;
+			var g = function g() {
+				d = null;
+				if (!c) a.apply(e, f);
+			};
 
-	document.body.appendChild(div);
-	width = div.offsetWidth - div.clientWidth;
-	document.body.removeChild(div);
+			var h = c && !d;
+			clearTimeout(d);
+			d = setTimeout(g, b);
+			if (h) {
+				a.apply(e, f);
+			}
+		};
+	};
 
-	return width;
-}
+	/**
+	 * requestAnimationFrame Polyfill
+	 */
+	var raf = window.requestAnimationFrame || function () {
+		var timeLast = 0;
 
-class MiniBar {
-	constructor(content, options) {
+		return window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) {
+			var timeCurrent = new Date().getTime();
+			var timeDelta = undefined;
+
+			/* Dynamically set the delay on a per-tick basis to more closely match 60fps. */
+			/* Technique by Erik Moller. MIT license: https://gist.github.com/paulirish/1579671. */
+			timeDelta = Math.max(0, 16 - (timeCurrent - timeLast));
+			timeLast = timeCurrent + timeDelta;
+
+			return setTimeout(function () {
+				callback(timeCurrent + timeDelta);
+			}, timeDelta);
+		};
+	}();
+
+	/**
+	 * Get native scrollbar width
+	 * @return {Number} Scrollbar width
+	 */
+	var getScrollBarWidth = function getScrollBarWidth() {
+		var width = 0;
+		var div = document.createElement("div");
+
+		div.style.cssText = "width: 100; height: 100; overflow: scroll; position: absolute; top: -9999;";
+
+		document.body.appendChild(div);
+		width = div.offsetWidth - div.clientWidth;
+		document.body.removeChild(div);
+
+		return width;
+	};
+
+	var MiniBar = function(content, options) {
+
 		this.content = content;
 
 		if (typeof content === "string") {
@@ -213,7 +204,7 @@ class MiniBar {
 			mouseenter: this.mouseenter.bind(this),
 			mousedown: this.mousedown.bind(this),
 			mousemove: this.mousemove.bind(this),
-			mouseup: this.mouseup.bind(this),
+			mouseup: this.mouseup.bind(this)
 		};
 
 		this.events.debounce = debounce(this.events.update, 50);
@@ -221,7 +212,9 @@ class MiniBar {
 		this.init();
 	}
 
-	init() {
+	MiniBar.prototype.init = function init() {
+		var that = this;
+
 		this.content.classList.add(this.config.contentClass);
 
 		this.container = document.createElement("div");
@@ -249,21 +242,19 @@ class MiniBar {
 			}
 		};
 
-		each(this.tracks, (i, track) => {
-			track.node.classList.add(this.config.trackClass, `${this.config.trackClass}-${i}`);
-			this.bars[i].node.classList.add(this.config.barClass);
-			track.node.appendChild(this.bars[i].node);
-			this.container.appendChild(track.node);
+		each(this.tracks, function (i, track) {
+			track.node.classList.add(that.config.trackClass, that.config.trackClass + "-" + i);
+			that.bars[i].node.classList.add(that.config.barClass);
+			track.node.appendChild(that.bars[i].node);
+			that.container.appendChild(track.node);
 
-			on(this.bars[i].node, "mousedown", this.events.mousedown);
+			on(that.bars[i].node, "mousedown", that.events.mousedown);
 		});
 
 		this.content.parentNode.insertBefore(this.container, this.content);
 		this.container.appendChild(this.content);
 
-		this.container.style.position = this.css.position === "static" ?
-			"relative" :
-			this.css.position;
+		this.container.style.position = this.css.position === "static" ? "relative" : this.css.position;
 
 		this.update();
 
@@ -273,24 +264,24 @@ class MiniBar {
 		on(window, "resize", this.events.debounce);
 
 		on(document, "DOMContentLoaded", this.events.update);
-	}
+	};
 
-	scroll() {
+	MiniBar.prototype.scroll = function scroll() {
 		this.updateScrollBar("x");
 		this.updateScrollBar("y");
-	}
+	};
 
-	mouseenter() {
+	MiniBar.prototype.mouseenter = function mouseenter() {
 		this.updateScrollBar("x");
 		this.updateScrollBar("y");
-	}
+	};
 
-	mousedown(e) {
+	MiniBar.prototype.mousedown = function mousedown(e) {
 		e.preventDefault();
 
-		let currentAxis = e.target === this.bars.x.node ? "x" : "y";
-		let currentBar = this.bars[currentAxis];
-		let currentTrack = this.tracks[currentAxis];
+		var currentAxis = e.target === this.bars.x.node ? "x" : "y";
+		var currentBar = this.bars[currentAxis];
+		var currentTrack = this.tracks[currentAxis];
 
 		this.currentAxis = currentAxis;
 
@@ -305,39 +296,38 @@ class MiniBar {
 		this.origin = {
 			x: e.pageX - currentBar.x,
 			y: e.pageY - currentBar.y,
-			axis: `page${currentAxis.toUpperCase()}`,
+			axis: "page" + currentAxis.toUpperCase(),
 			prop: currentAxis === "x" ? currentTrack.width : currentTrack.height,
 			size: currentAxis === "x" ? "scrollWidth" : "scrollHeight",
-			offset: currentAxis === "x" ? "scrollLeft" : "scrollTop",
+			offset: currentAxis === "x" ? "scrollLeft" : "scrollTop"
 		};
 
 		// Attach the mousemove and mouseup event listeners now
 		// instead of permanently having them on
 		on(document, "mousemove", this.events.mousemove);
 		on(document, "mouseup", this.events.mouseup);
-	}
+	};
 
-	mousemove(e) {
+	MiniBar.prototype.mousemove = function mousemove(e) {
 		e.preventDefault();
 
-		let o = this.origin;
-		let axis = this.currentAxis;
-		let axisOffset = e[o.axis];
-		let track = this.tracks[axis];
-		let content = this.content;
+		var o = this.origin;
+		var axis = this.currentAxis;
+		var axisOffset = e[o.axis];
+		var track = this.tracks[axis];
+		var content = this.content;
 
-
-		let offset = axisOffset - o[axis] - track[axis];
-		let ratio = offset / o.prop;
-		let scroll = ratio * this[o.size];
+		var offset = axisOffset - o[axis] - track[axis];
+		var ratio = offset / o.prop;
+		var scroll = ratio * this[o.size];
 
 		// Update scroll position
-		raf(() => {
+		raf(function () {
 			content[o.offset] = scroll;
 		});
-	}
+	};
 
-	mouseup() {
+	MiniBar.prototype.mouseup = function mouseup() {
 		this.origin = {};
 		this.currentAxis = null;
 
@@ -345,14 +335,15 @@ class MiniBar {
 
 		off(document, "mousemove", this.events.mousemove);
 		off(document, "mouseup", this.events.mouseup);
-	}
+	};
 
-	update() {
+	MiniBar.prototype.update = function update() {
+		var that = this;
 
 		// Cache the dimensions
-		each(this.tracks, (i, track) => {
-			this.extend(track, rect(track.node));
-			this.extend(this.bars[i], rect(this.bars[i].node));
+		each(this.tracks, function (i, track) {
+			that.extend(track, rect(track.node));
+			that.extend(that.bars[i], rect(that.bars[i].node));
 		});
 
 		this.rect = rect(this.container);
@@ -362,8 +353,8 @@ class MiniBar {
 		this.scrollHeight = this.content.scrollHeight;
 		this.scrollWidth = this.content.scrollWidth;
 
-		let scrollX = this.scrollWidth > this.rect.width;
-		let scrollY = this.scrollHeight > this.rect.height;
+		var scrollX = this.scrollWidth > this.rect.width;
+		var scrollY = this.scrollHeight > this.rect.height;
 
 		this.container.classList.toggle("mb-scroll-x", scrollX);
 		this.container.classList.toggle("mb-scroll-y", scrollY);
@@ -381,35 +372,41 @@ class MiniBar {
 
 		this.updateScrollBar("x");
 		this.updateScrollBar("y");
-	}
+	};
 
-	updateScrollBar(axis = "y") {
-		let css = {};
-		let o = axis === "x" ? "left" : "top";
-		let d = axis === "x" ? "width" : "height";
-		let scroll = axis === "x" ? "scrollLeft" : "scrollTop";
-		let size = axis === "x" ? "scrollWidth" : "scrollHeight";
-		let scrollbar = this.bars[axis].node;
-		let contentSize = this[size];
-		let barSize = this.tracks[axis][d];
+	MiniBar.prototype.updateScrollBar = function updateScrollBar() {
+		var that = this;
+
+		var axis = arguments.length <= 0 || arguments[0] === undefined ? "y" : arguments[0];
+
+		var css = {};
+		var o = axis === "x" ? "left" : "top";
+		var d = axis === "x" ? "width" : "height";
+		var scroll = axis === "x" ? "scrollLeft" : "scrollTop";
+		var size = axis === "x" ? "scrollWidth" : "scrollHeight";
+		var scrollbar = this.bars[axis].node;
+		var contentSize = this[size];
+		var barSize = this.tracks[axis][d];
 
 		// We need a live value not cached
-		let scrollOffset = this.content[scroll];
+		var scrollOffset = this.content[scroll];
 
-		let barRatio = barSize / contentSize;
-		let scrollRatio = scrollOffset / (contentSize - barSize);
+		var barRatio = barSize / contentSize;
+		var scrollRatio = scrollOffset / (contentSize - barSize);
 
 		css[d] = Math.max(roundDown(barRatio * barSize), this.config.minBarSize);
 		css[o] = roundDown((barSize - css[d]) * scrollRatio);
 
-		raf(() => {
-			style(this.bars[axis].node, css);
+		raf(function () {
+			style(that.bars[axis].node, css);
 		});
-	}
+	};
 
-	destroy() {
-		each(this.tracks, (i, track) => {
-			off(this.bars[i].node, "mousedown", this.events.mousedown);
+	MiniBar.prototype.destroy = function destroy() {
+		var that = this;
+
+		each(this.tracks, function (i, track) {
+			off(that.bars[i].node, "mousedown", that.events.mousedown);
 		});
 		off(this.content, "scroll", this.events.scroll);
 		off(this.container, "mouseenter", this.events.mouseenter);
@@ -419,20 +416,22 @@ class MiniBar {
 		this.content.removeAttribute("style");
 
 		this.container.parentNode.replaceChild(this.content, this.container);
-	}
+	};
 
-	extend(target, varArgs) {
-		if (target == null) { // TypeError if undefined or null
+	MiniBar.prototype.extend = function extend(target, varArgs) {
+		if (target == null) {
+			// TypeError if undefined or null
 			throw new TypeError('Cannot convert undefined or null to object');
 		}
 
-		const to = Object(target);
+		var to = Object(target);
 
-		for (let index = 1; index < arguments.length; index++) {
-			const nextSource = arguments[index];
+		for (var index = 1; index < arguments.length; index++) {
+			var nextSource = arguments[index];
 
-			if (nextSource != null) { // Skip over if undefined or null
-				for (const nextKey in nextSource) {
+			if (nextSource != null) {
+				// Skip over if undefined or null
+				for (var nextKey in nextSource) {
 					// Avoid bugs when hasOwnProperty is shadowed
 					if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
 						to[nextKey] = nextSource[nextKey];
@@ -441,5 +440,8 @@ class MiniBar {
 			}
 		}
 		return to;
-	}
-}
+	};
+
+	root.MiniBar = MiniBar;
+
+}(this));
