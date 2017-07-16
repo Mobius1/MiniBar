@@ -4,7 +4,7 @@
   "authors": [
     "Karl Saunders <mobius1@gmx.com>"
   ],
-  "description": "A lightweight, performant and dependency-free scrollbar library written in vanilla javascript.",
+  "description": "A lightweight, dependency-free scrollbar library written in vanilla javascript.",
   "main": "dist/minibar.min.js",
   "keywords": [
     "scrollbar",
