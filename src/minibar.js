@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.0.1
+ * MiniBar 0.0.2
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -11,7 +11,14 @@
  * @type {Object}
  */
 const defaultConfig = {
-	minBarSize: 50
+	minBarSize: 50,
+	alwaysShowBars: false,
+
+	containerClass: "mb-container",
+	contentClass: "mb-content",
+	trackClass: "mb-track",
+	barClass: "mb-bar",
+	visibleClass: "mb-visible"
 };
 
 /**
@@ -107,12 +114,12 @@ function rect(el) {
 	const doc = document;
 	const body = doc.body;
 	const r = el.getBoundingClientRect();
-	const x = win.pageXOffset !== undefined
-		? win.pageXOffset
-		: (doc.documentElement || body.parentNode || body).scrollLeft;
-	const y = win.pageYOffset !== undefined
-		? win.pageYOffset
-		: (doc.documentElement || body.parentNode || body).scrollTop;
+	const x = win.pageXOffset !== undefined ?
+		win.pageXOffset :
+		(doc.documentElement || body.parentNode || body).scrollLeft;
+	const y = win.pageYOffset !== undefined ?
+		win.pageYOffset :
+		(doc.documentElement || body.parentNode || body).scrollTop;
 
 	return {
 		x: r.left + x,
@@ -215,24 +222,36 @@ class MiniBar {
 	}
 
 	init() {
-		this.content.classList.add("mb-content");
+		this.content.classList.add(this.config.contentClass);
 
 		this.container = document.createElement("div");
-		this.container.classList.add("mb-container");
+		this.container.classList.add(this.config.containerClass);
+
+		if (this.config.alwaysShowBars) {
+			this.container.classList.add(this.config.visibleClass);
+		}
 
 		this.bars = {
-			x: { node: document.createElement("div") },
-			y: { node: document.createElement("div") }
+			x: {
+				node: document.createElement("div")
+			},
+			y: {
+				node: document.createElement("div")
+			}
 		};
 
 		this.tracks = {
-			x: { node: document.createElement("div") },
-			y: { node: document.createElement("div") }
+			x: {
+				node: document.createElement("div")
+			},
+			y: {
+				node: document.createElement("div")
+			}
 		};
 
 		each(this.tracks, (i, track) => {
-			track.node.classList.add(`mb-track`, `mb-track-${i}`);
-			this.bars[i].node.classList.add(`mb-bar`);
+			track.node.classList.add(this.config.trackClass, `${this.config.trackClass}-${i}`);
+			this.bars[i].node.classList.add(this.config.barClass);
 			track.node.appendChild(this.bars[i].node);
 			this.container.appendChild(track.node);
 
@@ -242,9 +261,9 @@ class MiniBar {
 		this.content.parentNode.insertBefore(this.container, this.content);
 		this.container.appendChild(this.content);
 
-		this.container.style.position = this.css.position === "static"
-			? "relative"
-			: this.css.position;
+		this.container.style.position = this.css.position === "static" ?
+			"relative" :
+			this.css.position;
 
 		this.update();
 
@@ -252,6 +271,8 @@ class MiniBar {
 		on(this.container, "mouseenter", this.events.mouseenter);
 
 		on(window, "resize", this.events.debounce);
+
+		on(document, "DOMContentLoaded", this.events.update);
 	}
 
 	scroll() {
@@ -274,9 +295,13 @@ class MiniBar {
 		this.currentAxis = currentAxis;
 
 		// Lets do all the nasty reflow-triggering stuff before mousemove
-		// otherwise it'll be a shit-show
+		// otherwise it'll be a shit-show during mousemove
 		this.update();
 
+		// Keep the tracks visible during drag
+		this.container.classList.add(this.config.visibleClass);
+
+		// Save data for use during mousemove
 		this.origin = {
 			x: e.pageX - currentBar.x,
 			y: e.pageY - currentBar.y,
@@ -286,6 +311,8 @@ class MiniBar {
 			offset: currentAxis === "x" ? "scrollLeft" : "scrollTop",
 		};
 
+		// Attach the mousemove and mouseup event listeners now
+		// instead of permanently having them on
 		on(document, "mousemove", this.events.mousemove);
 		on(document, "mouseup", this.events.mouseup);
 	}
@@ -318,6 +345,8 @@ class MiniBar {
 		this.origin = {};
 		this.currentAxis = null;
 
+		this.container.classList.toggle(this.config.visibleClass, this.config.alwaysShowBars);
+
 		off(document, "mousemove", this.events.mousemove);
 		off(document, "mouseup", this.events.mouseup);
 	}
@@ -344,7 +373,7 @@ class MiniBar {
 		this.container.classList.toggle("mb-scroll-y", scrollY);
 
 		style(this.content, {
-			overflow : "auto",
+			overflow: "auto",
 			marginBottom: scrollX ? -this.scrollbarSize : "",
 			paddingBottom: scrollX ? this.scrollbarSize : "",
 			marginRight: scrollY ? -this.scrollbarSize : "",
@@ -397,24 +426,24 @@ class MiniBar {
 	}
 
 	extend(target, varArgs) {
-    if (target == null) { // TypeError if undefined or null
-      throw new TypeError('Cannot convert undefined or null to object');
-    }
+		if (target == null) { // TypeError if undefined or null
+			throw new TypeError('Cannot convert undefined or null to object');
+		}
 
-    var to = Object(target);
+		const to = Object(target);
 
-    for (var index = 1; index < arguments.length; index++) {
-      var nextSource = arguments[index];
+		for (let index = 1; index < arguments.length; index++) {
+			const nextSource = arguments[index];
 
-      if (nextSource != null) { // Skip over if undefined or null
-        for (var nextKey in nextSource) {
-          // Avoid bugs when hasOwnProperty is shadowed
-          if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-            to[nextKey] = nextSource[nextKey];
-          }
-        }
-      }
-    }
-    return to;
+			if (nextSource != null) { // Skip over if undefined or null
+				for (const nextKey in nextSource) {
+					// Avoid bugs when hasOwnProperty is shadowed
+					if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+						to[nextKey] = nextSource[nextKey];
+					}
+				}
+			}
+		}
+		return to;
 	}
 }
