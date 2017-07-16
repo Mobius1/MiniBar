@@ -42,9 +42,7 @@ CDNs courtesy of [unpkg](https://unpkg.com/#/)
 
 ## Initialisation
 
-#### Javascript
-
-You can then instantiate MiniBar by passing a reference to your content as the first parameter of the constructor as either a DOM node or a CSS3 selector string:
+You can instantiate MiniBar by passing a reference to your content as the first parameter of the constructor as either a DOM node or a CSS3 selector string:
 
 ```javascript
 new MiniBar(document.getElementById('#myContent'));
@@ -54,7 +52,7 @@ new MiniBar(document.getElementById('#myContent'));
 new MiniBar('#myContent');
 ```
 
-MiniBar accepts the options object as a second parameter of the constructor:
+MiniBar also accepts an object as a second parameter of the constructor for user defined options:
 
 ```javascript
 new MiniBar('#mySelect', {
@@ -62,6 +60,23 @@ new MiniBar('#mySelect', {
 	alwaysShowBars: true
 });
 ```
+
+---
+
+## Options
+
+### `minBarSize`
+#### Type: `Number`
+#### Default: `50`
+
+Sets the minimum size of the scrollbars. This can prevent the scollbar becoming to small when you have a ton of content.
+
+
+### `alwaysShowBars`
+#### Type: `Boolean`
+#### Default: `false`
+
+By default the scrollbars aren't visible until hovering over the content. Set this to `true` to keep the scrollbars visible at all times.
 
 ---
 
