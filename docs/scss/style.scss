@@ -1,0 +1,181 @@
+@font-face {
+	src: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/86186/gothamrnd-medium.ttf");
+	font-family: "Gotham Rounded";
+}
+
+$dark: #4D394B;
+$darker: #2E222D;
+
+body {
+	margin: 0;
+	overflow: hidden;
+	font-family: "Gotham Rounded";
+	font-size: 15px;
+	color: #fff;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background-color: $darker;
+}
+
+section {
+	width: 100vw;
+	display: flex;
+	align-items: stretch;
+	justify-content: space-around;
+	flex-wrap: wrap;
+}
+
+h1 {
+	padding: 10px 20px;
+}
+
+h3 {
+	text-transform: uppercase;
+}
+
+p {
+	color: #ccc;
+}
+
+.container {
+	width: calc((100vw / 3) - 20px);
+	height: 38vh;
+	padding: 20px;
+	margin-bottom: 20px;
+	box-sizing: border-box;
+	background-color: $dark;
+	border-radius: 5px;
+}
+
+.main-title {
+	border-bottom: 1px solid #fff;
+	padding-bottom: 15px;
+}
+
+
+
+// LIB
+
+.mb-container {
+	overflow: hidden;
+	height: 100%;
+	width: 100%;
+}
+
+.mb-container:hover, .mb-visible {
+	&.mb-scroll-x {
+		.mb-track-x {
+			opacity: 1;
+		}
+	}
+
+	&.mb-scroll-y {
+		.mb-track-y {
+			opacity: 1;
+		}
+	}
+}
+
+.mb-content {
+	overflow: auto;
+	height: 100%;
+	width: auto;
+	box-sizing: content-box;	
+}
+
+.mb-track {
+	position: absolute;
+	transition: opacity 250ms;
+}
+
+.mb-bar {
+	position: absolute;
+	background-color: rgba(0,0,0,0.2);
+	border-radius: 5px;
+	z-index: 10;
+	transform-style: preserve-3d;
+}
+
+.mb-track-x {
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 10px;
+	opacity: 0;
+	
+	.mb-bar {
+		left: 0;
+		top: 0;
+		height: 100%;
+		min-width: 10px;
+	}	
+}
+
+.mb-track-y {
+	right: 0;
+	top: 0;
+	height: 100%;
+	width: 10px;
+	opacity: 0;
+	
+	.mb-bar {
+		right: 0;
+		top: 0;
+		width: 100%;
+		min-height: 10px;
+	}
+}	
+
+
+// DEMO
+
+
+.mb-bar {
+	background-color: #4C9689;
+}
+
+.container:nth-child(3) {
+	.mb-track {
+		background-color: $darker;
+		border-radius: 5px;
+	}
+}
+
+.container:nth-child(4) {
+	.mb-track {
+		background-color: $darker;
+	}
+	
+	.mb-track-x {
+		height: 2px;
+	}	
+	.mb-track-y {
+		width: 2px;
+		right: 4px;
+		
+		.mb-bar {
+			width: 10px;
+			left: -4px;
+		}
+	}
+}
+
+.container:nth-child(5) {
+	
+	.mb-track {
+		background-color: $darker;
+	}
+		
+	.mb-bar {
+		border-radius: 0;
+	}
+}
+
+.container:nth-child(6) {
+	.mb-track {
+		background-color: transparent
+	}
+}
