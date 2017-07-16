@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.0.4
+ * MiniBar 0.0.5
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -10,10 +10,10 @@
 	width: 100%;
 }
 
-.mb-container:hover.mb-scroll-x .mb-track-x, .mb-visible.mb-scroll-x .mb-track-x {
+.mb-container:hover.mb-scroll-x > .mb-track-x, .mb-visible.mb-scroll-x > .mb-track-x {
 	opacity: 1;
 }
-.mb-container:hover.mb-scroll-y .mb-track-y, .mb-visible.mb-scroll-y .mb-track-y {
+.mb-container:hover.mb-scroll-y > .mb-track-y, .mb-visible.mb-scroll-y > .mb-track-y {
 	opacity: 1;
 }
 

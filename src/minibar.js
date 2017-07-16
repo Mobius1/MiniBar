@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.0.4
+ * MiniBar 0.0.5
  * http://mobius.ovh/
  *
  * Released under the MIT license
