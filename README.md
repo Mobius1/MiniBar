@@ -3,6 +3,8 @@
 
 A lightweight, performant and dependency-free scrollbar library written in vanilla javascript.
 
+[Demo](https://s.codepen.io/Mobius1/debug/yXrLVB/PBrNWxpWReyA)
+
 ---
 
 Copyright © 2017 Karl Saunders | MIT license
