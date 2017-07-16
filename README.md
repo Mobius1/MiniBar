@@ -11,4 +11,58 @@ A lightweight, performant and dependency-free scrollbar library written in vanil
 
 ---
 
+## Install
+
+### bower
+
+```
+bower install minibarjs
+```
+
+### npm
+
+```
+npm install minibarjs
+```
+
+## Browser
+
+Grab the files from the CDNs and include them in your project:
+
+```html
+<link href="https://unpkg.com/minibarjs@latest/dist/minibar.min.css" rel="stylesheet" type="text/css">
+<script src="https://unpkg.com/minibarjs@latest/dist/minibar.min.js" type="text/javascript"></script>
+```
+
+You can replace `latest` with the required release number if needed.
+
+CDNs courtesy of [unpkg](https://unpkg.com/#/)
+
+---
+
+## Initialisation
+
+#### Javascript
+
+You can then instantiate MiniBar by passing a reference to your content as the first parameter of the constructor as either a DOM node or a CSS3 selector string:
+
+```javascript
+new MiniBar(document.getElementById('#myContent'));
+
+// or
+
+new MiniBar('#myContent');
+```
+
+MiniBar accepts the options object as a second parameter of the constructor:
+
+```javascript
+new MiniBar('#mySelect', {
+	minBarSize: 75,
+	alwaysShowBars: true
+});
+```
+
+---
+
 Copyright © 2017 Karl Saunders | MIT license
