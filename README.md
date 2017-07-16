@@ -3,7 +3,7 @@
 
 A lightweight, performant and dependency-free scrollbar library written in vanilla javascript.
 
-[Demo](https://s.codepen.io/Mobius1/debug/yXrLVB/PBrNWxpWReyA)
+[Demo](https://mobius1.github.io/MiniBar/)
 
 ---
 
