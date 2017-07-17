@@ -81,4 +81,22 @@ By default the scrollbars aren't visible until hovering over the content. Set th
 
 ---
 
+## Public Methods
+
+### `destroy`
+
+Destroy the current instance. Removes all nodes and event listeners attached to the DOM by MiniBar.
+
+
+### `init`
+
+Initialise the instance after destroying.
+
+
+### `update`
+
+Recalculate scollbar sizes / positions. This method is called automatically when the content and window are resized. You can call this method manually if you add or remove content.
+
+---
+
 Copyright © 2017 Karl Saunders | MIT license
