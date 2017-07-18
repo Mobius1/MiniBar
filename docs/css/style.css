@@ -98,6 +98,11 @@ p {
   border-radius: 0;
 }
 
+.container:nth-child(6) .container {
+  white-space: nowrap;
+}
+
+
 .container:nth-child(6) .mb-track {
   background-color: transparent;
 }
