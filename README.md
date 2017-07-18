@@ -10,6 +10,8 @@ A lightweight, dependency-free scrollbar library written in vanilla javascript.
 
 [Demo](https://mobius1.github.io/MiniBar/)
 
+> NOTE: MiniBar is currently in pre-release state so is not yet suitable for production.
+
 ---
 
 ## Install
