@@ -98,7 +98,7 @@ p {
   border-radius: 0;
 }
 
-.container:nth-child(6) .container {
+.container:nth-child(6) .content {
   white-space: nowrap;
 }
 
