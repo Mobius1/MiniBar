@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.0.5
+ * MiniBar 0.0.6
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -296,7 +296,11 @@
 
 		on(window, "resize", this.events.debounce);
 
-		on(document, "DOMContentLoaded", this.events.update);
+		on(document, "DOMContentLoaded", function() {
+			setTimeout(function() {
+				that.events.update();
+			}, 1000);
+		});
 	};
 
 	/**
