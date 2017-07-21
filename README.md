@@ -86,7 +86,7 @@ By default the scrollbars aren't visible until hovering over the content. Set th
 #### Type: `String`
 #### Default: `default`
 
-Set to `progress` to display thr scrollbar as a progress bar.
+Set to `progress` to display the scrollbars as a progress bars.
 
 ---
 
