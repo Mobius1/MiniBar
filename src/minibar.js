@@ -236,7 +236,6 @@
 		this.trackSize = { x: "width" , y:  "height" };
 		this.scrollPos = { x: "scrollLeft" , y:  "scrollTop" };
 		this.scrollSize = { x: "scrollWidth" , y:  "scrollHeight" };
-		this.offsetAxis = { x: "offsetX" , y:  "offsetY" };
 		this.mouseAxis = { x: "pageX" , y:  "pageY" };
 
 		// Events
