@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", init);
-window.addEventListener("load", init);
 
 function init() {
 	var scrollers = [];
