@@ -504,6 +504,7 @@
 
 		off(window, "resize", that.events.debounce);
 
+		that.container.classList.remove(that.config.visibleClass);
 		that.container.classList.remove(that.config.containerClass);
 
 		while(that.content.firstChild) {
