@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.0.9
+ * MiniBar 0.0.10
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -65,4 +65,8 @@
 	top: 0;
 	width: 100%;
 	min-height: 10px;
+}
+
+.mb-progress .mb-bar {
+	min-height: 0;
 }
