@@ -1,7 +1,7 @@
 /*!
- * MiniBar 0.0.9
+ * MiniBar 0.0.10
  * http://mobius.ovh/
  *
  * Released under the MIT license
  */
-.mb-container{overflow:hidden;height:100%;width:100%}.mb-container:hover.mb-scroll-x > .mb-track-x,.mb-visible.mb-scroll-x > .mb-track-x{opacity:1}.mb-container:hover.mb-scroll-y > .mb-track-y,.mb-visible.mb-scroll-y > .mb-track-y{opacity:1}.mb-content{overflow:auto;height:100%;width:auto;box-sizing:content-box}.mb-track{position:absolute;-webkit-transition:opacity 250ms;transition:opacity 250ms}.mb-bar{position:absolute;background-color:rgba(0,0,0,0.2);border-radius:5px;z-index:10;-webkit-transform-style:preserve-3d;transform-style:preserve-3d}.mb-track-x{left:0;bottom:0;width:100%;height:10px;opacity:0}.mb-track-x .mb-bar{left:0;top:0;height:100%;min-width:10px}.mb-track-y{right:0;top:0;height:100%;width:10px;opacity:0}.mb-track-y .mb-bar{right:0;top:0;width:100%;min-height:10px}
+.mb-container{overflow:hidden;height:100%;width:100%}.mb-container:hover.mb-scroll-x > .mb-track-x,.mb-visible.mb-scroll-x > .mb-track-x{opacity:1}.mb-container:hover.mb-scroll-y > .mb-track-y,.mb-visible.mb-scroll-y > .mb-track-y{opacity:1}.mb-content{overflow:auto;height:100%;width:auto;box-sizing:content-box}.mb-track{position:absolute;-webkit-transition:opacity 250ms;transition:opacity 250ms}.mb-bar{position:absolute;background-color:rgba(0,0,0,0.2);border-radius:5px;z-index:10;-webkit-transform-style:preserve-3d;transform-style:preserve-3d}.mb-track-x{left:0;bottom:0;width:100%;height:10px;opacity:0}.mb-track-x .mb-bar{left:0;top:0;height:100%;min-width:10px}.mb-track-y{right:0;top:0;height:100%;width:10px;opacity:0}.mb-track-y .mb-bar{right:0;top:0;width:100%;min-height:10px}.mb-progress .mb-bar{min-height:0}
