@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.0.6
+ * MiniBar 0.0.7
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -168,7 +168,7 @@
 			timeout = setTimeout(later, wait);
 			if (callNow) func.apply(context, args);
 		};
-	};
+	}
 
 	/**
 	 * requestAnimationFrame Polyfill
@@ -177,8 +177,7 @@
 		var timeLast = 0;
 
 		return window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) {
-			var timeCurrent = new Date().getTime();
-			var timeDelta = undefined;
+			var timeCurrent = new Date().getTime(), timeDelta;
 
 			/* Dynamically set the delay on a per-tick basis to more closely match 60fps. */
 			/* Technique by Erik Moller. MIT license: https://gist.github.com/paulirish/1579671. */
@@ -213,20 +212,26 @@
 	 * @param {(String|Object)} content CSS3 selector string or node reference
 	 * @param {Object} options 			User defined options
 	 */
-	var MiniBar = function(content, options) {
+	var MiniBar = function(container, options) {
 
-		this.content = content;
+		this.container = container;
 
 		if (typeof content === "string") {
-			this.content = document.querySelector(content);
+			this.container = document.querySelector(container);
 		}
 
 		this.config = extend({}, defaultConfig, options);
 
-		this.css = window.getComputedStyle(this.content);
+		this.css = window.getComputedStyle(this.container);
 
 		this.scrollbarSize = getScrollBarWidth();
 
+		// Dimension objects
+		this.trackPos = { x: "left" , y:  "top" };
+		this.trackSize = { x: "width" , y:  "height" };
+		this.scrollPos = { x: "scrollLeft" , y:  "scrollTop" };
+		this.scrollSize = { x: "scrollWidth" , y:  "scrollHeight" };
+		
 		this.events = {
 			update: this.update.bind(this),
 			scroll: this.scroll.bind(this),
@@ -237,45 +242,40 @@
 		};
 
 		this.events.debounce = debounce(this.events.update, 50);
-
+		
 		this.init();
-	}
+	};
 
 	/**
 	 * Init instance
 	 * @return {Void}
 	 */
-	MiniBar.prototype.init = function init() {
+	MiniBar.prototype.init = function() {
 		var that = this;
 
-		this.content.classList.add(this.config.contentClass);
-
-		this.container = document.createElement("div");
 		this.container.classList.add(this.config.containerClass);
+
+		this.content = document.createElement("div");
+		this.content.classList.add(this.config.contentClass);
 
 		if (this.config.alwaysShowBars) {
 			this.container.classList.add(this.config.visibleClass);
 		}
-
-		this.bars = {
-			x: {
-				node: document.createElement("div")
-			},
-			y: {
-				node: document.createElement("div")
-			}
-		};
-
-		this.tracks = {
-			x: {
-				node: document.createElement("div")
-			},
-			y: {
-				node: document.createElement("div")
-			}
-		};
-
+		
+		// Move all nodes to the the new content node
+		while(this.container.firstChild) {
+			that.content.appendChild(this.container.firstChild);
+		}
+		
+		// Set the tracks and bars up and append them to the container
+		this.bars = { x: {}, y: {} };
+		this.tracks = { x: {}, y: {} };		
+		
 		each(this.tracks, function (i, track) {
+			
+			that.bars[i].node = document.createElement("div");
+			track.node = document.createElement("div");
+			
 			track.node.classList.add(that.config.trackClass, that.config.trackClass + "-" + i);
 			that.bars[i].node.classList.add(that.config.barClass);
 			track.node.appendChild(that.bars[i].node);
@@ -283,31 +283,26 @@
 
 			on(that.bars[i].node, "mousedown", that.events.mousedown);
 		});
-
-		this.content.parentNode.insertBefore(this.container, this.content);
+		
+		// Append the content
 		this.container.appendChild(this.content);
-
+		
 		this.container.style.position = this.css.position === "static" ? "relative" : this.css.position;
-
-		this.update();
 
 		on(this.content, "scroll", this.events.scroll);
 		on(this.container, "mouseenter", this.events.mouseenter);
 
 		on(window, "resize", this.events.debounce);
 
-		on(document, "DOMContentLoaded", function() {
-			setTimeout(function() {
-				that.events.update();
-			}, 1000);
-		});
+		on(document, 'DOMContentLoaded', this.events.update);
+		on(window, 'load', this.events.update);
 	};
 
 	/**
 	 * Scroll callback
 	 * @return {Void}
 	 */
-	MiniBar.prototype.scroll = function scroll() {
+	MiniBar.prototype.scroll = function() {
 		this.updateScrollBar("x");
 		this.updateScrollBar("y");
 	};
@@ -316,7 +311,7 @@
 	 * Mouseenter callack
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mouseenter = function mouseenter() {
+	MiniBar.prototype.mouseenter = function() {
 		this.updateScrollBar("x");
 		this.updateScrollBar("y");
 	};
@@ -325,7 +320,7 @@
 	 * Mousedown callack
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mousedown = function mousedown(e) {
+	MiniBar.prototype.mousedown = function(e) {
 		e.preventDefault();
 
 		var currentAxis = e.target === this.bars.x.node ? "x" : "y";
@@ -361,7 +356,7 @@
 	 * Mousemove callack
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mousemove = function mousemove(e) {
+	MiniBar.prototype.mousemove = function(e) {
 		e.preventDefault();
 
 		var o = this.origin;
@@ -384,7 +379,7 @@
 	 * Mouseup callack
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mouseup = function mouseup() {
+	MiniBar.prototype.mouseup = function() {
 		this.origin = {};
 		this.currentAxis = null;
 
@@ -398,7 +393,7 @@
 	 * Update cached values and recalculate sizes / positions
 	 * @return {Void}
 	 */
-	MiniBar.prototype.update = function update() {
+	MiniBar.prototype.update = function() {
 		var that = this;
 
 		// Cache the dimensions
@@ -436,39 +431,35 @@
 		this.scrollY = scrollY;
 
 		// Update scrollbars
-		this.updateScrollBar("x");
-		this.updateScrollBar("y");
+		each(["x", "y"], function(i, v) {
+			that.updateScrollBar(v);
+		});
 	};
 
 	/**
 	 * Update a scrollbar's size and position
 	 * @return {Void}
 	 */
-	MiniBar.prototype.updateScrollBar = function updateScrollBar() {
-		var that = this;
-
-		var axis = arguments.length <= 0 || arguments[0] === undefined ? "y" : arguments[0];
+	MiniBar.prototype.updateScrollBar = function(axis) {
 
 		var css = {};
-		var o = axis === "x" ? "left" : "top";
-		var d = axis === "x" ? "width" : "height";
-		var scroll = axis === "x" ? "scrollLeft" : "scrollTop";
-		var size = axis === "x" ? "scrollWidth" : "scrollHeight";
-		var scrollbar = this.bars[axis].node;
-		var contentSize = this[size];
-		var barSize = this.tracks[axis][d];
+		var scrollBar = this.bars[axis].node;
+		var barSize = this.tracks[axis][this.trackSize[axis]];
 
-		// We need a live value not cached
-		var scrollOffset = this.content[scroll];
+		// We need a live value, not cached
+		var scrollOffset = this.content[this.scrollPos[axis]];
 
-		var barRatio = barSize / contentSize;
-		var scrollRatio = scrollOffset / (contentSize - barSize);
+		var barRatio = barSize / this[this.scrollSize[axis]];
+		var scrollRatio = scrollOffset / (this[this.scrollSize[axis]] - barSize);
 
-		css[d] = Math.max(Math.floor(barRatio * barSize), this.config.minBarSize);
-		css[o] = Math.floor((barSize - css[d]) * scrollRatio);
+		// Set the scrollbar size
+		css[this.trackSize[axis]] = Math.max(Math.floor(barRatio * barSize), this.config.minBarSize);
+		
+		// Set the scrollbar position
+		css[this.trackPos[axis]] = Math.floor((barSize - css[this.trackSize[axis]]) * scrollRatio);
 
 		raf(function () {
-			style(that.bars[axis].node, css);
+			style(scrollBar, css);
 		});
 	};
 
@@ -476,7 +467,7 @@
 	 * Destroy instance
 	 * @return {Void}
 	 */
-	MiniBar.prototype.destroy = function destroy() {
+	MiniBar.prototype.destroy = function() {
 		var that = this;
 
 		each(this.tracks, function (i, track) {
