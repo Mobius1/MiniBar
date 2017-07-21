@@ -81,6 +81,13 @@ Sets the minimum size of the scrollbars. This can prevent the scollbar becoming 
 
 By default the scrollbars aren't visible until hovering over the content. Set this to `true` to keep the scrollbars visible at all times.
 
+
+### `barType`
+#### Type: `String`
+#### Default: `default`
+
+Set to `progress` to display thr scrollbar as a progress bar.
+
 ---
 
 ## Public Methods
