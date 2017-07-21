@@ -59,8 +59,8 @@ MiniBar also accepts an object as a second parameter of the constructor for user
 
 ```javascript
 new MiniBar('#mySelect', {
-	minBarSize: 75,
-	alwaysShowBars: true
+    minBarSize: 75,
+    alwaysShowBars: true
 });
 ```
 
