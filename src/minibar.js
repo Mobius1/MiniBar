@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.0.8
+ * MiniBar 0.0.9
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -226,12 +226,17 @@
 
 		this.scrollbarSize = getScrollBarWidth();
 
+		this.bars = { x: {}, y: {} };
+		this.tracks = { x: {}, y: {} };
+
 		// Dimension objects
 		this.trackPos = { x: "left" , y:  "top" };
 		this.trackSize = { x: "width" , y:  "height" };
 		this.scrollPos = { x: "scrollLeft" , y:  "scrollTop" };
 		this.scrollSize = { x: "scrollWidth" , y:  "scrollHeight" };
+		this.mouseAxis = { x: "pageX" , y:  "pageY" };
 
+		// Events
 		this.events = {
 			update: this.update.bind(this),
 			scroll: this.scroll.bind(this),
@@ -253,26 +258,22 @@
 	MiniBar.prototype.init = function() {
 		var that = this;
 
-		this.container.classList.add(this.config.containerClass);
+		that.container.classList.add(that.config.containerClass);
 
-		this.content = document.createElement("div");
-		this.content.classList.add(this.config.contentClass);
+		that.content = document.createElement("div");
+		that.content.classList.add(that.config.contentClass);
 
-		if (this.config.alwaysShowBars) {
-			this.container.classList.add(this.config.visibleClass);
+		if (that.config.alwaysShowBars) {
+			that.container.classList.add(that.config.visibleClass);
 		}
 
 		// Move all nodes to the the new content node
-		while(this.container.firstChild) {
-			that.content.appendChild(this.container.firstChild);
+		while(that.container.firstChild) {
+			that.content.appendChild(that.container.firstChild);
 		}
 
 		// Set the tracks and bars up and append them to the container
-		this.bars = { x: {}, y: {} };
-		this.tracks = { x: {}, y: {} };
-
-		each(this.tracks, function (i, track) {
-
+		each(that.tracks, function (i, track) {
 			that.bars[i].node = document.createElement("div");
 			track.node = document.createElement("div");
 
@@ -285,19 +286,19 @@
 		});
 
 		// Append the content
-		this.container.appendChild(this.content);
+		that.container.appendChild(that.content);
 
-		this.container.style.position = this.css.position === "static" ? "relative" : this.css.position;
+		that.container.style.position = that.css.position === "static" ? "relative" : that.css.position;
 
-		this.update();
+		that.update();
 
-		on(this.content, "scroll", this.events.scroll);
-		on(this.container, "mouseenter", this.events.mouseenter);
+		on(that.content, "scroll", that.events.scroll);
+		on(that.container, "mouseenter", that.events.mouseenter);
 
-		on(window, "resize", this.events.debounce);
+		on(window, "resize", that.events.debounce);
 
-		on(document, 'DOMContentLoaded', this.events.update);
-		on(window, 'load', this.events.update);
+		on(document, 'DOMContentLoaded', that.events.update);
+		on(window, 'load', that.events.update);
 	};
 
 	/**
@@ -305,8 +306,7 @@
 	 * @return {Void}
 	 */
 	MiniBar.prototype.scroll = function() {
-		this.updateScrollBar("x");
-		this.updateScrollBar("y");
+		this.updateScrollBars();
 	};
 
 	/**
@@ -314,8 +314,7 @@
 	 * @return {Void}
 	 */
 	MiniBar.prototype.mouseenter = function() {
-		this.updateScrollBar("x");
-		this.updateScrollBar("y");
+		this.updateScrollBars();
 	};
 
 	/**
@@ -340,8 +339,7 @@
 		// Save data for use during mousemove
 		this.origin = {
 			x: e.pageX - currentBar.x,
-			y: e.pageY - currentBar.y,
-			axis: "page" + currentAxis.toUpperCase()
+			y: e.pageY - currentBar.y
 		};
 
 		// Attach the mousemove and mouseup event listeners now
@@ -360,7 +358,7 @@
 		var that = this, o = this.origin;
 		var track = that.tracks[that.currentAxis];
 
-		var offset = e[o.axis] - o[that.currentAxis] - track[that.currentAxis];
+		var offset = e[that.mouseAxis[that.currentAxis]] - o[that.currentAxis] - track[that.currentAxis];
 		var ratio = offset / track[that.trackSize[that.currentAxis]];
 		var scroll = ratio * that[that.scrollSize[that.currentAxis]];
 
@@ -426,9 +424,7 @@
 		this.scrollY = scrollY;
 
 		// Update scrollbars
-		each(["x", "y"], function(i, v) {
-			that.updateScrollBar(v);
-		});
+		this.updateScrollBars();
 	};
 
 	/**
@@ -455,6 +451,12 @@
 		raf(function () {
 			style(that.bars[axis].node, css);
 		});
+	};
+
+	MiniBar.prototype.updateScrollBars = function() {
+		each(this.bars, function(i, v) {
+			this.updateScrollBar(i);
+		}, this);
 	};
 
 	/**
