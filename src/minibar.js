@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.0.7
+ * MiniBar 0.0.8
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -231,7 +231,7 @@
 		this.trackSize = { x: "width" , y:  "height" };
 		this.scrollPos = { x: "scrollLeft" , y:  "scrollTop" };
 		this.scrollSize = { x: "scrollWidth" , y:  "scrollHeight" };
-		
+
 		this.events = {
 			update: this.update.bind(this),
 			scroll: this.scroll.bind(this),
@@ -242,7 +242,7 @@
 		};
 
 		this.events.debounce = debounce(this.events.update, 50);
-		
+
 		this.init();
 	};
 
@@ -261,21 +261,21 @@
 		if (this.config.alwaysShowBars) {
 			this.container.classList.add(this.config.visibleClass);
 		}
-		
+
 		// Move all nodes to the the new content node
 		while(this.container.firstChild) {
 			that.content.appendChild(this.container.firstChild);
 		}
-		
+
 		// Set the tracks and bars up and append them to the container
 		this.bars = { x: {}, y: {} };
-		this.tracks = { x: {}, y: {} };		
-		
+		this.tracks = { x: {}, y: {} };
+
 		each(this.tracks, function (i, track) {
-			
+
 			that.bars[i].node = document.createElement("div");
 			track.node = document.createElement("div");
-			
+
 			track.node.classList.add(that.config.trackClass, that.config.trackClass + "-" + i);
 			that.bars[i].node.classList.add(that.config.barClass);
 			track.node.appendChild(that.bars[i].node);
@@ -283,11 +283,13 @@
 
 			on(that.bars[i].node, "mousedown", that.events.mousedown);
 		});
-		
+
 		// Append the content
 		this.container.appendChild(this.content);
-		
+
 		this.container.style.position = this.css.position === "static" ? "relative" : this.css.position;
+
+		this.update();
 
 		on(this.content, "scroll", this.events.scroll);
 		on(this.container, "mouseenter", this.events.mouseenter);
@@ -325,7 +327,6 @@
 
 		var currentAxis = e.target === this.bars.x.node ? "x" : "y";
 		var currentBar = this.bars[currentAxis];
-		var currentTrack = this.tracks[currentAxis];
 
 		this.currentAxis = currentAxis;
 
@@ -340,10 +341,7 @@
 		this.origin = {
 			x: e.pageX - currentBar.x,
 			y: e.pageY - currentBar.y,
-			axis: "page" + currentAxis.toUpperCase(),
-			prop: currentAxis === "x" ? currentTrack.width : currentTrack.height,
-			size: currentAxis === "x" ? "scrollWidth" : "scrollHeight",
-			offset: currentAxis === "x" ? "scrollLeft" : "scrollTop"
+			axis: "page" + currentAxis.toUpperCase()
 		};
 
 		// Attach the mousemove and mouseup event listeners now
@@ -359,19 +357,16 @@
 	MiniBar.prototype.mousemove = function(e) {
 		e.preventDefault();
 
-		var o = this.origin;
-		var axis = this.currentAxis;
-		var axisOffset = e[o.axis];
-		var track = this.tracks[axis];
-		var content = this.content;
+		var that = this, o = this.origin;
+		var track = that.tracks[that.currentAxis];
 
-		var offset = axisOffset - o[axis] - track[axis];
-		var ratio = offset / o.prop;
-		var scroll = ratio * this[o.size];
+		var offset = e[o.axis] - o[that.currentAxis] - track[that.currentAxis];
+		var ratio = offset / track[that.trackSize[that.currentAxis]];
+		var scroll = ratio * that[that.scrollSize[that.currentAxis]];
 
 		// Update scroll position
 		raf(function () {
-			content[o.offset] = scroll;
+			that.content[that.scrollPos[that.currentAxis]] = scroll;
 		});
 	};
 
@@ -442,8 +437,7 @@
 	 */
 	MiniBar.prototype.updateScrollBar = function(axis) {
 
-		var css = {};
-		var scrollBar = this.bars[axis].node;
+		var that = this, css = {};
 		var barSize = this.tracks[axis][this.trackSize[axis]];
 
 		// We need a live value, not cached
@@ -454,12 +448,12 @@
 
 		// Set the scrollbar size
 		css[this.trackSize[axis]] = Math.max(Math.floor(barRatio * barSize), this.config.minBarSize);
-		
+
 		// Set the scrollbar position
 		css[this.trackPos[axis]] = Math.floor((barSize - css[this.trackSize[axis]]) * scrollRatio);
 
 		raf(function () {
-			style(scrollBar, css);
+			style(that.bars[axis].node, css);
 		});
 	};
 
@@ -470,17 +464,27 @@
 	MiniBar.prototype.destroy = function() {
 		var that = this;
 
-		each(this.tracks, function (i, track) {
+		each(that.tracks, function (i, track) {
 			off(that.bars[i].node, "mousedown", that.events.mousedown);
 		});
-		off(this.content, "scroll", this.events.scroll);
-		off(this.container, "mouseenter", this.events.mouseenter);
 
-		off(window, "resize", this.events.debounce);
+		off(that.content, "scroll", that.events.scroll);
+		off(that.container, "mouseenter", that.events.mouseenter);
 
-		this.content.removeAttribute("style");
+		off(window, "resize", that.events.debounce);
 
-		this.container.parentNode.replaceChild(this.content, this.container);
+		that.container.classList.remove(that.config.containerClass);
+
+		while(that.content.firstChild) {
+			that.container.appendChild(that.content.firstChild);
+		}
+
+		each(that.tracks, function(i, track) {
+			that.container.removeChild(track.node);
+			that.container.classList.remove("mb-scroll-" + i);
+		});
+
+		that.container.removeChild(that.content);
 	};
 
 	root.MiniBar = MiniBar;
