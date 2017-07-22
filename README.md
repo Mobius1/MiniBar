@@ -60,7 +60,8 @@ MiniBar also accepts an object as a second parameter of the constructor for user
 ```javascript
 new MiniBar('#myContent', {
     minBarSize: 75,
-    alwaysShowBars: true
+    alwaysShowBars: true,
+    ...
 });
 ```
 
