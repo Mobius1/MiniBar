@@ -70,10 +70,8 @@ You can also define global options with the `MiniBarOptions` object:
 MiniBarOptions = {
     minBarSize: 75,
     alwaysShowBars: true,
-    barType: "progress"
+    ...
 };
-
-new MiniBar('.my-content');
 ```
 
 ---
