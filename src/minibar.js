@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.1
+ * MiniBar 0.1.2
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -261,53 +261,58 @@
 	MiniBar.prototype.init = function() {
 		var that = this;
 
-		that.container.classList.add(that.config.containerClass);
+		if ( !that.initialised ) {
 
-		that.content = document.createElement("div");
-		that.content.classList.add(that.config.contentClass);
+			that.container.classList.add(that.config.containerClass);
 
-		if (that.config.alwaysShowBars) {
-			that.container.classList.add(that.config.visibleClass);
-		}
+			that.content = document.createElement("div");
+			that.content.classList.add(that.config.contentClass);
 
-		// Move all nodes to the the new content node
-		while(that.container.firstChild) {
-			that.content.appendChild(that.container.firstChild);
-		}
-
-		// Set the tracks and bars up and append them to the container
-		each(that.tracks, function (i, track) {
-			that.bars[i].node = document.createElement("div");
-			track.node = document.createElement("div");
-
-			track.node.classList.add(that.config.trackClass, that.config.trackClass + "-" + i);
-			that.bars[i].node.classList.add(that.config.barClass);
-			track.node.appendChild(that.bars[i].node);
-			that.container.appendChild(track.node);
-
-			if ( that.config.barType === "progress" ) {
-				track.node.classList.add(that.config.progressClass);
-
-				on(track.node, "mousedown", that.events.mousedown);
-			} else {
-				on(that.bars[i].node, "mousedown", that.events.mousedown);
+			if (that.config.alwaysShowBars) {
+				that.container.classList.add(that.config.visibleClass);
 			}
-		});
 
-		// Append the content
-		that.container.appendChild(that.content);
+			// Move all nodes to the the new content node
+			while(that.container.firstChild) {
+				that.content.appendChild(that.container.firstChild);
+			}
 
-		that.container.style.position = that.css.position === "static" ? "relative" : that.css.position;
+			// Set the tracks and bars up and append them to the container
+			each(that.tracks, function (i, track) {
+				that.bars[i].node = document.createElement("div");
+				track.node = document.createElement("div");
 
-		that.update();
+				track.node.classList.add(that.config.trackClass, that.config.trackClass + "-" + i);
+				that.bars[i].node.classList.add(that.config.barClass);
+				track.node.appendChild(that.bars[i].node);
+				that.container.appendChild(track.node);
 
-		on(that.content, "scroll", that.events.scroll);
-		on(that.container, "mouseenter", that.events.mouseenter);
+				if ( that.config.barType === "progress" ) {
+					track.node.classList.add(that.config.progressClass);
 
-		on(window, "resize", that.events.debounce);
+					on(track.node, "mousedown", that.events.mousedown);
+				} else {
+					on(that.bars[i].node, "mousedown", that.events.mousedown);
+				}
+			});
 
-		on(document, 'DOMContentLoaded', that.events.update);
-		on(window, 'load', that.events.update);
+			// Append the content
+			that.container.appendChild(that.content);
+
+			that.container.style.position = that.css.position === "static" ? "relative" : that.css.position;
+
+			that.update();
+
+			on(that.content, "scroll", that.events.scroll);
+			on(that.container, "mouseenter", that.events.mouseenter);
+
+			on(window, "resize", that.events.debounce);
+
+			on(document, 'DOMContentLoaded', that.events.update);
+			on(window, 'load', that.events.update);
+
+			that.initialised = true;
+		}
 	};
 
 	/**
@@ -506,32 +511,37 @@
 	MiniBar.prototype.destroy = function() {
 		var that = this;
 
-		// Remove the event listeners
-		off(that.container, "mouseenter", that.events.mouseenter);
-		off(window, "resize", that.events.debounce);
+		if ( that.initialised ) {
 
-		// Remove the main classes from the container
-		that.container.classList.remove(that.config.visibleClass);
-		that.container.classList.remove(that.config.containerClass);
+			// Remove the event listeners
+			off(that.container, "mouseenter", that.events.mouseenter);
+			off(window, "resize", that.events.debounce);
 
-		// Move the nodes back to their original container
-		while(that.content.firstChild) {
-			that.container.appendChild(that.content.firstChild);
+			// Remove the main classes from the container
+			that.container.classList.remove(that.config.visibleClass);
+			that.container.classList.remove(that.config.containerClass);
+
+			// Move the nodes back to their original container
+			while(that.content.firstChild) {
+				that.container.appendChild(that.content.firstChild);
+			}
+
+			// Remove the tracks
+			each(that.tracks, function(i, track) {
+				that.container.removeChild(track.node);
+				that.container.classList.remove("mb-scroll-" + i);
+			});
+
+			// Remove the content node
+			that.container.removeChild(that.content);
+
+			// Clear node references
+			that.bars = { x: {}, y: {} };
+			that.tracks = { x: {}, y: {} };
+			that.content = null;
+
+			that.initialised = false;
 		}
-
-		// Remove the tracks
-		each(that.tracks, function(i, track) {
-			that.container.removeChild(track.node);
-			that.container.classList.remove("mb-scroll-" + i);
-		});
-
-		// Remove the content node
-		that.container.removeChild(that.content);
-
-		// Clear node references
-		that.bars = { x: {}, y: {} };
-		that.tracks = { x: {}, y: {} };
-		that.content = null;
 	};
 
 	root.MiniBar = MiniBar;
