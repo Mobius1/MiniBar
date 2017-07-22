@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.0.11
+ * MiniBar 0.1.0
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -14,7 +14,7 @@
 	 */
 	var defaultConfig = {
 		barType: "default",
-		minBarSize: 50,
+		minBarSize: 10,
 		alwaysShowBars: false,
 
 		containerClass: "mb-container",
@@ -222,7 +222,7 @@
 			this.container = document.querySelector(container);
 		}
 
-		this.config = extend({}, defaultConfig, options);
+		this.config = extend({}, defaultConfig, options || window.MiniBarOptions || {});
 
 		this.css = window.getComputedStyle(this.container);
 
@@ -236,6 +236,7 @@
 		this.trackSize = { x: "width" , y:  "height" };
 		this.scrollPos = { x: "scrollLeft" , y:  "scrollTop" };
 		this.scrollSize = { x: "scrollWidth" , y:  "scrollHeight" };
+		this.offsetAxis = { x: "offsetX" , y:  "offsetY" };
 		this.mouseAxis = { x: "pageX" , y:  "pageY" };
 
 		// Events
@@ -345,17 +346,20 @@
 		this.container.classList.add(this.config.visibleClass);
 
 		// Save data for use during mousemove
-		this.origin = {
-			x: e.pageX - this.bars[currentAxis].x,
-			y: e.pageY - this.bars[currentAxis].y
-		};
-
 		if ( this.config.barType === "progress" ) {
 
-			this.origin.x = e.pageX - this.tracks[currentAxis].x;
-			this.origin.y = e.pageY - this.tracks[currentAxis].y;
+			this.origin = {
+				x: e.pageX - this.tracks[currentAxis].x,
+				y: e.pageY - this.tracks[currentAxis].y
+			};
 
 			this.mousemove(e);
+
+		} else {
+			this.origin = {
+				x: e.pageX - this.bars[currentAxis].x,
+				y: e.pageY - this.bars[currentAxis].y
+			};
 		}
 
 		// Attach the mousemove and mouseup event listeners now
@@ -374,15 +378,17 @@
 		var that = this, o = this.origin;
 		var track = that.tracks[that.currentAxis];
 		var trackSize = track[that.trackSize[that.currentAxis]];
-
-		var offset = e[that.mouseAxis[that.currentAxis]] - o[that.currentAxis] - track[that.currentAxis];
-		var ratio = offset / trackSize;
-		var scroll = ratio * that[that.scrollSize[that.currentAxis]];
+		var contentSize = that.rect[that.trackSize[that.currentAxis]];
+		var offset, ratio, scroll;
 
 		if ( that.config.barType === "progress" ) {
 			offset = e[that.mouseAxis[that.currentAxis]] - track[that.currentAxis];
 			ratio = offset / trackSize;
-			scroll = ratio * (that.content[that.scrollSize[that.currentAxis]] - trackSize);
+			scroll = ratio * (that.content[that.scrollSize[that.currentAxis]] -  contentSize);
+		} else {
+			offset = e[that.mouseAxis[that.currentAxis]] - o[that.currentAxis] - track[that.currentAxis];
+			ratio = offset / trackSize;
+			scroll = ratio * that[that.scrollSize[that.currentAxis]];
 		}
 
 		// Update scroll position
@@ -413,10 +419,6 @@
 		var that = this;
 
 		// Cache the dimensions
-		each(this.tracks, function (i, track) {
-			extend(track, rect(track.node));
-			extend(that.bars[i], rect(that.bars[i].node));
-		});
 
 		this.rect = rect(this.container);
 
@@ -446,6 +448,11 @@
 		this.scrollX = scrollX;
 		this.scrollY = scrollY;
 
+		each(this.tracks, function (i, track) {
+			extend(track, rect(track.node));
+			extend(that.bars[i], rect(that.bars[i].node));
+		});
+
 		// Update scrollbars
 		this.updateScrollBars();
 	};
@@ -457,24 +464,24 @@
 	MiniBar.prototype.updateScrollBar = function(axis) {
 
 		var that = this, css = {};
-		var barSize = this.tracks[axis][this.trackSize[axis]];
+		var trackSize = that.tracks[axis][that.trackSize[axis]];
+		var contentSize = that.rect[that.trackSize[axis]];
 
 		// We need a live value, not cached
-		var scrollOffset = this.content[this.scrollPos[axis]];
+		var scrollOffset = that.content[that.scrollPos[axis]];
 
-		var barRatio = barSize / this[this.scrollSize[axis]];
-		var scrollRatio = scrollOffset / (this[this.scrollSize[axis]] - barSize);
+		var barRatio = trackSize / that[that.scrollSize[axis]];
+		var scrollRatio = scrollOffset / (that[that.scrollSize[axis]] - contentSize);
 
-		if ( this.config.barType === "default" ) {
-
+		if ( that.config.barType === "progress" ) {
+			// Only need to set the size of a progress bar
+			css[that.trackSize[axis]] = Math.floor(trackSize * scrollRatio);
+		} else {
 			// Set the scrollbar size
-			css[this.trackSize[axis]] = Math.max(Math.floor(barRatio * barSize), this.config.minBarSize);
+			css[that.trackSize[axis]] = Math.max(Math.floor(barRatio * contentSize), that.config.minBarSize);
 
 			// Set the scrollbar position
-			css[this.trackPos[axis]] = Math.floor((barSize - css[this.trackSize[axis]]) * scrollRatio);
-		} else if ( this.config.barType === "progress" ) {
-			// Set the scrollbar size
-			css[this.trackSize[axis]] = Math.floor(barSize * scrollRatio);
+			css[that.trackPos[axis]] = Math.floor((trackSize - css[that.trackSize[axis]]) * scrollRatio);
 		}
 
 		raf(function () {
@@ -482,6 +489,10 @@
 		});
 	};
 
+	/**
+	 * Update all scrollbars
+	 * @return {Void}
+	 */
 	MiniBar.prototype.updateScrollBars = function() {
 		each(this.bars, function(i, v) {
 			this.updateScrollBar(i);
@@ -495,28 +506,32 @@
 	MiniBar.prototype.destroy = function() {
 		var that = this;
 
-		each(that.tracks, function (i, track) {
-			off(that.bars[i].node, "mousedown", that.events.mousedown);
-		});
-
-		off(that.content, "scroll", that.events.scroll);
+		// Remove the event listeners
 		off(that.container, "mouseenter", that.events.mouseenter);
-
 		off(window, "resize", that.events.debounce);
 
+		// Remove the main classes from the container
 		that.container.classList.remove(that.config.visibleClass);
 		that.container.classList.remove(that.config.containerClass);
 
+		// Move the nodes back to their original container
 		while(that.content.firstChild) {
 			that.container.appendChild(that.content.firstChild);
 		}
 
+		// Remove the tracks
 		each(that.tracks, function(i, track) {
 			that.container.removeChild(track.node);
 			that.container.classList.remove("mb-scroll-" + i);
 		});
 
+		// Remove the content node
 		that.container.removeChild(that.content);
+
+		// Clear node references
+		that.bars = { x: {}, y: {} };
+		that.tracks = { x: {}, y: {} };
+		that.content = null;
 	};
 
 	root.MiniBar = MiniBar;
