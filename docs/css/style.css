@@ -70,6 +70,10 @@ img {
   padding-bottom: 15px;
 }
 
+.mb-track {
+  border-radius: 5px;
+}
+
 .mb-bar {
   background-color: #4C9689;
 }
