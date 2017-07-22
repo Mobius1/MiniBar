@@ -58,10 +58,22 @@ new MiniBar('#myContent');
 MiniBar also accepts an object as a second parameter of the constructor for user defined options:
 
 ```javascript
-new MiniBar('#mySelect', {
+new MiniBar('#myContent', {
     minBarSize: 75,
     alwaysShowBars: true
 });
+```
+
+You can also define global options with the `MiniBarOptions` object:
+
+```javascript
+MiniBarOptions = {
+    minBarSize: 75,
+    alwaysShowBars: true,
+    barType: "progress"
+};
+
+new MiniBar('.my-content');
 ```
 
 ---
