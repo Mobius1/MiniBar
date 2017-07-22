@@ -26,6 +26,7 @@
 
 .mb-track {
 	position: absolute;
+	border-radius: 5px;
 	-webkit-transition: opacity 250ms;
 			transition: opacity 250ms;
 }
