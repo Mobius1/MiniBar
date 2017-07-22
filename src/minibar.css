@@ -68,6 +68,10 @@
 	min-height: 10px;
 }
 
+.mb-progress {
+    overflow: hidden;
+}
+
 .mb-progress .mb-bar {
 	min-height: 0;
 }
