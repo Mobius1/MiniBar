@@ -97,35 +97,7 @@ By default the scrollbars aren't visible until hovering over the content. Set th
 #### Type: `String`
 #### Default: `default`
 
-Set to `progress` to display the scrollbars as a progress bars.
-
-
-### `containerClass`
-#### Type: `String`
-#### Default: `mb-container`
-
-The class name added to the main container.
-
-
-### `contentClass`
-#### Type: `String`
-#### Default: `mb-content`
-
-The class name added to the main content.
-
-
-### `trackClass`
-#### Type: `String`
-#### Default: `mb-track`
-
-The class name for the tracks.
-
-
-### `barClass`
-#### Type: `String`
-#### Default: `mb-bar`
-
-The class name added to the bars
+Set to `progress` to display the scrollbars as progress bars.
 
 ---
 
