@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.3
+ * MiniBar 0.1.4
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -29,9 +29,9 @@
 
 	/**
 	 * Object.assign polyfill (https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill)
-	 * @param  {Onject} target
-	 * @param  {Onject} varArgs
-	 * @return {Onject}
+	 * @param  {Object} target
+	 * @param  {Object} varArgs
+	 * @return {Object}
 	 */
 	var extend = function(target, varArgs) {
 		if (target == null) {
@@ -76,26 +76,6 @@
 				callback.call(scope, e, collection[e]);
 			}
 		}
-	};
-
-	/**
-	 * Add event listener to target
-	 * @param  {Object} target
-	 * @param  {String} event
-	 * @param  {Function} callback
-	 */
-	var on = function on(target, event, callback) {
-		target.addEventListener(event, callback, false);
-	};
-
-	/**
-	 * Remove event listener to target
-	 * @param  {Object} target
-	 * @param  {String} event
-	 * @param  {Function} callback
-	 */
-	var off = function off(target, event, callback) {
-		target.removeEventListener(event, callback);
 	};
 
 	/**
@@ -292,34 +272,38 @@
 				if ( that.config.barType === "progress" ) {
 					track.node.classList.add(that.config.progressClass);
 
-					on(track.node, "mousedown", that.events.mousedown);
+					track.node.addEventListener("mousedown", that.events.mousedown);
 				} else {
-					on(that.bars[i].node, "mousedown", that.events.mousedown);
+					that.bars[i].node.addEventListener("mousedown", that.events.mousedown);
 				}
 
-				on(track.node, "mouseenter", function(e) {
+				track.node.addEventListener("mouseenter", function(e) {
 					that.container.classList.add(that.config.hoverClass + "-" + i);
 				});
-				on(track.node, "mouseleave", function(e) {
-					if ( !that.down )
+				track.node.addEventListener("mouseleave", function(e) {
+					if ( !that.down ) {
 						that.container.classList.remove(that.config.hoverClass + "-" + i);
+					}
 				});
 			});
 
 			// Append the content
 			that.container.appendChild(that.content);
 
-			that.container.style.position = that.css.position === "static" ? "relative" : that.css.position;
+			if ( that.css.position === "static" ) {
+				that.manualPosition = true;
+				that.container.style.position = "relative";
+			}
 
 			that.update();
 
-			on(that.content, "scroll", that.events.scroll);
-			on(that.container, "mouseenter", that.events.mouseenter);
+			that.content.addEventListener("scroll", that.events.scroll);
+			that.container.addEventListener("mouseenter", that.events.mouseenter);
 
-			on(window, "resize", that.events.debounce);
+			window.addEventListener("resize", that.events.debounce);
 
-			on(document, 'DOMContentLoaded', that.events.update);
-			on(window, 'load', that.events.update);
+			document.addEventListener('DOMContentLoaded', that.events.update);
+			window.addEventListener('load', that.events.update);
 
 			that.initialised = true;
 		}
@@ -383,8 +367,8 @@
 
 		// Attach the mousemove and mouseup event listeners now
 		// instead of permanently having them on
-		on(document, "mousemove", this.events.mousemove);
-		on(document, "mouseup", this.events.mouseup);
+		document.addEventListener("mousemove", this.events.mousemove);
+		document.addEventListener("mouseup", this.events.mouseup);
 	};
 
 	/**
@@ -536,8 +520,8 @@
 		if ( that.initialised ) {
 
 			// Remove the event listeners
-			off(that.container, "mouseenter", that.events.mouseenter);
-			off(window, "resize", that.events.debounce);
+			that.container.removeEventListener("mouseenter", that.events.mouseenter);
+			window.removeEventListener("resize", that.events.debounce);
 
 			// Remove the main classes from the container
 			that.container.classList.remove(that.config.visibleClass);
@@ -556,6 +540,15 @@
 
 			// Remove the content node
 			that.container.removeChild(that.content);
+
+			// Remove manual positioning
+			if ( that.manualPosition ) {
+				that.container.style.position = "";
+
+				if ( !that.container.getAttribute("style").length ) {
+					that.container.removeAttribute("style");
+				}
+			}
 
 			// Clear node references
 			that.bars = { x: {}, y: {} };
