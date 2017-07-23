@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.5
+ * MiniBar 0.1.6
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -24,7 +24,8 @@
 		visibleClass: "mb-visible",
 		progressClass: "mb-progress",
 		hoverClass: "mb-hover",
-		scrollingClass: "mb-scrolling"
+		scrollingClass: "mb-scrolling",
+		textareaClass: "mb-textarea"
 	};
 
 	/**
@@ -209,17 +210,18 @@
 		this.css = window.getComputedStyle(this.container);
 
 		this.scrollbarSize = getScrollBarWidth();
+		this.textarea = this.container.nodeName.toLowerCase() === "textarea";
 
 		this.bars = { x: {}, y: {} };
 		this.tracks = { x: {}, y: {} };
 
 		// Dimension objects
-		this.trackPos = { x: "left" , y:  "top" };
-		this.trackSize = { x: "width" , y:  "height" };
-		this.scrollPos = { x: "scrollLeft" , y:  "scrollTop" };
-		this.scrollSize = { x: "scrollWidth" , y:  "scrollHeight" };
-		this.offsetAxis = { x: "offsetX" , y:  "offsetY" };
-		this.mouseAxis = { x: "pageX" , y:  "pageY" };
+		this.trackPos = { x: "left" , y: "top" };
+		this.trackSize = { x: "width" , y: "height" };
+		this.scrollPos = { x: "scrollLeft" , y: "scrollTop" };
+		this.scrollSize = { x: "scrollWidth" , y: "scrollHeight" };
+		this.offsetAxis = { x: "offsetX" , y: "offsetY" };
+		this.mouseAxis = { x: "pageX" , y: "pageY" };
 
 		// Events
 		this.events = {
@@ -245,18 +247,33 @@
 
 		if ( !that.initialised ) {
 
+			if ( that.textarea ) {
+				that.content = that.container;
+				that.container = document.createElement("div");
+				that.container.classList.add(that.config.textareaClass);
+
+				that.content.parentNode.insertBefore(that.container, that.content);
+				that.container.appendChild(that.content);
+
+				that.content.addEventListener("input", function(e) {
+					that.update();
+				});
+
+			} else {
+				that.content = document.createElement("div");
+
+				// Move all nodes to the the new content node
+				while(that.container.firstChild) {
+					that.content.appendChild(that.container.firstChild);
+				}
+			}
+
 			that.container.classList.add(that.config.containerClass);
 
-			that.content = document.createElement("div");
 			that.content.classList.add(that.config.contentClass);
 
 			if (that.config.alwaysShowBars) {
 				that.container.classList.add(that.config.visibleClass);
-			}
-
-			// Move all nodes to the the new content node
-			while(that.container.firstChild) {
-				that.content.appendChild(that.container.firstChild);
 			}
 
 			// Set the tracks and bars up and append them to the container
@@ -439,7 +456,7 @@
 		that.scrollWidth = that.content.scrollWidth;
 
 		// Do we need horizontal scrolling?
-		var scrollX = that.scrollWidth > that.rect.width;
+		var scrollX = that.scrollWidth > that.rect.width && !that.textarea;
 
 		// Do we need vertical scrolling?
 		var scrollY = that.scrollHeight > that.rect.height;
@@ -466,6 +483,11 @@
 
 		// Update scrollbars
 		that.updateScrollBars();
+
+		// Only scroll to bottom if the cursor is at the end of the content and we're not dragging
+		if ( that.textarea && !that.down && that.content.selectionStart >= that.content.value.length ) {
+			that.content.scrollTop = that.scrollHeight + 1000;
+		}
 	};
 
 	/**

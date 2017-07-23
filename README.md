@@ -16,6 +16,8 @@ MiniBar just hides the browser's native scrollbars and presents customisable one
 
 MiniBar is currently in a pre-release state so is not yet suitable for production. The API will be in constant flux until v1.0.0 is released so check back for any changes.
 
+Textarea support is experimental.
+
 ---
 
 ## Install
