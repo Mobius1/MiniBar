@@ -1,7 +1,7 @@
 ![MiniBar](/docs/img/minibar_logo_medium.png?raw=true "MiniBar")
 
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/Mobius1/MiniBar/blob/master/LICENSE)
-[![release](https://img.shields.io/badge/release-0.1.2-orange.svg?style=flat)](https://github.com/Mobius1/MiniBar/releases/tag/0.1.2)
+[![release](https://img.shields.io/badge/release-0.1.3-orange.svg?style=flat)](https://github.com/Mobius1/MiniBar/releases/tag/0.1.3)
 [![npm version](https://badge.fury.io/js/minibarjs.svg)](https://badge.fury.io/js/minibarjs)
 ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js)
 ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?compression=gzip&label=gzipped)
@@ -118,5 +118,10 @@ Initialise the instance after destroying.
 Recalculate scollbar sizes / positions. This method is called automatically when the content and window are resized. You can call this method manually if you add or remove content.
 
 ---
+
+## To Do
+
+* Add touch / mobile support
+* Implement Mutation Observers to detect DOM changes?
 
 Copyright © 2017 Karl Saunders | MIT license
