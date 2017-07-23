@@ -45,7 +45,7 @@ p {
 .container {
   width: calc((100vw / 4) - 45px);
   margin: 20px;
-  height: 40vh;
+  height: 45vh;
   padding: 20px;
   margin-bottom: 20px;
   box-sizing: border-box;
