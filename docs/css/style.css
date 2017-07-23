@@ -73,6 +73,12 @@ img {
   outline: 5px solid #000;
 }
 
+textarea {
+  background-color: #2E222D;
+  color: #fff;
+  font-size: 16px;
+}
+
 button {
   background-color: #4C9689;
   border: 1px solid #4C9689;
