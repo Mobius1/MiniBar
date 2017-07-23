@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.6
+ * MiniBar 0.1.7
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -281,7 +281,10 @@
 				that.bars[i].node = document.createElement("div");
 				track.node = document.createElement("div");
 
-				track.node.classList.add(that.config.trackClass, that.config.trackClass + "-" + i);
+				// IE10 can't do multiple args
+				track.node.classList.add(that.config.trackClass);
+				track.node.classList.add(that.config.trackClass + "-" + i);
+
 				that.bars[i].node.classList.add(that.config.barClass);
 				track.node.appendChild(that.bars[i].node);
 				that.container.appendChild(track.node);
@@ -567,7 +570,8 @@
 			if ( that.manualPosition ) {
 				that.container.style.position = "";
 
-				if ( !that.container.getAttribute("style").length ) {
+				// IE returns null for empty style attribute
+				if ( that.container.getAttribute("style") === null || !that.container.getAttribute("style").length ) {
 					that.container.removeAttribute("style");
 				}
 			}
