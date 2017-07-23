@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.2
+ * MiniBar 0.1.3
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -22,7 +22,9 @@
 		trackClass: "mb-track",
 		barClass: "mb-bar",
 		visibleClass: "mb-visible",
-		progressClass: "mb-progress"
+		progressClass: "mb-progress",
+		hoverClass: "mb-hover",
+		scrollingClass: "mb-scrolling"
 	};
 
 	/**
@@ -294,6 +296,14 @@
 				} else {
 					on(that.bars[i].node, "mousedown", that.events.mousedown);
 				}
+
+				on(track.node, "mouseenter", function(e) {
+					that.container.classList.add(that.config.hoverClass + "-" + i);
+				});
+				on(track.node, "mouseleave", function(e) {
+					if ( !that.down )
+						that.container.classList.remove(that.config.hoverClass + "-" + i);
+				});
 			});
 
 			// Append the content
@@ -327,7 +337,7 @@
 	 * Mouseenter callack
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mouseenter = function() {
+	MiniBar.prototype.mouseenter = function(e) {
 		this.updateScrollBars();
 	};
 
@@ -337,6 +347,8 @@
 	 */
 	MiniBar.prototype.mousedown = function(e) {
 		e.preventDefault();
+
+		this.down = true;
 
 		var type = this.config.barType === "progress" ? "tracks" : "bars";
 		var currentAxis = e.target === this[type].x.node ? "x" : "y";
@@ -349,6 +361,8 @@
 
 		// Keep the tracks visible during drag
 		this.container.classList.add(this.config.visibleClass);
+		this.container.classList.add(this.config.scrollingClass + "-" + this.currentAxis);
+
 
 		// Save data for use during mousemove
 		if ( this.config.barType === "progress" ) {
@@ -406,11 +420,19 @@
 	 * Mouseup callack
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mouseup = function() {
-		this.origin = {};
-		this.currentAxis = null;
+	MiniBar.prototype.mouseup = function(e) {
 
 		this.container.classList.toggle(this.config.visibleClass, this.config.alwaysShowBars);
+		this.container.classList.remove(this.config.scrollingClass + "-" + this.currentAxis);
+
+		if ( !e.target.classList.contains(this.config.barClass) ) {
+			this.container.classList.remove(this.config.hoverClass + "-x");
+			this.container.classList.remove(this.config.hoverClass + "-y");
+		}
+
+		this.origin = {};
+		this.currentAxis = null;
+		this.down = false;
 
 		off(document, "mousemove", this.events.mousemove);
 		off(document, "mouseup", this.events.mouseup);
@@ -425,41 +447,41 @@
 
 		// Cache the dimensions
 
-		this.rect = rect(this.container);
+		that.rect = rect(that.container);
 
-		this.scrollTop = this.content.scrollTop;
-		this.scrollLeft = this.content.scrollLeft;
-		this.scrollHeight = this.content.scrollHeight;
-		this.scrollWidth = this.content.scrollWidth;
+		that.scrollTop = that.content.scrollTop;
+		that.scrollLeft = that.content.scrollLeft;
+		that.scrollHeight = that.content.scrollHeight;
+		that.scrollWidth = that.content.scrollWidth;
 
 		// Do we need horizontal scrolling?
-		var scrollX = this.scrollWidth > this.rect.width;
+		var scrollX = that.scrollWidth > that.rect.width;
 
 		// Do we need vertical scrolling?
-		var scrollY = this.scrollHeight > this.rect.height;
+		var scrollY = that.scrollHeight > that.rect.height;
 
-		this.container.classList.toggle("mb-scroll-x", scrollX);
-		this.container.classList.toggle("mb-scroll-y", scrollY);
+		that.container.classList.toggle("mb-scroll-x", scrollX);
+		that.container.classList.toggle("mb-scroll-y", scrollY);
 
 		// Style the content
-		style(this.content, {
+		style(that.content, {
 			overflow: "auto",
-			marginBottom: scrollX ? -this.scrollbarSize : "",
-			paddingBottom: scrollX ? this.scrollbarSize : "",
-			marginRight: scrollY ? -this.scrollbarSize : "",
-			paddingRight: scrollY ? this.scrollbarSize : ""
+			marginBottom: scrollX ? -that.scrollbarSize : "",
+			paddingBottom: scrollX ? that.scrollbarSize : "",
+			marginRight: scrollY ? -that.scrollbarSize : "",
+			paddingRight: scrollY ? that.scrollbarSize : ""
 		});
 
-		this.scrollX = scrollX;
-		this.scrollY = scrollY;
+		that.scrollX = scrollX;
+		that.scrollY = scrollY;
 
-		each(this.tracks, function (i, track) {
+		each(that.tracks, function (i, track) {
 			extend(track, rect(track.node));
 			extend(that.bars[i], rect(that.bars[i].node));
 		});
 
 		// Update scrollbars
-		this.updateScrollBars();
+		that.updateScrollBars();
 	};
 
 	/**
