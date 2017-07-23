@@ -8,9 +8,11 @@
 
 A lightweight, dependency-free scrollbar library written in vanilla javascript.
 
+MiniBar just hides the browser's native scrollbars so native scrolling behaviour is preserved.
+
 [Demo](https://mobius1.github.io/MiniBar/)
 
-> NOTE: MiniBar is currently in pre-release state so is not yet suitable for production.
+> NOTE: MiniBar is currently in pre-release state so is not yet suitable for production. The API will continue to change until v1.0.0 is released.
 
 ---
 
