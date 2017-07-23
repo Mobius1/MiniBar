@@ -12,7 +12,9 @@ MiniBar just hides the browser's native scrollbars and presents customisable one
 
 [Demo](https://mobius1.github.io/MiniBar/)
 
-> NOTE: MiniBar is currently in pre-release state so is not yet suitable for production. The API will continue to change until v1.0.0 is released.
+### Note
+
+MiniBar is currently in a pre-release state so is not yet suitable for production. The API will be in constant flux until v1.0.0 is released so check back for any changes.
 
 ---
 
