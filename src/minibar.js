@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.4
+ * MiniBar 0.1.5
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -418,8 +418,8 @@
 		this.currentAxis = null;
 		this.down = false;
 
-		off(document, "mousemove", this.events.mousemove);
-		off(document, "mouseup", this.events.mouseup);
+		document.removeEventListener("mousemove", this.events.mousemove);
+		document.removeEventListener("mouseup", this.events.mouseup);
 	};
 
 	/**
