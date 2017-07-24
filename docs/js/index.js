@@ -25,41 +25,67 @@ function init() {
 				moveCaretToEnd(scrollers[i].content);
 			}, 10);
 		}
+
+		if ( i === 8 ) {
+			updateWidth();
+		}
 	});
 
 	new MiniBar(document.getElementsByTagName("main")[0]);
 
-	document.querySelector(".tools").addEventListener("click", function(e) {
-		var t = e.target;
+	[].slice.call(document.querySelectorAll(".tools")).forEach(function(el) {
+		var index = parseInt(el.getAttribute("data-index"), 10);
+		el.addEventListener("click", function(e) {
+			var t = e.target;
 
-		if ( t.nodeName === "BUTTON" ) {
-			var action = t.getAttribute("data-action");
+			if ( t.nodeName === "BUTTON" ) {
+				var action = t.getAttribute("data-action");
 
-			switch(action) {
-				case "add":
-					add(scrollers[7]);
-					break;
-				case "remove":
-					remove(scrollers[7]);
-					break;
-				default:
-					scrollers[7][action]();
+				switch(action) {
+					case "add":
+						add(index);
+						break;
+					case "remove":
+						remove(index);
+						break;
+					default:
+						scrollers[index][action]();
+				}
 			}
-		}
+		});
 	});
+
 }
 
-function add(scroller) {
-	if ( scroller.initialised ) {
-		scroller.content.appendChild(scroller.content.firstElementChild.cloneNode(true));
-		scroller.update();
+function add(index) {
+	var s = scrollers[index], f = s.content.firstElementChild;
+	if ( s.initialised ) {
+		if ( index > 7 ) {
+			f.appendChild(f.firstElementChild.cloneNode(true));
+			updateWidth();
+		} else {
+			s.content.appendChild(f.cloneNode(true));
+		}
+		s.update();
 	}
 }
-function remove(scroller) {
-	if ( scroller.initialised && scroller.content.childElementCount > 1 ) {
-		scroller.content.removeChild(scroller.content.lastElementChild);
-		scroller.update();
+
+function remove(index) {
+	var s = scrollers[index];
+
+	if ( s.content.childElementCount > 1 ) {
+		s.content.removeChild(s.content.lastElementChild);
+		s.update();
 	}
+}
+
+function updateWidth() {
+	var s = scrollers[8],
+			f = s.content.firstElementChild,
+			w = f.firstElementChild.offsetWidth + 10,
+			c = f.childElementCount;
+
+	f.style.width = (c * w) + "px";
 }
 
 function moveCaretToEnd(el) {
