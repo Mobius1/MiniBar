@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.7
+ * MiniBar 0.1.8
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -175,6 +175,11 @@
 		};
 	}();
 
+	// t: current time, b: begInnIng value, c: change In value, d: duration
+	var easeOutCirc = function (t, b, c, d) {
+		return c * Math.sqrt(1 - (t=t/d-1)*t) + b;
+	};
+
 	/**
 	 * Get native scrollbar width
 	 * @return {Number} Scrollbar width
@@ -230,7 +235,8 @@
 			mouseenter: this.mouseenter.bind(this),
 			mousedown: this.mousedown.bind(this),
 			mousemove: this.mousemove.bind(this),
-			mouseup: this.mouseup.bind(this)
+			mouseup: this.mouseup.bind(this),
+			mousewheel: this.mousewheel.bind(this),
 		};
 
 		this.events.debounce = debounce(this.events.update, 50);
@@ -318,6 +324,7 @@
 			that.update();
 
 			that.content.addEventListener("scroll", that.events.scroll);
+			that.content.addEventListener("wheel", that.events.mousewheel);
 			that.container.addEventListener("mouseenter", that.events.mouseenter);
 
 			window.addEventListener("resize", that.events.debounce);
@@ -333,8 +340,42 @@
 	 * Scroll callback
 	 * @return {Void}
 	 */
-	MiniBar.prototype.scroll = function() {
+	MiniBar.prototype.scroll = function(e) {
 		this.updateScrollBars();
+	};
+
+	/**
+	 * Mousewheel callback
+	 * @return {Void}
+	 */
+	MiniBar.prototype.mousewheel = function(e) {
+		if ( this.config.horizontalMouseScroll ) {
+
+			e.preventDefault();
+
+			var that = this, y = e.deltaY, startTime = Date.now();
+
+			function horizonalScroll() {
+				var now = Date.now(),
+						current = now - startTime,
+						position = easeOutCirc(current, 0, 8, 400);
+
+				if ( current > 400 ) {
+					cancelAnimationFrame(that.frame);
+					return;
+				}
+
+				if ( y < 0 ) {
+					that.content.scrollLeft -= position;
+				} else if ( y > 0 ) {
+					that.content.scrollLeft += position;
+				}
+
+				that.frame = raf(horizonalScroll);
+			}
+
+			horizonalScroll();
+		}
 	};
 
 	/**
