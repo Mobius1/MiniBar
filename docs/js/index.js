@@ -52,8 +52,9 @@ function init() {
 		});
 	});
 
-	updateWidth();
-
+	setTimeout(function() {
+		updateWidth();
+	}, 1000);
 }
 
 function add(index) {
