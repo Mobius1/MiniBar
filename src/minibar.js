@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.8
+ * MiniBar 0.1.9
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -355,7 +355,7 @@
 
 			var that = this, y = e.deltaY, startTime = Date.now();
 
-			function horizonalScroll() {
+			var horizontalScroll = function() {
 				var now = Date.now(),
 						current = now - startTime,
 						position = easeOutCirc(current, 0, 8, 400);
@@ -371,10 +371,10 @@
 					that.content.scrollLeft += position;
 				}
 
-				that.frame = raf(horizonalScroll);
-			}
+				that.frame = raf(horizontalScroll);
+			};
 
-			horizonalScroll();
+			horizontalScroll();
 		}
 	};
 
