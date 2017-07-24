@@ -42,10 +42,9 @@ p {
   color: #ccc;
 }
 
-.container {
-  width: calc((100vw / 4) - 45px);
+.container, .container-wide {
   margin: 20px;
-  height: 45vh;
+  height: 40vh;
   padding: 20px;
   margin-bottom: 20px;
   box-sizing: border-box;
@@ -53,6 +52,14 @@ p {
   float: left;
   border-radius: 5px;
   position: relative;
+}
+
+.container {
+  width: calc((100vw / 4) - 45px);
+}
+
+.container-wide {
+  width: calc(100vw - 60px);
 }
 
 .content {
@@ -160,18 +167,23 @@ body > .mb-container > .mb-track {
 }
 
 .container:nth-child(7) .mb-hover-y .mb-track-y {
-  width: 10px;
+  -webkit-transform: scale(2, 1);
+          transform: scale(2, 1);
 }
 .container:nth-child(7) .mb-track {
   background-color: #2E222D;
-  border-radius: 5px;
-  -webkit-transition-property: width;
-  transition-property: width;
-  -webkit-transition-duration: 150ms;
-          transition-duration: 150ms;
+  border-radius: 0;
+  -webkit-transform: scale(1, 1);
+          transform: scale(1, 1);
+  -webkit-transform-origin: 100% 0 0;
+          transform-origin: 100% 0 0;
+  -webkit-transition: -webkit-transform 150ms;
+  transition: -webkit-transform 150ms;
+  transition: transform 150ms;
+  transition: transform 150ms, -webkit-transform 150ms;
 }
 .container:nth-child(7) .mb-bar {
-  border-radius: 5px;
+  border-radius: 0;
 }
 .container:nth-child(7) .mb-track-y {
   width: 5px;
@@ -179,4 +191,16 @@ body > .mb-container > .mb-track {
 
 .container:nth-child(8) .main-title {
   color: rgba(255, 255, 255, 0);
+}
+
+.container-wide .images {
+  height: 100%;
+  width: 7000px;
+}
+.container-wide img {
+  float: left;
+  outline: none;
+  margin: 0 10px 0 0;
+  height: 100%;
+  width: auto;
 }

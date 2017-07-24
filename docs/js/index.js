@@ -8,15 +8,16 @@ function init() {
 		alwaysShowBars: true
 	};
 
-	[].slice.call(document.querySelectorAll(".inner")).forEach(function(el, i) {
+	[].slice.call(document.querySelectorAll(".inner")).forEach(function(el, i, arr) {
 
-		if ( el.nodeName !== "TEXTAREA" ) {
+		if ( el.nodeName !== "TEXTAREA" && i < arr.length - 1 ) {
 			el.firstElementChild.innerHTML = getContent();
 		}
 
 		scrollers.push(new MiniBar(el, {
-			alwaysShowBars: "visible" in el.dataset,
-			barType: i === 4 ? "progress" : "default"
+			alwaysShowBars: true,
+			barType: i === 4 ? "progress" : "default",
+			horizontalMouseScroll: i === arr.length - 1
 		}));
 
 		if ( el.nodeName === "TEXTAREA" ) {
@@ -54,7 +55,6 @@ function add(scroller) {
 		scroller.update();
 	}
 }
-
 function remove(scroller) {
 	if ( scroller.initialised && scroller.content.childElementCount > 1 ) {
 		scroller.content.removeChild(scroller.content.lastElementChild);
