@@ -105,6 +105,13 @@ By default the scrollbars aren't visible until hovering over the content. Set th
 
 Set to `progress` to display the scrollbars as progress bars.
 
+
+### `horizontalMouseScroll`
+#### Type: `Boolean`
+#### Default: `false`
+
+Allow horizontal scrolling with the mousewheel.
+
 ---
 
 ## Public Methods
