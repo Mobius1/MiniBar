@@ -26,9 +26,6 @@ function init() {
 			}, 10);
 		}
 
-		if ( i === 8 ) {
-			updateWidth();
-		}
 	});
 
 	new MiniBar(document.getElementsByTagName("main")[0]);
@@ -54,6 +51,8 @@ function init() {
 			}
 		});
 	});
+
+	updateWidth();
 
 }
 
