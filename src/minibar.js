@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.9
+ * MiniBar 0.1.10
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -206,7 +206,7 @@
 
 		this.container = container;
 
-		if (typeof content === "string") {
+		if (typeof container === "string") {
 			this.container = document.querySelector(container);
 		}
 
