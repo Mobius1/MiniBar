@@ -12,7 +12,7 @@
 	 * Default configuration properties
 	 * @type {Object}
 	 */
-	var defaultConfig = {
+	var config = {
 		barType: "default",
 		minBarSize: 10,
 		alwaysShowBars: false,
@@ -31,26 +31,21 @@
 	/**
 	 * Object.assign polyfill (https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Object/assign#Polyfill)
 	 * @param  {Object} target
-	 * @param  {Object} varArgs
+	 * @param  {Object} args
 	 * @return {Object}
 	 */
-	var extend = function(target, varArgs) {
-		if (target == null) {
-			// TypeError if undefined or null
-			throw new TypeError('Cannot convert undefined or null to object');
-		}
-
-		var to = Object(target);
+	var extend = function(o, args) {
+		var to = Object(o);
 
 		for (var index = 1; index < arguments.length; index++) {
-			var nextSource = arguments[index];
+			var ns = arguments[index];
 
-			if (nextSource != null) {
+			if (ns != null) {
 				// Skip over if undefined or null
-				for (var nextKey in nextSource) {
+				for (var nxt in ns) {
 					// Avoid bugs when hasOwnProperty is shadowed
-					if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-						to[nextKey] = nextSource[nextKey];
+					if (Object.prototype.hasOwnProperty.call(ns, nxt)) {
+						to[nxt] = ns[nxt];
 					}
 				}
 			}
@@ -59,22 +54,42 @@
 	};
 
 	/**
+	 * Add event listener to target
+	 * @param  {Object} el
+	 * @param  {String} e
+	 * @param  {Function} fn
+	 */
+	var on = function on(el, e, fn) {
+		el.addEventListener(e, fn, false);
+	};
+
+	/**
+	 * Remove event listener to target
+	 * @param  {Object} el
+	 * @param  {String} e
+	 * @param  {Function} fn
+	 */
+	var off = function off(el, e, fn) {
+		el.removeEventListener(e, fn);
+	};
+
+	/**
 	 * Iterator helper
-	 * @param  {(Array|Object)}   collection Any object, array or array-like collection.
-	 * @param  {Function} callback   The callback function
-	 * @param  {Object}   scope      Change the value of this
+	 * @param  {(Array|Object)}   arr Any object, array or array-like collection.
+	 * @param  {Function} f   The callback function
+	 * @param  {Object}   s      Change the value of this
 	 * @return {Void}
 	 */
-	var each = function each(collection, callback, scope) {
-		if ("[object Object]" === Object.prototype.toString.call(collection)) {
-			for (var d in collection) {
-				if (Object.prototype.hasOwnProperty.call(collection, d)) {
-					callback.call(scope, d, collection[d]);
+	var each = function each(arr, fn, s) {
+		if ("[object Object]" === Object.prototype.toString.call(arr)) {
+			for (var d in arr) {
+				if (Object.prototype.hasOwnProperty.call(arr, d)) {
+					fn.call(s, d, arr[d]);
 				}
 			}
 		} else {
-			for (var e = 0, f = collection.length; e < f; e++) {
-				callback.call(scope, e, collection[e]);
+			for (var e = 0, f = arr.length; e < f; e++) {
+				fn.call(s, e, arr[e]);
 			}
 		}
 	};
@@ -87,14 +102,13 @@
 	 */
 	var style = function style(el, prop, val) {
 		var css = el && el.style;
-		var isObj = "[object Object]" === Object.prototype.toString.call(prop);
+		var obj = "[object Object]" === Object.prototype.toString.call(prop);
 
 		if (css) {
-			if (val === void 0 && !isObj) {
-				val = window.getComputedStyle(el);
-				return prop === void 0 ? val : val[prop];
+			if (!val && !obj) {
+				return window.getComputedStyle(el);
 			} else {
-				if (isObj) {
+				if (obj) {
 					each(prop, function (p, v) {
 						if (!(p in css)) {
 							p = "-webkit-" + p;
@@ -118,12 +132,12 @@
 	 * @return {Object}   	Formatted DOMRect copy
 	 */
 	var rect = function rect(el) {
-		var win = window;
-		var doc = document;
-		var body = doc.body;
+		var w = window;
+		var d = document;
+		var b = d.body;
 		var r = el.getBoundingClientRect();
-		var x = win.pageXOffset !== undefined ? win.pageXOffset : (doc.documentElement || body.parentNode || body).scrollLeft;
-		var y = win.pageYOffset !== undefined ? win.pageYOffset : (doc.documentElement || body.parentNode || body).scrollTop;
+		var x = w.pageXOffset !== undefined ? w.pageXOffset : (d.documentElement || b.parentNode || b).scrollLeft;
+		var y = w.pageYOffset !== undefined ? w.pageYOffset : (d.documentElement || b.parentNode || b).scrollTop;
 
 		return {
 			x: r.left + x,
@@ -135,23 +149,23 @@
 
 	/**
 	 * Returns a function, that, as long as it continues to be invoked, will not be triggered.
-	 * @param  {Function} func
+	 * @param  {Function} fn
 	 * @param  {Number} wait
-	 * @param  {Boolean} immediate
+	 * @param  {Boolean} now
 	 * @return {Function}
 	 */
-	function debounce(func, wait, immediate) {
-		var timeout;
+	function debounce(fn, wait, now) {
+		var t;
 		return function() {
-			var context = this, args = arguments;
+			var ctx = this, args = arguments;
 			var later = function() {
-				timeout = null;
-				if (!immediate) func.apply(context, args);
+				t = null;
+				if (!now) fn.apply(ctx, args);
 			};
-			var callNow = immediate && !timeout;
-			clearTimeout(timeout);
-			timeout = setTimeout(later, wait);
-			if (callNow) func.apply(context, args);
+			var callNow = now && !t;
+			clearTimeout(t);
+			t = setTimeout(later, wait);
+			if (callNow) fn.apply(ctx, args);
 		};
 	}
 
@@ -159,19 +173,19 @@
 	 * requestAnimationFrame Polyfill
 	 */
 	var raf = window.requestAnimationFrame || function () {
-		var timeLast = 0;
+		var tl = 0;
 
-		return window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) {
-			var timeCurrent = new Date().getTime(), timeDelta;
+		return window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (fn) {
+			var tc = new Date().getTime(), td;
 
 			/* Dynamically set the delay on a per-tick basis to more closely match 60fps. */
 			/* Technique by Erik Moller. MIT license: https://gist.github.com/paulirish/1579671. */
-			timeDelta = Math.max(0, 16 - (timeCurrent - timeLast));
-			timeLast = timeCurrent + timeDelta;
+			td = Math.max(0, 16 - (tc - tl));
+			tl = tc + td;
 
 			return setTimeout(function () {
-				callback(timeCurrent + timeDelta);
-			}, timeDelta);
+				fn(tc + td);
+			}, td);
 		};
 	}();
 
@@ -185,14 +199,14 @@
 	 * @return {Number} Scrollbar width
 	 */
 	var getScrollBarWidth = function() {
-		var width = 0;
-		var div = document.createElement("div");
+		var width = 0, d = document;
+		var div = d.createElement("div");
 
 		div.style.cssText = "width: 100; height: 100; overflow: scroll; position: absolute; top: -9999;";
 
-		document.body.appendChild(div);
+		d.body.appendChild(div);
 		width = div.offsetWidth - div.clientWidth;
-		document.body.removeChild(div);
+		d.body.removeChild(div);
 
 		return width;
 	};
@@ -204,17 +218,13 @@
 	 */
 	var MiniBar = function(container, options) {
 
-		this.container = container;
+		this.container = typeof container === "string" ? document.querySelector(container) : container;
 
-		if (typeof container === "string") {
-			this.container = document.querySelector(container);
-		}
-
-		this.config = extend({}, defaultConfig, options || window.MiniBarOptions || {});
+		this.config = extend({}, config, options || window.MiniBarOptions || {});
 
 		this.css = window.getComputedStyle(this.container);
 
-		this.scrollbarSize = getScrollBarWidth();
+		this.size = getScrollBarWidth();
 		this.textarea = this.container.nodeName.toLowerCase() === "textarea";
 
 		this.bars = { x: {}, y: {} };
@@ -225,30 +235,27 @@
 		this.trackSize = { x: "width" , y: "height" };
 		this.scrollPos = { x: "scrollLeft" , y: "scrollTop" };
 		this.scrollSize = { x: "scrollWidth" , y: "scrollHeight" };
-		this.offsetAxis = { x: "offsetX" , y: "offsetY" };
 		this.mouseAxis = { x: "pageX" , y: "pageY" };
 
 		// Events
-		this.events = {
-			update: this.update.bind(this),
-			scroll: this.scroll.bind(this),
-			mouseenter: this.mouseenter.bind(this),
-			mousedown: this.mousedown.bind(this),
-			mousemove: this.mousemove.bind(this),
-			mouseup: this.mouseup.bind(this),
-			mousewheel: this.mousewheel.bind(this),
-		};
+		this.events = {};
+
+		each(["update", "scroll", "mouseenter", "mousedown", "mousemove", "mouseup", "mousewheel"], function(i, evt) {
+			this.events[evt] = this[evt].bind(this);
+		}, this);
 
 		this.events.debounce = debounce(this.events.update, 50);
 
 		this.init();
 	};
 
+	var proto = MiniBar.prototype;
+
 	/**
 	 * Init instance
 	 * @return {Void}
 	 */
-	MiniBar.prototype.init = function() {
+	proto.init = function() {
 		var that = this;
 
 		if ( !that.initialised ) {
@@ -261,7 +268,7 @@
 				that.content.parentNode.insertBefore(that.container, that.content);
 				that.container.appendChild(that.content);
 
-				that.content.addEventListener("input", function(e) {
+				on(that.content, "input", function(e) {
 					that.update();
 				});
 
@@ -298,15 +305,15 @@
 				if ( that.config.barType === "progress" ) {
 					track.node.classList.add(that.config.progressClass);
 
-					track.node.addEventListener("mousedown", that.events.mousedown);
+					on(track.node, "mousedown", that.events.mousedown);
 				} else {
-					that.bars[i].node.addEventListener("mousedown", that.events.mousedown);
+					on(that.bars[i].node, "mousedown", that.events.mousedown);
 				}
 
-				track.node.addEventListener("mouseenter", function(e) {
+				on(track.node, "mouseenter", function(e) {
 					that.container.classList.add(that.config.hoverClass + "-" + i);
 				});
-				track.node.addEventListener("mouseleave", function(e) {
+				on(track.node, "mouseleave", function(e) {
 					if ( !that.down ) {
 						that.container.classList.remove(that.config.hoverClass + "-" + i);
 					}
@@ -323,14 +330,14 @@
 
 			that.update();
 
-			that.content.addEventListener("scroll", that.events.scroll);
-			that.content.addEventListener("wheel", that.events.mousewheel);
-			that.container.addEventListener("mouseenter", that.events.mouseenter);
+			on(that.content, "scroll", that.events.scroll);
+			on(that.content, "wheel", that.events.mousewheel);
+			on(that.container, "mouseenter", that.events.mouseenter);
 
-			window.addEventListener("resize", that.events.debounce);
+			on(window, "resize", that.events.debounce);
 
-			document.addEventListener('DOMContentLoaded', that.events.update);
-			window.addEventListener('load', that.events.update);
+			on(document, 'DOMContentLoaded', that.events.update);
+			on(window, 'load', that.events.update);
 
 			that.initialised = true;
 		}
@@ -340,7 +347,7 @@
 	 * Scroll callback
 	 * @return {Void}
 	 */
-	MiniBar.prototype.scroll = function(e) {
+	proto.scroll = function(e) {
 		this.updateScrollBars();
 	};
 
@@ -348,7 +355,7 @@
 	 * Mousewheel callback
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mousewheel = function(e) {
+	proto.mousewheel = function(e) {
 		if ( this.config.horizontalMouseScroll ) {
 
 			e.preventDefault();
@@ -357,18 +364,18 @@
 
 			var horizontalScroll = function() {
 				var now = Date.now(),
-						current = now - startTime,
-						position = easeOutCirc(current, 0, 8, 400);
+						ct = now - startTime,
+						scroll = easeOutCirc(ct, 0, 8, 400);
 
-				if ( current > 400 ) {
+				if ( ct > 400 ) {
 					cancelAnimationFrame(that.frame);
 					return;
 				}
 
 				if ( y < 0 ) {
-					that.content.scrollLeft -= position;
+					that.content.scrollLeft -= scroll;
 				} else if ( y > 0 ) {
-					that.content.scrollLeft += position;
+					that.content.scrollLeft += scroll;
 				}
 
 				that.frame = raf(horizontalScroll);
@@ -382,7 +389,7 @@
 	 * Mouseenter callack
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mouseenter = function(e) {
+	proto.mouseenter = function(e) {
 		this.updateScrollBars();
 	};
 
@@ -390,74 +397,74 @@
 	 * Mousedown callack
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mousedown = function(e) {
+	proto.mousedown = function(e) {
 		e.preventDefault();
 
 		this.down = true;
 
-		var type = this.config.barType === "progress" ? "tracks" : "bars";
-		var currentAxis = e.target === this[type].x.node ? "x" : "y";
+		var o = this.config, type = o.barType === "progress" ? "tracks" : "bars";
+		var axis = e.target === this[type].x.node ? "x" : "y";
 
-		this.currentAxis = currentAxis;
+		this.currentAxis = axis;
 
 		// Lets do all the nasty reflow-triggering stuff before mousemove
 		// otherwise it'll be a shit-show during mousemove
 		this.update();
 
 		// Keep the tracks visible during drag
-		this.container.classList.add(this.config.visibleClass);
-		this.container.classList.add(this.config.scrollingClass + "-" + this.currentAxis);
+		this.container.classList.add(o.visibleClass);
+		this.container.classList.add(o.scrollingClass + "-" + axis);
 
 
 		// Save data for use during mousemove
-		if ( this.config.barType === "progress" ) {
+		if ( o.barType === "progress" ) {
 
 			this.origin = {
-				x: e.pageX - this.tracks[currentAxis].x,
-				y: e.pageY - this.tracks[currentAxis].y
+				x: e.pageX - this.tracks[axis].x,
+				y: e.pageY - this.tracks[axis].y
 			};
 
 			this.mousemove(e);
 
 		} else {
 			this.origin = {
-				x: e.pageX - this.bars[currentAxis].x,
-				y: e.pageY - this.bars[currentAxis].y
+				x: e.pageX - this.bars[axis].x,
+				y: e.pageY - this.bars[axis].y
 			};
 		}
 
 		// Attach the mousemove and mouseup event listeners now
 		// instead of permanently having them on
-		document.addEventListener("mousemove", this.events.mousemove);
-		document.addEventListener("mouseup", this.events.mouseup);
+		on(document, "mousemove", this.events.mousemove);
+		on(document, "mouseup", this.events.mouseup);
 	};
 
 	/**
 	 * Mousemove callack
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mousemove = function(e) {
+	proto.mousemove = function(e) {
 		e.preventDefault();
 
-		var that = this, o = this.origin;
-		var track = that.tracks[that.currentAxis];
-		var trackSize = track[that.trackSize[that.currentAxis]];
-		var contentSize = that.rect[that.trackSize[that.currentAxis]];
+		var that = this, o = this.origin, axis = this.currentAxis;
+		var track = that.tracks[axis];
+		var trackSize = track[that.trackSize[axis]];
+		var contentSize = that.rect[that.trackSize[axis]];
 		var offset, ratio, scroll;
 
 		if ( that.config.barType === "progress" ) {
-			offset = e[that.mouseAxis[that.currentAxis]] - track[that.currentAxis];
+			offset = e[that.mouseAxis[axis]] - track[axis];
 			ratio = offset / trackSize;
-			scroll = ratio * (that.content[that.scrollSize[that.currentAxis]] -  contentSize);
+			scroll = ratio * (that.content[that.scrollSize[axis]] -  contentSize);
 		} else {
-			offset = e[that.mouseAxis[that.currentAxis]] - o[that.currentAxis] - track[that.currentAxis];
+			offset = e[that.mouseAxis[axis]] - o[axis] - track[axis];
 			ratio = offset / trackSize;
-			scroll = ratio * that[that.scrollSize[that.currentAxis]];
+			scroll = ratio * that[that.scrollSize[axis]];
 		}
 
 		// Update scroll position
 		raf(function () {
-			that.content[that.scrollPos[that.currentAxis]] = scroll;
+			that.content[that.scrollPos[axis]] = scroll;
 		});
 	};
 
@@ -465,63 +472,64 @@
 	 * Mouseup callack
 	 * @return {Void}
 	 */
-	MiniBar.prototype.mouseup = function(e) {
+	proto.mouseup = function(e) {
+		var cl = this.container.classList, o = this.config, evts = this.events;
 
-		this.container.classList.toggle(this.config.visibleClass, this.config.alwaysShowBars);
-		this.container.classList.remove(this.config.scrollingClass + "-" + this.currentAxis);
+		cl.toggle(o.visibleClass, o.alwaysShowBars);
+		cl.remove(o.scrollingClass + "-" + this.currentAxis);
 
-		if ( !e.target.classList.contains(this.config.barClass) ) {
-			this.container.classList.remove(this.config.hoverClass + "-x");
-			this.container.classList.remove(this.config.hoverClass + "-y");
+		if ( !e.target.classList.contains(o.barClass) ) {
+			cl.remove(o.hoverClass + "-x");
+			cl.remove(o.hoverClass + "-y");
 		}
 
 		this.origin = {};
 		this.currentAxis = null;
 		this.down = false;
 
-		document.removeEventListener("mousemove", this.events.mousemove);
-		document.removeEventListener("mouseup", this.events.mouseup);
+		off(document, "mousemove", evts.mousemove);
+		off(document, "mouseup", evts.mouseup);
 	};
 
 	/**
 	 * Update cached values and recalculate sizes / positions
 	 * @return {Void}
 	 */
-	MiniBar.prototype.update = function() {
-		var that = this;
+	proto.update = function() {
+		var that = this, ct = that.content;
 
 		// Cache the dimensions
 
 		that.rect = rect(that.container);
 
-		that.scrollTop = that.content.scrollTop;
-		that.scrollLeft = that.content.scrollLeft;
-		that.scrollHeight = that.content.scrollHeight;
-		that.scrollWidth = that.content.scrollWidth;
+		that.scrollTop = ct.scrollTop;
+		that.scrollLeft = ct.scrollLeft;
+		that.scrollHeight = ct.scrollHeight;
+		that.scrollWidth = ct.scrollWidth;
 
 		// Do we need horizontal scrolling?
-		var scrollX = that.scrollWidth > that.rect.width && !that.textarea;
+		var sx = that.scrollWidth > that.rect.width && !that.textarea;
 
 		// Do we need vertical scrolling?
-		var scrollY = that.scrollHeight > that.rect.height;
+		var sy = that.scrollHeight > that.rect.height;
 
-		that.container.classList.toggle("mb-scroll-x", scrollX);
-		that.container.classList.toggle("mb-scroll-y", scrollY);
+		that.container.classList.toggle("mb-scroll-x", sx);
+		that.container.classList.toggle("mb-scroll-y", sy);
 
 		// Style the content
-		style(that.content, {
+		style(ct, {
 			overflow: "auto",
-			marginBottom: scrollX ? -that.scrollbarSize : "",
-			paddingBottom: scrollX ? that.scrollbarSize : "",
-			marginRight: scrollY ? -that.scrollbarSize : "",
-			paddingRight: scrollY ? that.scrollbarSize : ""
+			marginBottom: sx ? -that.size : "",
+			paddingBottom: sx ? that.size : "",
+			marginRight: sy ? -that.size : "",
+			paddingRight: sy ? that.size : ""
 		});
 
-		that.scrollX = scrollX;
-		that.scrollY = scrollY;
+		that.scrollX = sx;
+		that.scrollY = sy;
 
-		each(that.tracks, function (i, track) {
-			extend(track, rect(track.node));
+		each(that.tracks, function (i, t) {
+			extend(t, rect(t.node));
 			extend(that.bars[i], rect(that.bars[i].node));
 		});
 
@@ -529,8 +537,8 @@
 		that.updateScrollBars();
 
 		// Only scroll to bottom if the cursor is at the end of the content and we're not dragging
-		if ( that.textarea && !that.down && that.content.selectionStart >= that.content.value.length ) {
-			that.content.scrollTop = that.scrollHeight + 1000;
+		if ( that.textarea && !that.down && ct.selectionStart >= ct.value.length ) {
+			ct.scrollTop = that.scrollHeight + 1000;
 		}
 	};
 
@@ -538,27 +546,31 @@
 	 * Update a scrollbar's size and position
 	 * @return {Void}
 	 */
-	MiniBar.prototype.updateScrollBar = function(axis) {
+	proto.updateScrollBar = function(axis) {
 
 		var that = this, css = {};
-		var trackSize = that.tracks[axis][that.trackSize[axis]];
-		var contentSize = that.rect[that.trackSize[axis]];
+
+		// Width or height of track
+		var ts = that.tracks[axis][that.trackSize[axis]];
+
+		// Width or height of content
+		var cs = that.rect[that.trackSize[axis]];
 
 		// We need a live value, not cached
-		var scrollOffset = that.content[that.scrollPos[axis]];
+		var so = that.content[that.scrollPos[axis]];
 
-		var barRatio = trackSize / that[that.scrollSize[axis]];
-		var scrollRatio = scrollOffset / (that[that.scrollSize[axis]] - contentSize);
+		var br = ts / that[that.scrollSize[axis]];
+		var sr = so / (that[that.scrollSize[axis]] - cs);
 
 		if ( that.config.barType === "progress" ) {
 			// Only need to set the size of a progress bar
-			css[that.trackSize[axis]] = Math.floor(trackSize * scrollRatio);
+			css[that.trackSize[axis]] = Math.floor(ts * sr);
 		} else {
 			// Set the scrollbar size
-			css[that.trackSize[axis]] = Math.max(Math.floor(barRatio * contentSize), that.config.minBarSize);
+			css[that.trackSize[axis]] = Math.max(Math.floor(br * cs), that.config.minBarSize);
 
 			// Set the scrollbar position
-			css[that.trackPos[axis]] = Math.floor((trackSize - css[that.trackSize[axis]]) * scrollRatio);
+			css[that.trackPos[axis]] = Math.floor((ts - css[that.trackSize[axis]]) * sr);
 		}
 
 		raf(function () {
@@ -570,7 +582,7 @@
 	 * Update all scrollbars
 	 * @return {Void}
 	 */
-	MiniBar.prototype.updateScrollBars = function() {
+	proto.updateScrollBars = function() {
 		each(this.bars, function(i, v) {
 			this.updateScrollBar(i);
 		}, this);
@@ -580,40 +592,40 @@
 	 * Destroy instance
 	 * @return {Void}
 	 */
-	MiniBar.prototype.destroy = function() {
-		var that = this;
+	proto.destroy = function() {
+		var that = this, ct = this.container;
 
 		if ( that.initialised ) {
 
 			// Remove the event listeners
-			that.container.removeEventListener("mouseenter", that.events.mouseenter);
-			window.removeEventListener("resize", that.events.debounce);
+			off(ct, "mouseenter", that.events.mouseenter);
+			off(window, "resize", that.events.debounce);
 
 			// Remove the main classes from the container
-			that.container.classList.remove(that.config.visibleClass);
-			that.container.classList.remove(that.config.containerClass);
+			ct.classList.remove(that.config.visibleClass);
+			ct.classList.remove(that.config.containerClass);
 
 			// Move the nodes back to their original container
 			while(that.content.firstChild) {
-				that.container.appendChild(that.content.firstChild);
+				ct.appendChild(that.content.firstChild);
 			}
 
 			// Remove the tracks
 			each(that.tracks, function(i, track) {
-				that.container.removeChild(track.node);
-				that.container.classList.remove("mb-scroll-" + i);
+				ct.removeChild(track.node);
+				ct.classList.remove("mb-scroll-" + i);
 			});
 
 			// Remove the content node
-			that.container.removeChild(that.content);
+			ct.removeChild(that.content);
 
 			// Remove manual positioning
 			if ( that.manualPosition ) {
-				that.container.style.position = "";
+				ct.style.position = "";
 
 				// IE returns null for empty style attribute
-				if ( that.container.getAttribute("style") === null || !that.container.getAttribute("style").length ) {
-					that.container.removeAttribute("style");
+				if ( ct.getAttribute("style") === null || !ct.getAttribute("style").length ) {
+					ct.removeAttribute("style");
 				}
 			}
 
