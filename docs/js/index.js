@@ -15,7 +15,7 @@ function init() {
 		}
 
 		scrollers.push(new MiniBar(el, {
-			alwaysShowBars: true,
+			alwaysShowBars: el.hasAttribute("data-visible"),
 			barType: i === 4 ? "progress" : "default",
 			horizontalMouseScroll: i === arr.length - 1
 		}));
