@@ -70,17 +70,17 @@
 	 * @param  {String} e
 	 * @param  {Function} fn
 	 */
-	var on = function on(el, e, fn) {
+	var on = function(el, e, fn) {
 		el.addEventListener(e, fn, false);
 	};
 
 	/**
-	 * Remove event listener to target
+	 * Remove event listener from target
 	 * @param  {Object} el
 	 * @param  {String} e
 	 * @param  {Function} fn
 	 */
-	var off = function off(el, e, fn) {
+	var off = function(el, e, fn) {
 		el.removeEventListener(e, fn);
 	};
 
@@ -91,7 +91,7 @@
 	 * @param  {Object}   s      Change the value of this
 	 * @return {Void}
 	 */
-	var each = function each(arr, fn, s) {
+	var each = function(arr, fn, s) {
 		if ("[object Object]" === Object.prototype.toString.call(arr)) {
 			for (var d in arr) {
 				if (Object.prototype.hasOwnProperty.call(arr, d)) {
@@ -111,7 +111,7 @@
 	 * @param  {(String|Object)} prop
 	 * @param  {String} val
 	 */
-	var style = function style(el, prop) {
+	var style = function(el, prop) {
 		var css = el && el.style;
 		var obj = "[object Object]" === Object.prototype.toString.call(prop);
 
@@ -137,7 +137,7 @@
 	 * @param  {Boolean} e 	Include margins
 	 * @return {Object}   	Formatted DOMRect copy
 	 */
-	var rect = function rect(el) {
+	var rect = function(el) {
 		var w = win;
 		var r = el.getBoundingClientRect();
 		var x = w.pageXOffset !== undefined ? w.pageXOffset : (doc.documentElement || body.parentNode || body).scrollLeft;
