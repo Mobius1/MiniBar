@@ -8,7 +8,7 @@
 
 A lightweight, dependency-free scrollbar library written in vanilla javascript.
 
-* Full customisable via CSS
+* Fully customisable via CSS
 * Native scrolling behaviour preserved
 * Vertical and horizontal scroll support
 * Textarea support
