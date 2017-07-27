@@ -1,20 +1,24 @@
 ![MiniBar](/docs/img/minibar_logo_medium.png?raw=true "MiniBar")
 
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/Mobius1/MiniBar/blob/master/LICENSE)
-[![release](https://img.shields.io/badge/release-0.1.10-orange.svg?style=flat)](https://github.com/Mobius1/MiniBar/releases)
+[![release](https://img.shields.io/badge/release-0.1.11-orange.svg?style=flat)](https://github.com/Mobius1/MiniBar/releases)
 [![npm version](https://badge.fury.io/js/minibarjs.svg)](https://badge.fury.io/js/minibarjs)
 ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js)
 ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?compression=gzip&label=gzipped)
 
 A lightweight, dependency-free scrollbar library written in vanilla javascript.
 
-MiniBar just hides the browser's native scrollbars and presents customisable ones. Native scrolling behaviour is preserved.
+* Full customisable via CSS
+* Native scrolling behaviour preserved
+* Vertical and horizontal scroll support
+* Textarea support
+* Horizontal scrolling with mousewheel
 
-[Demo](https://mobius1.github.io/MiniBar/)
+[Demo](https://mobius1.github.io/MiniBar/) | [Changelog](https://github.com/Mobius1/MiniBar/releases)
 
 ### Note
 
-MiniBar is currently in a pre-release state so is not yet suitable for production. The API will be in constant flux until v1.0.0 is released so check back for any changes.
+MiniBar is currently in a pre-release state so is not yet suitable for production so use with care. The API will be in constant flux until v1.0.0 is released so check back for any changes.
 
 Horizontal scrolling with mousewheel and textarea support are experimental and may not work in certain browsers.
 
