@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.10
+ * MiniBar 0.1.11
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -36,7 +36,8 @@
 		progressClass: "mb-progress",
 		hoverClass: "mb-hover",
 		scrollingClass: "mb-scrolling",
-		textareaClass: "mb-textarea"
+		textareaClass: "mb-textarea",
+		wrapperClass: "mb-wrapper"
 	};
 
 	/**
@@ -263,13 +264,16 @@
 
 			if ( t.textarea ) {
 				t.content = t.container;
-				t.container = doc.createElement("div");
+				t.container = document.createElement("div");
 				t.container.classList.add(t.config.textareaClass);
-
+				
+				t.wrapper = document.createElement("div");
+				t.wrapper.classList.add(t.config.wrapperClass);
+				t.container.appendChild(t.wrapper);
+				
 				t.content.parentNode.insertBefore(t.container, t.content);
-				t.container.appendChild(t.content);
-
-				on(t.content, "input", function(e) {
+				
+				t.content.addEventListener("input", function(e) {
 					t.update();
 				});
 
@@ -322,7 +326,11 @@
 			});
 
 			// Append the content
-			t.container.appendChild(t.content);
+			if ( t.textarea ) {
+				t.wrapper.appendChild(t.content);
+			} else {
+				t.container.appendChild(t.content);
+			}
 
 			if ( t.css.position === "static" ) {
 				t.manualPosition = true;
@@ -536,9 +544,17 @@
 		// Update scrollbars
 		t.updateScrollBars();
 
-		// Only scroll to bottom if the cursor is at the end of the content and we're not dragging
-		if ( t.textarea && !t.down && ct.selectionStart >= ct.value.length ) {
-			ct.scrollTop = t.scrollHeight + 1000;
+		t.wrapperPadding = 0;
+		
+		if ( t.textarea ) {
+			var css = style(t.wrapper);
+
+			t.wrapperPadding = parseInt(css.paddingTop, 10) + parseInt(css.paddingBottom, 10);
+			
+			// Only scroll to bottom if the cursor is at the end of the content and we're not dragging
+			if ( !t.down && t.content.selectionStart >= t.content.value.length ) {
+				t.content.scrollTop = t.scrollHeight + 1000;
+			}
 		}
 	};
 
@@ -557,7 +573,7 @@
 			tsize = t.tracks[axis][ts[axis]],
 
 			// Width or height of content
-			cs = t.rect[ts[axis]],
+			cs = t.rect[ts[axis]] - t.wrapperPadding,
 
 			// We need a live value, not cached
 			so = t.content[scrollPos[axis]],
