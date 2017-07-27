@@ -185,7 +185,6 @@ body > .mb-container > .mb-track {
 }
 .container:nth-child(7) .mb-track {
   background-color: #2E222D;
-  border-radius: 0;
   -webkit-transform: scale(1, 1);
           transform: scale(1, 1);
   -webkit-transform-origin: 100% 0 0;
