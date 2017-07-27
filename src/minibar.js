@@ -223,32 +223,30 @@
 	 */
 	var MiniBar = function(container, options) {
 
-		var t = this;
+		this.container = typeof container === "string" ? doc.querySelector(container) : container;
 
-		t.container = typeof container === "string" ? doc.querySelector(container) : container;
+		this.config = extend({}, config, options || win.MiniBarOptions || {});
 
-		t.config = extend({}, config, options || win.MiniBarOptions || {});
+		this.css = win.getComputedStyle(this.container);
 
-		t.css = win.getComputedStyle(t.container);
+		this.size = getScrollBarWidth();
+		this.textarea = this.container.nodeName.toLowerCase() === "textarea";
 
-		t.size = getScrollBarWidth();
-		t.textarea = t.container.nodeName.toLowerCase() === "textarea";
-
-		t.bars = { x: {}, y: {} };
-		t.tracks = { x: {}, y: {} };
+		this.bars = { x: {}, y: {} };
+		this.tracks = { x: {}, y: {} };
 
 		// Events
-		t.events = {};
+		this.events = {};
 
 		// Bind events
 		each(["update", "scroll", "mouseenter", "mousedown", "mousemove", "mouseup", "mousewheel"], function(i, evt) {
-			t.events[evt] = t[evt].bind(t);
+			this.events[evt] = t[evt].bind(t);
 		}, t);
 
 		// Debounce win resize
-		t.events.debounce = debounce(t.events.update, 50);
+		this.events.debounce = debounce(this.events.update, 50);
 
-		t.init();
+		this.init();
 	};
 
 	var proto = MiniBar.prototype;
@@ -262,17 +260,20 @@
 
 		if ( !t.initialised ) {
 
+			// We need a seperate wrapper for the textarea that we can pad
+			// otherwise the text will be up against the container edges
 			if ( t.textarea ) {
 				t.content = t.container;
 				t.container = document.createElement("div");
 				t.container.classList.add(t.config.textareaClass);
-				
+
 				t.wrapper = document.createElement("div");
 				t.wrapper.classList.add(t.config.wrapperClass);
 				t.container.appendChild(t.wrapper);
-				
+
 				t.content.parentNode.insertBefore(t.container, t.content);
-				
+
+				// Update the bar on input
 				t.content.addEventListener("input", function(e) {
 					t.update();
 				});
@@ -294,7 +295,7 @@
 				t.container.classList.add(t.config.visibleClass);
 			}
 
-			// Set the tracks and bars up and append them to the container
+			// Set the tracks and bars and append them to the container
 			each(t.tracks, function (i, track) {
 				t.bars[i].node = doc.createElement("div");
 				track.node = doc.createElement("div");
@@ -318,6 +319,7 @@
 				on(track.node, "mouseenter", function(e) {
 					t.container.classList.add(t.config.hoverClass + "-" + i);
 				});
+
 				on(track.node, "mouseleave", function(e) {
 					if ( !t.down ) {
 						t.container.classList.remove(t.config.hoverClass + "-" + i);
@@ -353,7 +355,8 @@
 	};
 
 	/**
-	 * Scroll callback
+	 * Event callback
+	 * @param  {[type]} e Event interface
 	 * @return {Void}
 	 */
 	proto.scroll = function(e) {
@@ -362,6 +365,7 @@
 
 	/**
 	 * Mousewheel callback
+	 * @param  {[type]} e Event interface
 	 * @return {Void}
 	 */
 	proto.mousewheel = function(e) {
@@ -396,6 +400,7 @@
 
 	/**
 	 * Mouseenter callack
+	 * @param  {[type]} e Event interface
 	 * @return {Void}
 	 */
 	proto.mouseenter = function(e) {
@@ -404,6 +409,7 @@
 
 	/**
 	 * Mousedown callack
+	 * @param  {[type]} e Event interface
 	 * @return {Void}
 	 */
 	proto.mousedown = function(e) {
@@ -450,6 +456,7 @@
 
 	/**
 	 * Mousemove callack
+	 * @param  {[type]} e Event interface
 	 * @return {Void}
 	 */
 	proto.mousemove = function(e) {
@@ -478,6 +485,7 @@
 
 	/**
 	 * Mouseup callack
+	 * @param  {[type]} e Event interface
 	 * @return {Void}
 	 */
 	proto.mouseup = function(e) {
@@ -545,12 +553,12 @@
 		t.updateScrollBars();
 
 		t.wrapperPadding = 0;
-		
+
 		if ( t.textarea ) {
 			var css = style(t.wrapper);
 
 			t.wrapperPadding = parseInt(css.paddingTop, 10) + parseInt(css.paddingBottom, 10);
-			
+
 			// Only scroll to bottom if the cursor is at the end of the content and we're not dragging
 			if ( !t.down && t.content.selectionStart >= t.content.value.length ) {
 				t.content.scrollTop = t.scrollHeight + 1000;
