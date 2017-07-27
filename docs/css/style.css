@@ -179,25 +179,15 @@ body > .mb-container > .mb-track {
   background-color: rgba(255, 255, 255, 0.6);
 }
 
-.container:nth-child(7) .mb-hover-y .mb-track-y {
-  -webkit-transform: scale(2, 1);
-          transform: scale(2, 1);
-}
 .container:nth-child(7) .mb-track {
   background-color: #2E222D;
-  -webkit-transform: scale(1, 1);
-          transform: scale(1, 1);
-  -webkit-transform-origin: 100% 0 0;
-          transform-origin: 100% 0 0;
-  -webkit-transition: -webkit-transform 150ms;
-  transition: -webkit-transform 150ms;
-  transition: transform 150ms;
-  transition: transform 150ms, -webkit-transform 150ms;
 }
+
 .container:nth-child(7) .mb-track {
   background-color: #2E222D;
   width: 5px;
 }
+
 .container:nth-child(7) .mb-bar {
   background-color: #4C9689;
   border-radius: 2.5px;
