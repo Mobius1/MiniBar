@@ -99,6 +99,14 @@ button {
 .main-title {
   border-bottom: 1px solid #4C9689;
   padding-bottom: 15px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.mb-wrapper {
+  background-color: #2E222D;
 }
 
 .mb-bar {
@@ -116,9 +124,14 @@ body > .mb-container > .mb-track {
 .container:nth-child(4) .mb-bar,
 .container:nth-child(6) .mb-bar,
 .container:nth-child(7) .mb-bar,
-.container:nth-child(8) .mb-bar {
-  -webkit-transition: height 150ms linear 0ms;
-  transition: height 150ms linear 0ms;
+.container:nth-child(8) .mb-bar,
+.container-wide .mb-bar {
+  -webkit-transition-property: height, width;
+  transition-property: height, width;
+  -webkit-transition-duration: 150ms;
+          transition-duration: 150ms;
+  -webkit-transition-timing-function: linear;
+          transition-timing-function: linear;
 }
 
 .container:nth-child(2) .mb-track,
@@ -182,11 +195,13 @@ body > .mb-container > .mb-track {
   transition: transform 150ms;
   transition: transform 150ms, -webkit-transform 150ms;
 }
-.container:nth-child(7) .mb-bar {
-  border-radius: 0;
-}
-.container:nth-child(7) .mb-track-y {
+.container:nth-child(7) .mb-track {
+  background-color: #2E222D;
   width: 5px;
+}
+.container:nth-child(7) .mb-bar {
+  background-color: #4C9689;
+  border-radius: 2.5px;
 }
 
 .container:nth-child(8) .main-title {
