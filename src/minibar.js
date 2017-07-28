@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.11
+ * MiniBar 0.1.12
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -194,7 +194,14 @@
 		};
 	}();
 
-	// t: current time, b: begInnIng value, c: change In value, d: duration
+	/**
+	 * Easing equation
+	 * @param  {Number} t Current time
+	 * @param  {Number} b Start value
+	 * @param  {Number} c Change in value
+	 * @param  {Number} d Duration
+	 * @return {Number}
+	 */
 	var easeOutCirc = function (t, b, c, d) {
 		return c * Math.sqrt(1 - (t=t/d-1)*t) + b;
 	};
@@ -217,12 +224,30 @@
 	};
 
 	/**
+	 * classList shim
+	 * @type {Object}
+	 */
+	var classList = {
+		contains: function(a, b) {
+			if ( a ) { return a.classList ? a.classList.contains(b) : !!a.className && !!a.className.match(new RegExp("(\\s|^)" + b + "(\\s|$)")); }
+		},
+		add: function(a, b) {
+			if (!classList.contains(a, b)) { if (a.classList) { a.classList.add(b); } else { a.className = a.className.trim() + " " + b; } }
+		},
+		remove: function(a, b) {
+			if (classList.contains(a, b)) { if (a.classList) { a.classList.remove(b); } else { a.className = a.className.replace(new RegExp("(^|\\s)" + b.split(" ").join("|") + "(\\s|$)", "gi"), " "); } }
+		},
+		toggle: function(a, b, f) {
+			if (!classList.contains(a, b) || f) { a.classList.add(b); } else { a.classList.remove(b); }
+		}
+	};
+
+	/**
 	 * Main Library
 	 * @param {(String|Object)} content CSS3 selector string or node reference
 	 * @param {Object} options 			User defined options
 	 */
 	var MiniBar = function(container, options) {
-
 		this.container = typeof container === "string" ? doc.querySelector(container) : container;
 
 		this.config = extend({}, config, options || win.MiniBarOptions || {});
@@ -240,8 +265,8 @@
 
 		// Bind events
 		each(["update", "scroll", "mouseenter", "mousedown", "mousemove", "mouseup", "mousewheel"], function(i, evt) {
-			this.events[evt] = t[evt].bind(t);
-		}, t);
+			this.events[evt] = this[evt].bind(this);
+		}, this);
 
 		// Debounce win resize
 		this.events.debounce = debounce(this.events.update, 50);
@@ -265,10 +290,10 @@
 			if ( t.textarea ) {
 				t.content = t.container;
 				t.container = document.createElement("div");
-				t.container.classList.add(t.config.textareaClass);
+				classList.add(t.container, t.config.textareaClass);
 
 				t.wrapper = document.createElement("div");
-				t.wrapper.classList.add(t.config.wrapperClass);
+				classList.add(t.wrapper, t.config.wrapperClass);
 				t.container.appendChild(t.wrapper);
 
 				t.content.parentNode.insertBefore(t.container, t.content);
@@ -287,12 +312,12 @@
 				}
 			}
 
-			t.container.classList.add(t.config.containerClass);
+			classList.add(t.container, t.config.containerClass);
 
-			t.content.classList.add(t.config.contentClass);
+			classList.add(t.content, t.config.contentClass);
 
 			if (t.config.alwaysShowBars) {
-				t.container.classList.add(t.config.visibleClass);
+				classList.add(t.container, t.config.visibleClass);
 			}
 
 			// Set the tracks and bars and append them to the container
@@ -301,15 +326,15 @@
 				track.node = doc.createElement("div");
 
 				// IE10 can't do multiple args
-				track.node.classList.add(t.config.trackClass);
-				track.node.classList.add(t.config.trackClass + "-" + i);
+				classList.add(track.node, t.config.trackClass);
+				classList.add(track.node, t.config.trackClass + "-" + i);
 
-				t.bars[i].node.classList.add(t.config.barClass);
+				classList.add(t.bars[i].node, t.config.barClass);
 				track.node.appendChild(t.bars[i].node);
 				t.container.appendChild(track.node);
 
 				if ( t.config.barType === "progress" ) {
-					track.node.classList.add(t.config.progressClass);
+					classList.add(track.node, t.config.progressClass);
 
 					on(track.node, "mousedown", t.events.mousedown);
 				} else {
@@ -317,12 +342,11 @@
 				}
 
 				on(track.node, "mouseenter", function(e) {
-					t.container.classList.add(t.config.hoverClass + "-" + i);
+					classList.add(t.container, t.config.hoverClass + "-" + i);
 				});
-
 				on(track.node, "mouseleave", function(e) {
 					if ( !t.down ) {
-						t.container.classList.remove(t.config.hoverClass + "-" + i);
+						classList.remove(t.container, t.config.hoverClass + "-" + i);
 					}
 				});
 			});
@@ -355,8 +379,8 @@
 	};
 
 	/**
-	 * Event callback
-	 * @param  {[type]} e Event interface
+	 * Scroll callback
+	* @param  {Object} e Event interface
 	 * @return {Void}
 	 */
 	proto.scroll = function(e) {
@@ -365,7 +389,7 @@
 
 	/**
 	 * Mousewheel callback
-	 * @param  {[type]} e Event interface
+	 * @param  {Object} e Event interface
 	 * @return {Void}
 	 */
 	proto.mousewheel = function(e) {
@@ -400,7 +424,7 @@
 
 	/**
 	 * Mouseenter callack
-	 * @param  {[type]} e Event interface
+	 * @param  {Object} e Event interface
 	 * @return {Void}
 	 */
 	proto.mouseenter = function(e) {
@@ -409,7 +433,7 @@
 
 	/**
 	 * Mousedown callack
-	 * @param  {[type]} e Event interface
+	 * @param  {Object} e Event interface
 	 * @return {Void}
 	 */
 	proto.mousedown = function(e) {
@@ -427,8 +451,8 @@
 		this.update();
 
 		// Keep the tracks visible during drag
-		this.container.classList.add(o.visibleClass);
-		this.container.classList.add(o.scrollingClass + "-" + axis);
+		classList.add(this.container, o.visibleClass);
+		classList.add(this.container, o.scrollingClass + "-" + axis);
 
 
 		// Save data for use during mousemove
@@ -456,7 +480,7 @@
 
 	/**
 	 * Mousemove callack
-	 * @param  {[type]} e Event interface
+	 * @param  {Object} e Event interface
 	 * @return {Void}
 	 */
 	proto.mousemove = function(e) {
@@ -485,18 +509,18 @@
 
 	/**
 	 * Mouseup callack
-	 * @param  {[type]} e Event interface
+	 * @param  {Object} e Event interface
 	 * @return {Void}
 	 */
 	proto.mouseup = function(e) {
-		var cl = this.container.classList, o = this.config, evts = this.events;
+		var o = this.config, evts = this.events;
 
-		cl.toggle(o.visibleClass, o.alwaysShowBars);
-		cl.remove(o.scrollingClass + "-" + this.currentAxis);
+		classList.toggle(this.container, o.visibleClass, o.alwaysShowBars);
+		classList.remove(this.container, o.scrollingClass + "-" + this.currentAxis);
 
-		if ( !e.target.classList.contains(o.barClass) ) {
-			cl.remove(o.hoverClass + "-x");
-			cl.remove(o.hoverClass + "-y");
+		if ( !classList.contains(e.target, o.barClass) ) {
+			classList.remove(this.container, o.hoverClass + "-x");
+			classList.remove(this.container, o.hoverClass + "-y");
 		}
 
 		this.origin = {};
@@ -509,6 +533,7 @@
 
 	/**
 	 * Update cached values and recalculate sizes / positions
+	 * @param  {Object} e Event interface
 	 * @return {Void}
 	 */
 	proto.update = function() {
@@ -529,8 +554,8 @@
 		// Do we need vertical scrolling?
 		var sy = t.scrollHeight > t.rect.height;
 
-		t.container.classList.toggle("mb-scroll-x", sx);
-		t.container.classList.toggle("mb-scroll-y", sy);
+		classList.toggle(t.container, "mb-scroll-x", sx);
+		classList.toggle(t.container, "mb-scroll-y", sy);
 
 		// Style the content
 		style(ct, {
@@ -568,6 +593,7 @@
 
 	/**
 	 * Update a scrollbar's size and position
+	 * @param  {String} axis
 	 * @return {Void}
 	 */
 	proto.updateScrollBar = function(axis) {
@@ -620,7 +646,7 @@
 	 * @return {Void}
 	 */
 	proto.destroy = function() {
-		var t = this, ct = this.container, cl = ct.classList;
+		var t = this, ct = this.container;
 
 		if ( t.initialised ) {
 
@@ -629,8 +655,8 @@
 			off(win, "resize", t.events.debounce);
 
 			// Remove the main classes from the container
-			cl.remove(t.config.visibleClass);
-			cl.remove(t.config.containerClass);
+			classList.remove(ct, t.config.visibleClass);
+			classList.remove(ct, t.config.containerClass);
 
 			// Move the nodes back to their original container
 			while(t.content.firstChild) {
@@ -640,7 +666,7 @@
 			// Remove the tracks
 			each(t.tracks, function(i, track) {
 				ct.removeChild(track.node);
-				cl.remove("mb-scroll-" + i);
+				classList.remove(ct, "mb-scroll-" + i);
 			});
 
 			// Remove the content node
