@@ -238,7 +238,13 @@
 			if (classList.contains(a, b)) { if (a.classList) { a.classList.remove(b); } else { a.className = a.className.replace(new RegExp("(^|\\s)" + b.split(" ").join("|") + "(\\s|$)", "gi"), " "); } }
 		},
 		toggle: function(a, b, f) {
-			if (!classList.contains(a, b) || f) { a.classList.add(b); } else { a.classList.remove(b); }
+			b += "";
+
+			var result = this.contains(b), method = result ? f !== true && "remove" : f !== false && "add";
+
+			if (method) {
+				this[method](a, b);
+			}
 		}
 	};
 
