@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.12
+ * MiniBar 0.1.13
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -27,6 +27,7 @@
 		barType: "default",
 		minBarSize: 10,
 		alwaysShowBars: false,
+		horizontalMouseScroll: false,
 
 		containerClass: "mb-container",
 		contentClass: "mb-content",
@@ -41,28 +42,22 @@
 	};
 
 	/**
-	 * Object.assign polyfill
-	 * @param  {Object} target
-	 * @param  {Object} args
+	 * Deep extend
+	 * @param  {Object} src
+	 * @param  {Object} props
 	 * @return {Object}
 	 */
-	var extend = function(o, args) {
-		var to = Object(o);
-
-		for (var index = 1; index < arguments.length; index++) {
-			var ns = arguments[index];
-
-			if (ns != null) {
-				// Skip over if undefined or null
-				for (var nxt in ns) {
-					// Avoid bugs when hasOwnProperty is shadowed
-					if (Object.prototype.hasOwnProperty.call(ns, nxt)) {
-						to[nxt] = ns[nxt];
-					}
-				}
+	var extend = function(src, props) {
+		for (var p in props) {
+			var v = props[p];
+			if (v && Object.prototype.toString.call(v) === "[object Object]") {
+					src[p] = src[p] || {};
+					extend(src[p], v);
+			} else {
+					src[p] = v;
 			}
 		}
-		return to;
+		return src;
 	};
 
 	/**
@@ -195,18 +190,6 @@
 	}();
 
 	/**
-	 * Easing equation
-	 * @param  {Number} t Current time
-	 * @param  {Number} b Start value
-	 * @param  {Number} c Change in value
-	 * @param  {Number} d Duration
-	 * @return {Number}
-	 */
-	var easeOutCirc = function (t, b, c, d) {
-		return c * Math.sqrt(1 - (t=t/d-1)*t) + b;
-	};
-
-	/**
 	 * Get native scrollbar width
 	 * @return {Number} Scrollbar width
 	 */
@@ -238,9 +221,7 @@
 			if (classList.contains(a, b)) { if (a.classList) { a.classList.remove(b); } else { a.className = a.className.replace(new RegExp("(^|\\s)" + b.split(" ").join("|") + "(\\s|$)", "gi"), " "); } }
 		},
 		toggle: function(a, b, f) {
-			b += "";
-
-			var result = this.contains(b), method = result ? f !== true && "remove" : f !== false && "add";
+			var result = this.contains(a, b), method = result ? f !== true && "remove" : f !== false && "add";
 
 			if (method) {
 				this[method](a, b);
@@ -256,7 +237,7 @@
 	var MiniBar = function(container, options) {
 		this.container = typeof container === "string" ? doc.querySelector(container) : container;
 
-		this.config = extend({}, config, options || win.MiniBarOptions || {});
+		this.config = extend(config, options || win.MiniBarOptions);
 
 		this.css = win.getComputedStyle(this.container);
 
@@ -287,100 +268,103 @@
 	 * @return {Void}
 	 */
 	proto.init = function() {
-		var t = this;
+		var mb = this;
 
-		if ( !t.initialised ) {
+		if ( !mb.initialised ) {
 
 			// We need a seperate wrapper for the textarea that we can pad
 			// otherwise the text will be up against the container edges
-			if ( t.textarea ) {
-				t.content = t.container;
-				t.container = document.createElement("div");
-				classList.add(t.container, t.config.textareaClass);
+			if ( mb.textarea ) {
+				mb.content = mb.container;
+				mb.container = document.createElement("div");
+				classList.add(mb.container, mb.config.textareaClass);
 
-				t.wrapper = document.createElement("div");
-				classList.add(t.wrapper, t.config.wrapperClass);
-				t.container.appendChild(t.wrapper);
+				mb.wrapper = document.createElement("div");
+				classList.add(mb.wrapper, mb.config.wrapperClass);
+				mb.container.appendChild(mb.wrapper);
 
-				t.content.parentNode.insertBefore(t.container, t.content);
+				mb.content.parentNode.insertBefore(mb.container, mb.content);
 
 				// Update the bar on input
-				t.content.addEventListener("input", function(e) {
-					t.update();
+				mb.content.addEventListener("input", function(e) {
+					mb.update();
 				});
 
 			} else {
-				t.content = doc.createElement("div");
+				mb.content = doc.createElement("div");
 
 				// Move all nodes to the the new content node
-				while(t.container.firstChild) {
-					t.content.appendChild(t.container.firstChild);
+				while(mb.container.firstChild) {
+					mb.content.appendChild(mb.container.firstChild);
 				}
 			}
 
-			classList.add(t.container, t.config.containerClass);
+			classList.add(mb.container, mb.config.containerClass);
 
-			classList.add(t.content, t.config.contentClass);
+			classList.add(mb.content, mb.config.contentClass);
 
-			if (t.config.alwaysShowBars) {
-				classList.add(t.container, t.config.visibleClass);
+			if (mb.config.alwaysShowBars) {
+				classList.add(mb.container, mb.config.visibleClass);
 			}
 
 			// Set the tracks and bars and append them to the container
-			each(t.tracks, function (i, track) {
-				t.bars[i].node = doc.createElement("div");
+			each(mb.tracks, function (axis, track) {
+				mb.bars[axis].node = doc.createElement("div");
 				track.node = doc.createElement("div");
 
 				// IE10 can't do multiple args
-				classList.add(track.node, t.config.trackClass);
-				classList.add(track.node, t.config.trackClass + "-" + i);
+				classList.add(track.node, mb.config.trackClass);
+				classList.add(track.node, mb.config.trackClass + "-" + axis);
 
-				classList.add(t.bars[i].node, t.config.barClass);
-				track.node.appendChild(t.bars[i].node);
-				t.container.appendChild(track.node);
+				classList.add(mb.bars[axis].node, mb.config.barClass);
+				track.node.appendChild(mb.bars[axis].node);
+				mb.container.appendChild(track.node);
 
-				if ( t.config.barType === "progress" ) {
-					classList.add(track.node, t.config.progressClass);
+				if ( mb.config.barType === "progress" ) {
+					classList.add(track.node, mb.config.progressClass);
 
-					on(track.node, "mousedown", t.events.mousedown);
+					on(track.node, "mousedown", mb.events.mousedown);
 				} else {
-					on(t.bars[i].node, "mousedown", t.events.mousedown);
+					on(mb.bars[axis].node, "mousedown", mb.events.mousedown);
 				}
 
 				on(track.node, "mouseenter", function(e) {
-					classList.add(t.container, t.config.hoverClass + "-" + i);
+					classList.add(mb.container, mb.config.hoverClass + "-" + axis);
 				});
 				on(track.node, "mouseleave", function(e) {
-					if ( !t.down ) {
-						classList.remove(t.container, t.config.hoverClass + "-" + i);
+					if ( !mb.down ) {
+						classList.remove(mb.container, mb.config.hoverClass + "-" + axis);
 					}
 				});
 			});
 
 			// Append the content
-			if ( t.textarea ) {
-				t.wrapper.appendChild(t.content);
+			if ( mb.textarea ) {
+				mb.wrapper.appendChild(mb.content);
 			} else {
-				t.container.appendChild(t.content);
+				mb.container.appendChild(mb.content);
 			}
 
-			if ( t.css.position === "static" ) {
-				t.manualPosition = true;
-				t.container.style.position = "relative";
+			if ( mb.css.position === "static" ) {
+				mb.manualPosition = true;
+				mb.container.style.position = "relative";
 			}
 
-			t.update();
+			mb.update();
 
-			on(t.content, "scroll", t.events.scroll);
-			on(t.content, "wheel", t.events.mousewheel);
-			on(t.container, "mouseenter", t.events.mouseenter);
+			on(mb.content, "scroll", mb.events.scroll);
+			on(mb.container, "mouseenter", mb.events.mouseenter);
 
-			on(win, "resize", t.events.debounce);
+			if ( this.config.horizontalMouseScroll ) {
+				on(mb.content, "wheel", mb.events.mousewheel);
+			}
 
-			on(doc, 'DOMContentLoaded', t.events.update);
-			on(win, 'load', t.events.update);
+			on(win, "resize", mb.events.debounce);
 
-			t.initialised = true;
+			on(doc, 'DOMContentLoaded', mb.events.update);
+			on(win, 'load', mb.events.update);
+
+			mb.initialised = true;
 		}
 	};
 
@@ -394,38 +378,57 @@
 	};
 
 	/**
+	 * Scroll content by amount
+	 * @param  {Number} 	amount   Number of pixels to scroll
+	 * @param  {String} 	axis     Scroll axis
+	 * @param  {Number} 	duration Duration of scroll animation in ms
+	 * @param  {Function} 	easing   Easing function
+	 * @return {Void}
+	 */
+	proto.scrollBy = function(amount, axis, duration, easing) {
+
+		axis = axis || "y";
+
+		// Duration of scroll
+		duration = duration || 250;
+
+		// Easing function
+		easing = easing || function (t, b, c, d) {
+			t /= d;
+			return -c * t*(t-2) + b;
+		};
+
+		var t = this, start = Date.now(), position = t.content[scrollPos[axis]];
+
+		// Scroll function
+		var scroll = function() {
+			var now = Date.now(), ct = now - start;
+
+			// Cancel after allotted interval
+			if ( ct > duration ) {
+				cancelAnimationFrame(t.frame);
+				return;
+			}
+
+			// Scroll the content
+			t.content[scrollPos[axis]] = easing(ct, position, amount, duration);
+
+			// requestAnimationFrame
+			t.frame = raf(scroll);
+		};
+
+		scroll();
+	};
+
+	/**
 	 * Mousewheel callback
 	 * @param  {Object} e Event interface
 	 * @return {Void}
 	 */
 	proto.mousewheel = function(e) {
-		if ( this.config.horizontalMouseScroll ) {
+		e.preventDefault();
 
-			e.preventDefault();
-
-			var t = this, y = e.deltaY, startTime = Date.now();
-
-			var horizontalScroll = function() {
-				var now = Date.now(),
-						ct = now - startTime,
-						scroll = easeOutCirc(ct, 0, 8, 400);
-
-				if ( ct > 400 ) {
-					cancelAnimationFrame(t.frame);
-					return;
-				}
-
-				if ( y < 0 ) {
-					t.content.scrollLeft -= scroll;
-				} else if ( y > 0 ) {
-					t.content.scrollLeft += scroll;
-				}
-
-				t.frame = raf(horizontalScroll);
-			};
-
-			horizontalScroll();
-		}
+		this.scrollBy(e.deltaY * 100, "x");
 	};
 
 	/**
@@ -447,41 +450,41 @@
 
 		this.down = true;
 
-		var o = this.config, type = o.barType === "progress" ? "tracks" : "bars";
-		var axis = e.target === this[type].x.node ? "x" : "y";
+		var mb = this, o = mb.config, type = o.barType === "progress" ? "tracks" : "bars";
+		var axis = e.target === mb[type].x.node ? "x" : "y";
 
-		this.currentAxis = axis;
+		mb.currentAxis = axis;
 
 		// Lets do all the nasty reflow-triggering stuff before mousemove
 		// otherwise it'll be a shit-show during mousemove
-		this.update();
+		mb.update();
 
 		// Keep the tracks visible during drag
-		classList.add(this.container, o.visibleClass);
-		classList.add(this.container, o.scrollingClass + "-" + axis);
+		classList.add(mb.container, o.visibleClass);
+		classList.add(mb.container, o.scrollingClass + "-" + axis);
 
 
 		// Save data for use during mousemove
 		if ( o.barType === "progress" ) {
 
-			this.origin = {
-				x: e.pageX - this.tracks[axis].x,
-				y: e.pageY - this.tracks[axis].y
+			mb.origin = {
+				x: e.pageX - mb.tracks[axis].x,
+				y: e.pageY - mb.tracks[axis].y
 			};
 
-			this.mousemove(e);
+			mb.mousemove(e);
 
 		} else {
-			this.origin = {
-				x: e.pageX - this.bars[axis].x,
-				y: e.pageY - this.bars[axis].y
+			mb.origin = {
+				x: e.pageX - mb.bars[axis].x,
+				y: e.pageY - mb.bars[axis].y
 			};
 		}
 
 		// Attach the mousemove and mouseup event listeners now
 		// instead of permanently having them on
-		on(doc, "mousemove", this.events.mousemove);
-		on(doc, "mouseup", this.events.mouseup);
+		on(doc, "mousemove", mb.events.mousemove);
+		on(doc, "mouseup", mb.events.mouseup);
 	};
 
 	/**
@@ -492,24 +495,24 @@
 	proto.mousemove = function(e) {
 		e.preventDefault();
 
-		var t = this, o = this.origin, axis = this.currentAxis,
-			track = t.tracks[axis],
+		var mb = this, o = this.origin, axis = this.currentAxis,
+			track = mb.tracks[axis],
 			ts = track[trackSize[axis]],
 			offset, ratio, scroll;
 
-		if ( t.config.barType === "progress" ) {
+		if ( mb.config.barType === "progress" ) {
 			offset = e[mAxis[axis]] - track[axis];
 			ratio = offset / ts;
-			scroll = ratio * (t.content[scrollSize[axis]] -  t.rect[trackSize[axis]]);
+			scroll = ratio * (mb.content[scrollSize[axis]] -  mb.rect[trackSize[axis]]);
 		} else {
 			offset = e[mAxis[axis]] - o[axis] - track[axis];
 			ratio = offset / ts;
-			scroll = ratio * t[scrollSize[axis]];
+			scroll = ratio * mb[scrollSize[axis]];
 		}
 
 		// Update scroll position
 		raf(function () {
-			t.content[scrollPos[axis]] = scroll;
+			mb.content[scrollPos[axis]] = scroll;
 		});
 	};
 
@@ -543,56 +546,56 @@
 	 * @return {Void}
 	 */
 	proto.update = function() {
-		var t = this, ct = t.content;
+		var mb = this, ct = mb.content;
 
 		// Cache the dimensions
 
-		t.rect = rect(t.container);
+		mb.rect = rect(mb.container);
 
-		t.scrollTop = ct.scrollTop;
-		t.scrollLeft = ct.scrollLeft;
-		t.scrollHeight = ct.scrollHeight;
-		t.scrollWidth = ct.scrollWidth;
+		mb.scrollTop = ct.scrollTop;
+		mb.scrollLeft = ct.scrollLeft;
+		mb.scrollHeight = ct.scrollHeight;
+		mb.scrollWidth = ct.scrollWidth;
 
 		// Do we need horizontal scrolling?
-		var sx = t.scrollWidth > t.rect.width && !t.textarea;
+		var sx = mb.scrollWidth > mb.rect.width && !mb.textarea;
 
 		// Do we need vertical scrolling?
-		var sy = t.scrollHeight > t.rect.height;
+		var sy = mb.scrollHeight > mb.rect.height;
 
-		classList.toggle(t.container, "mb-scroll-x", sx);
-		classList.toggle(t.container, "mb-scroll-y", sy);
+		classList.toggle(mb.container, "mb-scroll-x", sx);
+		classList.toggle(mb.container, "mb-scroll-y", sy);
 
 		// Style the content
 		style(ct, {
 			overflow: "auto",
-			marginBottom: sx ? -t.size : "",
-			paddingBottom: sx ? t.size : "",
-			marginRight: sy ? -t.size : "",
-			paddingRight: sy ? t.size : ""
+			marginBottom: sx ? -mb.size : "",
+			paddingBottom: sx ? mb.size : "",
+			marginRight: sy ? -mb.size : "",
+			paddingRight: sy ? mb.size : ""
 		});
 
-		t.scrollX = sx;
-		t.scrollY = sy;
+		mb.scrollX = sx;
+		mb.scrollY = sy;
 
-		each(t.tracks, function (i, track) {
+		each(mb.tracks, function (i, track) {
 			extend(track, rect(track.node));
-			extend(t.bars[i], rect(t.bars[i].node));
+			extend(mb.bars[i], rect(mb.bars[i].node));
 		});
 
 		// Update scrollbars
-		t.updateScrollBars();
+		mb.updateScrollBars();
 
-		t.wrapperPadding = 0;
+		mb.wrapperPadding = 0;
 
-		if ( t.textarea ) {
-			var css = style(t.wrapper);
+		if ( mb.textarea ) {
+			var css = style(mb.wrapper);
 
-			t.wrapperPadding = parseInt(css.paddingTop, 10) + parseInt(css.paddingBottom, 10);
+			mb.wrapperPadding = parseInt(css.paddingTop, 10) + parseInt(css.paddingBottom, 10);
 
 			// Only scroll to bottom if the cursor is at the end of the content and we're not dragging
-			if ( !t.down && t.content.selectionStart >= t.content.value.length ) {
-				t.content.scrollTop = t.scrollHeight + 1000;
+			if ( !mb.down && mb.content.selectionStart >= mb.content.value.length ) {
+				mb.content.scrollTop = mb.scrollHeight + 1000;
 			}
 		}
 	};
@@ -604,22 +607,22 @@
 	 */
 	proto.updateScrollBar = function(axis) {
 
-		var t = this, css = {},
+		var mb = this, css = {},
 			ts = trackSize,
 			ss = scrollSize,
-			o = t.config,
+			o = mb.config,
 
 			// Width or height of track
-			tsize = t.tracks[axis][ts[axis]],
+			tsize = mb.tracks[axis][ts[axis]],
 
 			// Width or height of content
-			cs = t.rect[ts[axis]] - t.wrapperPadding,
+			cs = mb.rect[ts[axis]] - mb.wrapperPadding,
 
 			// We need a live value, not cached
-			so = t.content[scrollPos[axis]],
+			so = mb.content[scrollPos[axis]],
 
-			br = tsize / t[ss[axis]],
-			sr = so / (t[ss[axis]] - cs);
+			br = tsize / mb[ss[axis]],
+			sr = so / (mb[ss[axis]] - cs);
 
 		if ( o.barType === "progress" ) {
 			// Only need to set the size of a progress bar
@@ -633,7 +636,7 @@
 		}
 
 		raf(function () {
-			style(t.bars[axis].node, css);
+			style(mb.bars[axis].node, css);
 		});
 	};
 
@@ -652,34 +655,34 @@
 	 * @return {Void}
 	 */
 	proto.destroy = function() {
-		var t = this, ct = this.container;
+		var mb = this, ct = this.container;
 
-		if ( t.initialised ) {
+		if ( mb.initialised ) {
 
 			// Remove the event listeners
-			off(ct, "mouseenter", t.events.mouseenter);
-			off(win, "resize", t.events.debounce);
+			off(ct, "mouseenter", mb.events.mouseenter);
+			off(win, "resize", mb.events.debounce);
 
 			// Remove the main classes from the container
-			classList.remove(ct, t.config.visibleClass);
-			classList.remove(ct, t.config.containerClass);
+			classList.remove(ct, mb.config.visibleClass);
+			classList.remove(ct, mb.config.containerClass);
 
 			// Move the nodes back to their original container
-			while(t.content.firstChild) {
-				ct.appendChild(t.content.firstChild);
+			while(mb.content.firstChild) {
+				ct.appendChild(mb.content.firstChild);
 			}
 
 			// Remove the tracks
-			each(t.tracks, function(i, track) {
+			each(mb.tracks, function(i, track) {
 				ct.removeChild(track.node);
 				classList.remove(ct, "mb-scroll-" + i);
 			});
 
 			// Remove the content node
-			ct.removeChild(t.content);
+			ct.removeChild(mb.content);
 
 			// Remove manual positioning
-			if ( t.manualPosition ) {
+			if ( mb.manualPosition ) {
 				ct.style.position = "";
 
 				// IE returns null for empty style attribute
@@ -689,11 +692,11 @@
 			}
 
 			// Clear node references
-			t.bars = { x: {}, y: {} };
-			t.tracks = { x: {}, y: {} };
-			t.content = null;
+			mb.bars = { x: {}, y: {} };
+			mb.tracks = { x: {}, y: {} };
+			mb.content = null;
 
-			t.initialised = false;
+			mb.initialised = false;
 		}
 	};
 
