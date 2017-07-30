@@ -3,36 +3,35 @@ var scrollers = [];
 document.addEventListener("DOMContentLoaded", init);
 
 function init() {
-	
+
 	MiniBarOptions = {
 		alwaysShowBars: true
 	};
 
 	[].slice.call(document.querySelectorAll(".inner")).forEach(function(el, i, arr) {
-		
+
 		if ( el.nodeName !== "TEXTAREA" && i < arr.length - 1 ) {
 			el.firstElementChild.innerHTML = getContent();
 		}
-		
+
 		var options = {
 			alwaysShowBars: i !== 0 && i !== 5,
 			barType: i === 4 ? "progress" : "default",
 			horizontalMouseScroll: i === arr.length - 1
 		};
-		
+
 		if ( i === 7 ) {
 			options.navButtons = {
 				enabled: true
 			};
-			options.scrollY = false;
 		}
-		
+
 		if ( i === 9 ) {
 			options.scrollY = false;
 		}
-		
+
 		scrollers.push(new MiniBar(el, options));
-		
+
 		if ( el.nodeName === "TEXTAREA" ) {
 			setTimeout(function() {
 				moveCaretToEnd(scrollers[i].content);
@@ -41,7 +40,7 @@ function init() {
 	});
 
 	new MiniBar(document.getElementsByTagName("main")[0]);
-	
+
 	[].slice.call(document.querySelectorAll(".tools")).forEach(function(el) {
 		var index = parseInt(el.getAttribute("data-index"), 10);
 		el.addEventListener("click", function(e) {
@@ -63,11 +62,11 @@ function init() {
 			}
 		});
 	});
-	
+
 	setTimeout(function() {
 		updateWidth();
 	}, 1000);
-	
+
 }
 
 function add(index) {
@@ -85,7 +84,7 @@ function add(index) {
 
 function remove(index) {
 	var s = scrollers[index];
-	
+
 	if ( s.content.childElementCount > 1 ) {
 		s.content.removeChild(s.content.lastElementChild);
 		s.update();
@@ -97,7 +96,7 @@ function updateWidth() {
 			f = s.content.firstElementChild,
 			w = f.firstElementChild.offsetWidth + 10,
 			c = f.childElementCount;
-	
+
 	f.style.width = (c * w) + "px";
 }
 
