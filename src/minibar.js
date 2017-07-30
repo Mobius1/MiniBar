@@ -32,10 +32,8 @@
 		scrollX: true,
 		scrollY: true,
 
-		navButtons: {
-			enabled: false,
-			scrollAmount: 8
-		},
+		navButtons: false,
+		scrollAmount: 8,
 
 		containerClass: "mb-container",
 		contentClass: "mb-content",
@@ -343,11 +341,11 @@
 				track.node.appendChild(mb.bars[axis].node);
 
 				// Add nav buttons
-				if ( o.navButtons.enabled ) {
+				if ( o.navButtons ) {
 					var dec = doc.createElement("button"),
 							inc = doc.createElement("button"),
 							wrap = doc.createElement("div"),
-							amount = o.navButtons.scrollAmount;
+							amount = o.scrollAmount;
 
 					dec.className = o.buttonClass + " " + o.decreaseClass;
 					inc.className = o.buttonClass + " " + o.increaseClass;
@@ -756,7 +754,7 @@
 
 			// Remove the tracks and / or buttons
 			each(mb.tracks, function(i, track) {
-				ct.removeChild( mb.config.navButtons.enabled ? track.node.parentNode : track.node);
+				ct.removeChild( mb.config.navButtons ? track.node.parentNode : track.node);
 				classList.remove(ct, "mb-scroll-" + i);
 			});
 
