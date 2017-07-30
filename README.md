@@ -1,7 +1,7 @@
 ![MiniBar](/docs/img/minibar_logo_medium.png?raw=true "MiniBar")
 
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/Mobius1/MiniBar/blob/master/LICENSE)
-[![release](https://img.shields.io/badge/release-0.1.16-orange.svg?style=flat)](https://github.com/Mobius1/MiniBar/releases)
+[![release](https://img.shields.io/badge/release-0.2.0-orange.svg?style=flat)](https://github.com/Mobius1/MiniBar/releases)
 [![npm version](https://badge.fury.io/js/minibarjs.svg)](https://badge.fury.io/js/minibarjs)
 ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js)
 ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?compression=gzip&label=gzipped)
@@ -40,7 +40,7 @@ npm install minibarjs
 
 ## Browser
 
-Grab the files from the CDNs and include them in your project:
+Grab the files from the CDN and include them in your project:
 
 ```html
 <link href="https://unpkg.com/minibarjs@latest/dist/minibar.min.css" rel="stylesheet" type="text/css">
@@ -48,8 +48,6 @@ Grab the files from the CDNs and include them in your project:
 ```
 
 You can replace `latest` with the required release number if needed.
-
-CDNs courtesy of [unpkg](https://unpkg.com/#/)
 
 ---
 
@@ -115,6 +113,21 @@ Set to `progress` to display the scrollbars as progress bars.
 #### Default: `false`
 
 Allow horizontal scrolling with the mousewheel.
+
+
+### `navButtons`
+#### Type: `Object`
+#### Default: 
+```javascript
+	navButtons = {
+		enabled: false,
+		scrollAmount: 8
+	}
+```
+
+Enable scrollbars with navigation buttons.
+
+The `enabled` property must be set to `true` to enable the nav buttons. The `scrollAmount` property can be customised to increase or decrease the amount scrolled when clicking a nav button.
 
 ---
 

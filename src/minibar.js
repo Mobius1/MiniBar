@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.16
+ * MiniBar 0.2.0
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -29,6 +29,14 @@
 		alwaysShowBars: false,
 		horizontalMouseScroll: false,
 
+		scrollX: true,
+		scrollY: true,
+
+		navButtons: {
+			enabled: false,
+			scrollAmount: 8
+		},
+
 		containerClass: "mb-container",
 		contentClass: "mb-content",
 		trackClass: "mb-track",
@@ -38,7 +46,12 @@
 		hoverClass: "mb-hover",
 		scrollingClass: "mb-scrolling",
 		textareaClass: "mb-textarea",
-		wrapperClass: "mb-wrapper"
+		wrapperClass: "mb-wrapper",
+		navClass: "mb-nav",
+		buttonClass: "mb-button",
+		buttonsClass: "mb-buttons",
+		increaseClass: "mb-increase",
+		decreaseClass: "mb-decrease",
 	};
 
 	/**
@@ -217,21 +230,18 @@
 	 * @type {Object}
 	 */
 	var classList = {
-		contains: function(a, b) {
-			if ( a ) { return a.classList ? a.classList.contains(b) : !!a.className && !!a.className.match(new RegExp("(\\s|^)" + b + "(\\s|$)")); }
+		contains: function(s, a) {
+			if (s) return s.classList ? s.classList.contains(a) : !!s.className && !!s.className.match(new RegExp("(\\s|^)" + a + "(\\s|$)"))
 		},
-		add: function(a, b) {
-			if (!classList.contains(a, b)) { if (a.classList) { a.classList.add(b); } else { a.className = a.className.trim() + " " + b; } }
+		add: function(s, a) {
+			classList.contains(s, a) || (s.classList ? s.classList.add(a) : s.className = s.className.trim() + " " + a)
 		},
-		remove: function(a, b) {
-			if (classList.contains(a, b)) { if (a.classList) { a.classList.remove(b); } else { a.className = a.className.replace(new RegExp("(^|\\s)" + b.split(" ").join("|") + "(\\s|$)", "gi"), " "); } }
+		remove: function(s, a) {
+			classList.contains(s, a) && (s.classList ? s.classList.remove(a) : s.className = s.className.replace(new RegExp("(^|\\s)" + a.split(" ").join("|") + "(\\s|$)", "gi"), " "))
 		},
-		toggle: function(a, b, f) {
-			var result = this.contains(a, b), method = result ? f !== true && "remove" : f !== false && "add";
-
-			if (method) {
-				this[method](a, b);
-			}
+		toggle: function(s, a, c) {
+			var i = this.contains(s, a) ? !0 !== c && "remove" : !1 !== c && "add";
+			i && this[i](s, a)
 		}
 	};
 
@@ -243,7 +253,14 @@
 	var MiniBar = function(container, options) {
 		this.container = typeof container === "string" ? doc.querySelector(container) : container;
 
-		this.config = extend({}, config, options || win.MiniBarOptions);
+		this.config = config;
+
+		// User options
+		if ( options ) {
+			this.config = extend({}, config, options);
+		} else if ( win.MiniBarOptions ) {
+			this.config = extend({}, config, win.MiniBarOptions);
+		}
 
 		this.css = win.getComputedStyle(this.container);
 
@@ -274,7 +291,7 @@
 	 * @return {Void}
 	 */
 	proto.init = function() {
-		var mb = this;
+		var mb = this, o = mb.config;
 
 		if ( !mb.initialised ) {
 
@@ -282,11 +299,11 @@
 			// otherwise the text will be up against the container edges
 			if ( mb.textarea ) {
 				mb.content = mb.container;
-				mb.container = document.createElement("div");
-				classList.add(mb.container, mb.config.textareaClass);
+				mb.container = doc.createElement("div");
+				classList.add(mb.container, o.textareaClass);
 
-				mb.wrapper = document.createElement("div");
-				classList.add(mb.wrapper, mb.config.wrapperClass);
+				mb.wrapper = doc.createElement("div");
+				classList.add(mb.wrapper, o.wrapperClass);
 				mb.container.appendChild(mb.wrapper);
 
 				mb.content.parentNode.insertBefore(mb.container, mb.content);
@@ -305,12 +322,12 @@
 				}
 			}
 
-			classList.add(mb.container, mb.config.containerClass);
+			classList.add(mb.container, o.containerClass);
 
-			classList.add(mb.content, mb.config.contentClass);
+			classList.add(mb.content, o.contentClass);
 
-			if (mb.config.alwaysShowBars) {
-				classList.add(mb.container, mb.config.visibleClass);
+			if (o.alwaysShowBars) {
+				classList.add(mb.container, o.visibleClass);
 			}
 
 			// Set the tracks and bars and append them to the container
@@ -319,15 +336,70 @@
 				track.node = doc.createElement("div");
 
 				// IE10 can't do multiple args
-				classList.add(track.node, mb.config.trackClass);
-				classList.add(track.node, mb.config.trackClass + "-" + axis);
+				classList.add(track.node, o.trackClass);
+				classList.add(track.node, o.trackClass + "-" + axis);
 
-				classList.add(mb.bars[axis].node, mb.config.barClass);
+				classList.add(mb.bars[axis].node, o.barClass);
 				track.node.appendChild(mb.bars[axis].node);
-				mb.container.appendChild(track.node);
 
-				if ( mb.config.barType === "progress" ) {
-					classList.add(track.node, mb.config.progressClass);
+				// Add nav buttons
+				if ( o.navButtons.enabled ) {
+					var dec = doc.createElement("button"),
+							inc = doc.createElement("button"),
+							wrap = doc.createElement("div"),
+							amount = o.navButtons.scrollAmount;
+
+					dec.className = o.buttonClass + " " + o.decreaseClass;
+					inc.className = o.buttonClass + " " + o.increaseClass;
+					wrap.className = o.buttonsClass + " " + o.buttonsClass + "-" + axis;
+
+					wrap.appendChild(dec);
+					wrap.appendChild(track.node);
+					wrap.appendChild(inc);
+
+					mb.container.appendChild(wrap);
+
+					classList.add(mb.container, o.navClass);
+
+					// Mousedown on buttons
+					on(wrap, "mousedown", function(e) {
+						var el = e.target;
+
+						cancelAnimationFrame(mb.frame);
+
+						if ( el === inc || el === dec ) {
+
+							var scroll = mb.content[scrollPos[axis]];
+
+							var move = function(c) {
+								switch (mb.content[scrollPos[axis]] = scroll, el) {
+									case dec:
+										scroll -= amount;
+										break;
+									case inc:
+										scroll += amount
+								}
+								mb.frame = raf(move)
+							};
+
+							move();
+						}
+
+					});
+
+					// Mouseup on buttons
+					on(wrap, "mouseup", function(e) {
+						var c = e.target,
+							m = 5 * amount;
+						cancelAnimationFrame(mb.frame), c !== inc && c !== dec || mb.scrollBy(c === dec ? -m : m, axis)
+					});
+
+				} else {
+					mb.container.appendChild(track.node);
+				}
+
+				if ( o.barType === "progress" ) {
+					classList.add(track.node, o.progressClass);
 
 					on(track.node, "mousedown", mb.events.mousedown);
 				} else {
@@ -335,11 +407,11 @@
 				}
 
 				on(track.node, "mouseenter", function(e) {
-					classList.add(mb.container, mb.config.hoverClass + "-" + axis);
+					classList.add(mb.container, o.hoverClass + "-" + axis);
 				});
 				on(track.node, "mouseleave", function(e) {
 					if ( !mb.down ) {
-						classList.remove(mb.container, mb.config.hoverClass + "-" + axis);
+						classList.remove(mb.container, o.hoverClass + "-" + axis);
 					}
 				});
 			});
@@ -359,8 +431,11 @@
 			mb.update();
 
 			on(mb.content, "scroll", mb.events.scroll);
-			on(mb.content, "wheel", mb.events.mousewheel);
 			on(mb.container, "mouseenter", mb.events.mouseenter);
+
+			if ( o.horizontalMouseScroll ) {
+				on(mb.content, "wheel", mb.events.mousewheel);
+			}
 
 			on(win, "resize", mb.events.debounce);
 
@@ -437,11 +512,9 @@
 	 * @return {Void}
 	 */
 	proto.mousewheel = function(e) {
-		if ( this.config.horizontalMouseScroll ) {
-			e.preventDefault();
+		e.preventDefault();
 
-			this.scrollBy(e.deltaY * 100, "x");
-		}
+		this.scrollBy(e.deltaY * 100, "x");
 	};
 
 	/**
@@ -571,10 +644,10 @@
 		mb.scrollWidth = ct.scrollWidth;
 
 		// Do we need horizontal scrolling?
-		var sx = mb.scrollWidth > mb.rect.width && !mb.textarea;
+		var sx = mb.scrollWidth > mb.rect.width && mb.config.scrollX && !mb.textarea;
 
 		// Do we need vertical scrolling?
-		var sy = mb.scrollHeight > mb.rect.height;
+		var sy = mb.scrollHeight > mb.rect.height && mb.config.scrollY;
 
 		classList.toggle(mb.container, "mb-scroll-x", sx);
 		classList.toggle(mb.container, "mb-scroll-y", sy);
@@ -679,17 +752,18 @@
 			// Remove the main classes from the container
 			classList.remove(ct, mb.config.visibleClass);
 			classList.remove(ct, mb.config.containerClass);
+			classList.remove(ct, mb.config.navClass);
+
+			// Remove the tracks and / or buttons
+			each(mb.tracks, function(i, track) {
+				ct.removeChild( mb.config.navButtons.enabled ? track.node.parentNode : track.node);
+				classList.remove(ct, "mb-scroll-" + i);
+			});
 
 			// Move the nodes back to their original container
 			while(mb.content.firstChild) {
 				ct.appendChild(mb.content.firstChild);
 			}
-
-			// Remove the tracks
-			each(mb.tracks, function(i, track) {
-				ct.removeChild(track.node);
-				classList.remove(ct, "mb-scroll-" + i);
-			});
 
 			// Remove the content node
 			ct.removeChild(mb.content);
