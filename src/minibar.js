@@ -58,24 +58,14 @@
      * @param  {Object} args
      * @return {Object}
      */
-    var extend = function(o, args) {
-        var to = Object(o);
-
-        for (var index = 1; index < arguments.length; index++) {
-            var ns = arguments[index];
-
-            if (ns != null) {
-                // Skip over if undefined or null
-                for (var nxt in ns) {
-                    // Avoid bugs when hasOwnProperty is shadowed
-                    if (Object.prototype.hasOwnProperty.call(ns, nxt)) {
-                        to[nxt] = ns[nxt];
-                    }
-                }
-            }
+    var extend = function(r, t) {
+        for (var e = Object(r), n = 1; n < arguments.length; n++) {
+            var a = arguments[n];
+            if (null != a)
+                for (var o in a) Object.prototype.hasOwnProperty.call(a, o) && (e[o] = a[o])
         }
-        return to;
-};
+        return e
+    };
 
     /**
      * Add event listener to target
@@ -120,27 +110,18 @@
 
     /**
      * Mass assign style properties
-     * @param  {Object} el
-     * @param  {(String|Object)} prop
-     * @param  {String} val
+     * @param  {Object} t
+     * @param  {(String|Object)} e
+     * @param  {String|Object}
      */
-    var style = function(el, prop) {
-        var css = el && el.style;
-        var obj = "[object Object]" === Object.prototype.toString.call(prop);
-
-        if (css) {
-            if (!prop) {
-                return win.getComputedStyle(el);
-            } else {
-                if (obj) {
-                    each(prop, function (p, v) {
-                        if (!(p in css)) {
-                            p = "-webkit-" + p;
-                        }
-                        css[p] = v + (typeof v === "string" ? "" : p === "opacity" ? "" : "px");
-                    });
-                }
-            }
+    var style = function(t, e) {
+        var i = t && t.style,
+            n = "[object Object]" === Object.prototype.toString.call(e);
+        if (i) {
+            if (!e) return win.getComputedStyle(t);
+            n && each(e, function(t, e) {
+                t in i || (t = "-webkit-" + t), i[t] = e + ("string" == typeof e ? "" : "opacity" === t ? "" : "px")
+            })
         }
     };
 
@@ -150,18 +131,18 @@
      * @param  {Boolean} e  Include margins
      * @return {Object}     Formatted DOMRect copy
      */
-    var rect = function(el) {
-        var w = win;
-        var r = el.getBoundingClientRect();
-        var x = w.pageXOffset !== undefined ? w.pageXOffset : (doc.documentElement || body.parentNode || body).scrollLeft;
-        var y = w.pageYOffset !== undefined ? w.pageYOffset : (doc.documentElement || body.parentNode || body).scrollTop;
-
+    var rect = function(e) {
+        var t = win,
+            o = e.getBoundingClientRect(),
+            b = doc.documentElement || body.parentNode || body,
+            d = (void 0 !== t.pageXOffset) ? t.pageXOffset : b.scrollLeft,
+            n = (void 0 !== t.pageYOffset) ? t.pageYOffset : b.scrollTop;
         return {
-            x: r.left + x,
-            y: r.top + y,
-            height: Math.round(r.height),
-            width: Math.round(r.width)
-        };
+            x: o.left + d,
+            y: o.top + n,
+            height: Math.round(o.height),
+            width: Math.round(o.width)
+        }
     };
 
     /**
@@ -171,39 +152,23 @@
      * @param  {Boolean} now
      * @return {Function}
      */
-    function debounce(fn, wait, now) {
-        var t;
+    function debounce(n, t, u) {
+        var e;
         return function() {
-            var ctx = this, args = arguments;
-            var later = function() {
-                t = null;
-                if (!now) fn.apply(ctx, args);
-            };
-            var callNow = now && !t;
-            clearTimeout(t);
-            t = setTimeout(later, wait);
-            if (callNow) fn.apply(ctx, args);
-        };
+            var i = this,
+                o = arguments,
+                a = u && !e;
+            clearTimeout(e), e = setTimeout(function() {
+                e = null, u || n.apply(i, o)
+            }, t), a && n.apply(i, o)
+        }
     }
 
     /**
-     * requestAnimationFrame Polyfill
+     * requestAnimationFrame shim
      */
-    var raf = win.requestAnimationFrame || function () {
-        var tl = 0;
-
-        return win.webkitRequestAnimationFrame || win.mozRequestAnimationFrame || function (fn) {
-            var tc = new Date().getTime(), td;
-
-            /* Dynamically set the delay on a per-tick basis to more closely match 60fps. */
-            /* Technique by Erik Moller. MIT license: https://gist.github.com/paulirish/1579671. */
-            td = Math.max(0, 16 - (tc - tl));
-            tl = tc + td;
-
-            return setTimeout(function () {
-                fn(tc + td);
-            }, td);
-        };
+    var raf=win.requestAnimationFrame||function(){
+        var e=0;return win.webkitRequestAnimationFrame||win.mozRequestAnimationFrame||function(n){var t,i=(new Date).getTime();return t=Math.max(0,16-(i-e)),e=i+t,setTimeout(function(){n(i+t)},t)}
     }();
 
     /**
@@ -211,16 +176,9 @@
      * @return {Number} Scrollbar width
      */
     var getScrollBarWidth = function() {
-        var width = 0;
-        var div = doc.createElement("div");
-
-        div.style.cssText = "width: 100; height: 100; overflow: scroll; position: absolute; top: -9999;";
-
-        doc.body.appendChild(div);
-        width = div.offsetWidth - div.clientWidth;
-        doc.body.removeChild(div);
-
-        return width;
+        var t = 0,
+            e = doc.createElement("div");
+        return e.style.cssText = "width: 100; height: 100; overflow: scroll; position: absolute; top: -9999;", doc.body.appendChild(e), t = e.offsetWidth - e.clientWidth, doc.body.removeChild(e), t
     };
 
     /**
@@ -534,19 +492,19 @@
 
         this.down = true;
 
-        var mb = this, o = mb.config, type = o.barType === "progress" ? "tracks" : "bars";
-        var axis = e.target === mb[type].x.node ? "x" : "y";
+        var mb = this, o = mb.config,
+                type = o.barType === "progress" ? "tracks" : "bars",
+                axis = e.target === mb[type].x.node ? "x" : "y";
 
         mb.currentAxis = axis;
 
-        // Lets do all the nasty reflow-triggering stuff before mousemove
+        // Lets do all the nasty reflow-triggering stuff now
         // otherwise it'll be a shit-show during mousemove
         mb.update();
 
         // Keep the tracks visible during drag
         classList.add(mb.container, o.visibleClass);
         classList.add(mb.container, o.scrollingClass + "-" + axis);
-
 
         // Save data for use during mousemove
         if ( o.barType === "progress" ) {
@@ -565,7 +523,7 @@
             };
         }
 
-        // Attach the mousemove and mouseup event listeners now
+        // Attach the mousemove and mouseup listeners now
         // instead of permanently having them on
         on(doc, "mousemove", mb.events.mousemove);
         on(doc, "mouseup", mb.events.mouseup);
@@ -606,19 +564,19 @@
      * @return {Void}
      */
     proto.mouseup = function(e) {
-        var o = this.config, evts = this.events;
+        var mb = this, o = mb.config, evts = mb.events;
 
-        classList.toggle(this.container, o.visibleClass, o.alwaysShowBars);
-        classList.remove(this.container, o.scrollingClass + "-" + this.currentAxis);
+        classList.toggle(mb.container, o.visibleClass, o.alwaysShowBars);
+        classList.remove(mb.container, o.scrollingClass + "-" + mb.currentAxis);
 
         if ( !classList.contains(e.target, o.barClass) ) {
-            classList.remove(this.container, o.hoverClass + "-x");
-            classList.remove(this.container, o.hoverClass + "-y");
+            classList.remove(mb.container, o.hoverClass + "-x");
+            classList.remove(mb.container, o.hoverClass + "-y");
         }
 
-        this.origin = {};
-        this.currentAxis = null;
-        this.down = false;
+        mb.origin = {};
+        mb.currentAxis = null;
+        mb.down = false;
 
         off(doc, "mousemove", evts.mousemove);
         off(doc, "mouseup", evts.mouseup);
@@ -630,10 +588,9 @@
      * @return {Void}
      */
     proto.update = function() {
-        var mb = this, ct = mb.content;
+        var mb = this, o = mb.config, ct = mb.content;
 
         // Cache the dimensions
-
         mb.rect = rect(mb.container);
 
         mb.scrollTop = ct.scrollTop;
@@ -647,8 +604,8 @@
         // Do we need vertical scrolling?
         var sy = mb.scrollHeight > mb.rect.height;
 
-        classList.toggle(mb.container, "mb-scroll-x", sx && mb.config.scrollX);
-        classList.toggle(mb.container, "mb-scroll-y", sy && mb.config.scrollY);
+        classList.toggle(mb.container, "mb-scroll-x", sx && o.scrollX);
+        classList.toggle(mb.container, "mb-scroll-y", sy && o.scrollY);
 
         // Style the content
         style(ct, {
@@ -740,7 +697,7 @@
      * @return {Void}
      */
     proto.destroy = function() {
-        var mb = this, ct = this.container;
+        var mb = this, o = mb.config, ct = mb.container;
 
         if ( mb.initialised ) {
 
@@ -749,13 +706,13 @@
             off(win, "resize", mb.events.debounce);
 
             // Remove the main classes from the container
-            classList.remove(ct, mb.config.visibleClass);
-            classList.remove(ct, mb.config.containerClass);
-            classList.remove(ct, mb.config.navClass);
+            classList.remove(ct, o.visibleClass);
+            classList.remove(ct, o.containerClass);
+            classList.remove(ct, o.navClass);
 
             // Remove the tracks and / or buttons
             each(mb.tracks, function(i, track) {
-                ct.removeChild( mb.config.navButtons ? track.node.parentNode : track.node);
+                ct.removeChild( o.navButtons ? track.node.parentNode : track.node);
                 classList.remove(ct, "mb-scroll-" + i);
             });
 
