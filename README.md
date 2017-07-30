@@ -88,7 +88,7 @@ MiniBarOptions = {
 ## Options
 
 ### `minBarSize`
-#### Type: `Number`
+#### Type: `Integer`
 #### Default: `50`
 
 Sets the minimum size of the scrollbars. This can prevent the scollbar becoming to small when you have a ton of content.
@@ -117,17 +117,16 @@ Allow horizontal scrolling with the mousewheel.
 
 ### `navButtons`
 #### Type: `Object`
-#### Default: 
-```javascript
-	navButtons = {
-		enabled: false,
-		scrollAmount: 8
-	}
-```
+#### Default: `false`
 
 Enable scrollbars with navigation buttons.
 
-The `enabled` property must be set to `true` to enable the nav buttons. The `scrollAmount` property can be customised to increase or decrease the amount scrolled when clicking a nav button.
+
+### `scrollAmount`
+#### Type: `Integer`
+#### Default: `10`
+
+Increase or decrease the amount scrolled when clicking a nav button.
 
 ---
 
