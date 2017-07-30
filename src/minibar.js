@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.13
+ * MiniBar 0.1.14
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -353,11 +353,8 @@
 			mb.update();
 
 			on(mb.content, "scroll", mb.events.scroll);
+			on(mb.content, "wheel", mb.events.mousewheel);
 			on(mb.container, "mouseenter", mb.events.mouseenter);
-
-			if ( this.config.horizontalMouseScroll ) {
-				on(mb.content, "wheel", mb.events.mousewheel);
-			}
 
 			on(win, "resize", mb.events.debounce);
 
@@ -436,7 +433,9 @@
 	proto.mousewheel = function(e) {
 		e.preventDefault();
 
-		this.scrollBy(e.deltaY * 100, "x");
+		if ( this.config.horizontalMouseScroll ) {
+			this.scrollBy(e.deltaY * 100, "x");
+		}
 	};
 
 	/**
