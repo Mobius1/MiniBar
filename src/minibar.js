@@ -389,8 +389,16 @@
 
 		axis = axis || "y";
 
+		// No animation
+		if ( duration === 0 ) {
+			this.content[scrollPos[axis]] += amount;
+			return;
+		}
+
 		// Duration of scroll
-		duration = duration || 250;
+		if ( duration === undefined ) {
+			duration = 250;
+		}
 
 		// Easing function
 		easing = easing || function (t, b, c, d) {
