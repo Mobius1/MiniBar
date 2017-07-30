@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.1.15
+ * MiniBar 0.1.16
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -42,23 +42,29 @@
 	};
 
 	/**
-	 * Deep extend
-	 * @param  {Object} src
-	 * @param  {Object} props
+	 * Object.assign polyfill
+	 * @param  {Object} target
+	 * @param  {Object} args
 	 * @return {Object}
 	 */
-	var extend = function(src, props) {
-		for (var p in props) {
-			var v = props[p];
-			if (v && Object.prototype.toString.call(v) === "[object Object]") {
-					src[p] = src[p] || {};
-					extend(src[p], v);
-			} else {
-					src[p] = v;
+	var extend = function(o, args) {
+		var to = Object(o);
+
+		for (var index = 1; index < arguments.length; index++) {
+			var ns = arguments[index];
+
+			if (ns != null) {
+				// Skip over if undefined or null
+				for (var nxt in ns) {
+					// Avoid bugs when hasOwnProperty is shadowed
+					if (Object.prototype.hasOwnProperty.call(ns, nxt)) {
+						to[nxt] = ns[nxt];
+					}
+				}
 			}
 		}
-		return src;
-	};
+		return to;
+};
 
 	/**
 	 * Add event listener to target
@@ -237,7 +243,7 @@
 	var MiniBar = function(container, options) {
 		this.container = typeof container === "string" ? doc.querySelector(container) : container;
 
-		this.config = extend(config, options || win.MiniBarOptions);
+		this.config = extend({}, config, options || win.MiniBarOptions);
 
 		this.css = win.getComputedStyle(this.container);
 
@@ -353,11 +359,8 @@
 			mb.update();
 
 			on(mb.content, "scroll", mb.events.scroll);
+			on(mb.content, "wheel", mb.events.mousewheel);
 			on(mb.container, "mouseenter", mb.events.mouseenter);
-
-			if ( mb.config.horizontalMouseScroll ) {
-				on(mb.content, "wheel", mb.events.mousewheel);
-			}
 
 			on(win, "resize", mb.events.debounce);
 
@@ -434,9 +437,11 @@
 	 * @return {Void}
 	 */
 	proto.mousewheel = function(e) {
-		e.preventDefault();
+		if ( this.config.horizontalMouseScroll ) {
+			e.preventDefault();
 
-		this.scrollBy(e.deltaY * 100, "x");
+			this.scrollBy(e.deltaY * 100, "x");
+		}
 	};
 
 	/**
