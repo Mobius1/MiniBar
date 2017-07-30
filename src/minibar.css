@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.2.0
+ * MiniBar 0.2.1
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -10,11 +10,11 @@
   width: 100%;
 }
 
-.mb-container:hover.mb-scroll-x .mb-buttons-x, .mb-container:hover.mb-scroll-x .mb-track-x, .mb-visible.mb-scroll-x .mb-buttons-x, .mb-visible.mb-scroll-x .mb-track-x {
+.mb-container:hover.mb-scroll-x > .mb-track-x, .mb-container:hover.mb-scroll-x > .mb-buttons-x, .mb-container:hover.mb-scroll-x > .mb-buttons-x > .mb-track-x, .mb-visible.mb-scroll-x > .mb-track-x, .mb-visible.mb-scroll-x > .mb-buttons-x, .mb-visible.mb-scroll-x > .mb-buttons-x > .mb-track-x {
   opacity: 1;
 }
 
-.mb-container:hover.mb-scroll-y .mb-buttons-y, .mb-container:hover.mb-scroll-y .mb-track-y, .mb-visible.mb-scroll-y .mb-buttons-y, .mb-visible.mb-scroll-y .mb-track-y {
+.mb-container:hover.mb-scroll-y > .mb-track-y, .mb-container:hover.mb-scroll-y > .mb-buttons-y, .mb-container:hover.mb-scroll-y > .mb-buttons-y > .mb-track-y, .mb-visible.mb-scroll-y > .mb-track-y, .mb-visible.mb-scroll-y > .mb-buttons-y, .mb-visible.mb-scroll-y > .mb-buttons-y > .mb-track-y {
   opacity: 1;
 }
 

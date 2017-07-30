@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.2.0
+ * MiniBar 0.2.1
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -33,7 +33,7 @@
 		scrollY: true,
 
 		navButtons: false,
-		scrollAmount: 8,
+		scrollAmount: 10,
 
 		containerClass: "mb-container",
 		contentClass: "mb-content",
@@ -642,17 +642,18 @@
 		mb.scrollWidth = ct.scrollWidth;
 
 		// Do we need horizontal scrolling?
-		var sx = mb.scrollWidth > mb.rect.width && mb.config.scrollX && !mb.textarea;
+		var sx = mb.scrollWidth > mb.rect.width && !mb.textarea;
 
 		// Do we need vertical scrolling?
-		var sy = mb.scrollHeight > mb.rect.height && mb.config.scrollY;
+		var sy = mb.scrollHeight > mb.rect.height;
 
-		classList.toggle(mb.container, "mb-scroll-x", sx);
-		classList.toggle(mb.container, "mb-scroll-y", sy);
+		classList.toggle(mb.container, "mb-scroll-x", sx && mb.config.scrollX);
+		classList.toggle(mb.container, "mb-scroll-y", sy && mb.config.scrollY);
 
 		// Style the content
 		style(ct, {
-			overflow: "auto",
+			overflowX: sx ? "auto" : "",
+			overflowY: sy ? "auto" : "",
 			marginBottom: sx ? -mb.size : "",
 			paddingBottom: sx ? mb.size : "",
 			marginRight: sy ? -mb.size : "",
