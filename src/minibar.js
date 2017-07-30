@@ -46,8 +46,8 @@
         textareaClass: "mb-textarea",
         wrapperClass: "mb-wrapper",
         navClass: "mb-nav",
-        buttonClass: "mb-button",
-        buttonsClass: "mb-buttons",
+        btnClass: "mb-button",
+        btnsClass: "mb-buttons",
         increaseClass: "mb-increase",
         decreaseClass: "mb-decrease",
     };
@@ -230,7 +230,7 @@
         this.events = {};
 
         // Bind events
-        each(["update", "scroll", "mouseenter", "mousedown", "mousemove", "mouseup", "mousewheel"], function(i, evt) {
+        each(["update", "scroll", "mouseenter", "mousedown", "mousemove", "mouseup", "wheel"], function(i, evt) {
             this.events[evt] = this[evt].bind(this);
         }, this);
 
@@ -304,9 +304,9 @@
                             wrap = doc.createElement("div"),
                             amount = o.scrollAmount;
 
-                    dec.className = o.buttonClass + " " + o.decreaseClass;
-                    inc.className = o.buttonClass + " " + o.increaseClass;
-                    wrap.className = o.buttonsClass + " " + o.buttonsClass + "-" + axis;
+                    dec.className = o.btnClass + " " + o.decreaseClass;
+                    inc.className = o.btnClass + " " + o.increaseClass;
+                    wrap.className = o.btnsClass + " " + o.btnsClass + "-" + axis;
 
                     wrap.appendChild(dec);
                     wrap.appendChild(track.node);
@@ -390,7 +390,7 @@
             on(mb.container, "mouseenter", ev.mouseenter);
 
             if ( o.horizontalMouseScroll ) {
-                on(mb.content, "wheel", ev.mousewheel);
+                on(mb.content, "wheel", ev.wheel);
             }
 
             on(win, "resize", ev.debounce);
@@ -408,7 +408,7 @@
      * @return {Void}
      */
     proto.scroll = function(e) {
-        this.updateScrollBars();
+        this.updateBars();
     };
 
     /**
@@ -440,11 +440,11 @@
             return -c * t*(t-2) + b;
         };
 
-        var t = this, start = Date.now(), position = t.content[scrollPos[axis]];
+        var t = this, st = Date.now(), pos = t.content[scrollPos[axis]];
 
         // Scroll function
         var scroll = function() {
-            var now = Date.now(), ct = now - start;
+            var now = Date.now(), ct = now - st;
 
             // Cancel after allotted interval
             if ( ct > duration ) {
@@ -453,7 +453,7 @@
             }
 
             // Update scroll position
-            t.content[scrollPos[axis]] = easing(ct, position, amount, duration);
+            t.content[scrollPos[axis]] = easing(ct, pos, amount, duration);
 
             // requestAnimationFrame
             t.frame = raf(scroll);
@@ -467,7 +467,7 @@
      * @param  {Object} e Event interface
      * @return {Void}
      */
-    proto.mousewheel = function(e) {
+    proto.wheel = function(e) {
         e.preventDefault();
 
         this.scrollBy(e.deltaY * 100, "x");
@@ -479,7 +479,7 @@
      * @return {Void}
      */
     proto.mouseenter = function(e) {
-        this.updateScrollBars();
+        this.updateBars();
     };
 
     /**
@@ -507,21 +507,13 @@
         classList.add(mb.container, o.scrollingClass + "-" + axis);
 
         // Save data for use during mousemove
-        if ( o.barType === "progress" ) {
-
-            mb.origin = {
-                x: e.pageX - mb.tracks[axis].x,
-                y: e.pageY - mb.tracks[axis].y
-            };
-
-            mb.mousemove(e);
-
-        } else {
-            mb.origin = {
-                x: e.pageX - mb.bars[axis].x,
-                y: e.pageY - mb.bars[axis].y
-            };
-        }
+        o.barType === "progress" ? (mb.origin = {
+            x: e.pageX - mb.tracks[axis].x,
+            y: e.pageY - mb.tracks[axis].y
+        }, mb.mousemove(e)) : mb.origin = {
+            x: e.pageX - mb.bars[axis].x,
+            y: e.pageY - mb.bars[axis].y
+        };
 
         // Attach the mousemove and mouseup listeners now
         // instead of permanently having them on
@@ -625,7 +617,7 @@
         });
 
         // Update scrollbars
-        mb.updateScrollBars();
+        mb.updateBars();
 
         mb.wrapperPadding = 0;
 
@@ -646,7 +638,7 @@
      * @param  {String} axis
      * @return {Void}
      */
-    proto.updateScrollBar = function(axis) {
+    proto.updateBar = function(axis) {
 
         var mb = this, css = {},
             ts = trackSize,
@@ -685,9 +677,9 @@
      * Update all scrollbars
      * @return {Void}
      */
-    proto.updateScrollBars = function() {
+    proto.updateBars = function() {
         each(this.bars, function(i, v) {
-            this.updateScrollBar(i);
+            this.updateBar(i);
         }, this);
     };
 
