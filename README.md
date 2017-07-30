@@ -134,6 +134,25 @@ Initialise the instance after destroying.
 
 Recalculate scollbar sizes / positions. This method is called automatically when the content and window are resized. You can call this method manually if you add or remove content.
 
+
+
+### `scrollBy(amount, axis, duration, easing)`
+
+```javascript
+/**
+ * @param  {Number} 	amount   Number of pixels to scroll
+ * @param  {String} 	axis     Scroll axis
+ * @param  {Number} 	duration Duration of scroll animation in ms
+ * @param  {Function} 	easing   Easing function
+ */
+```
+
+Scroll the content by a certain amount. You can define which axis to scroll with the `axis` parameter (defaults to "y").
+
+By default this method animates the scrolling. To control the duration of the animation simply set the number of `ms` with the `duration` parameter. Setting to `0` will disable animation.
+
+The default easing used is `easeOutQuad`, but you can pass your own easing function with the `easing` parameter.
+
 ---
 
 ## To Do
