@@ -247,7 +247,7 @@
      * @return {Void}
      */
     proto.init = function() {
-        var mb = this, o = mb.config;
+        var mb = this, o = mb.config, ev = mb.events;
 
         if ( !mb.initialised ) {
 
@@ -279,7 +279,6 @@
             }
 
             classList.add(mb.container, o.containerClass);
-
             classList.add(mb.content, o.contentClass);
 
             if (o.alwaysShowBars) {
@@ -357,14 +356,15 @@
                 if ( o.barType === "progress" ) {
                     classList.add(track.node, o.progressClass);
 
-                    on(track.node, "mousedown", mb.events.mousedown);
+                    on(track.node, "mousedown", ev.mousedown);
                 } else {
-                    on(mb.bars[axis].node, "mousedown", mb.events.mousedown);
+                    on(mb.bars[axis].node, "mousedown", ev.mousedown);
                 }
 
                 on(track.node, "mouseenter", function(e) {
                     classList.add(mb.container, o.hoverClass + "-" + axis);
                 });
+
                 on(track.node, "mouseleave", function(e) {
                     if ( !mb.down ) {
                         classList.remove(mb.container, o.hoverClass + "-" + axis);
@@ -386,17 +386,17 @@
 
             mb.update();
 
-            on(mb.content, "scroll", mb.events.scroll);
-            on(mb.container, "mouseenter", mb.events.mouseenter);
+            on(mb.content, "scroll", ev.scroll);
+            on(mb.container, "mouseenter", ev.mouseenter);
 
             if ( o.horizontalMouseScroll ) {
-                on(mb.content, "wheel", mb.events.mousewheel);
+                on(mb.content, "wheel", ev.mousewheel);
             }
 
-            on(win, "resize", mb.events.debounce);
+            on(win, "resize", ev.debounce);
 
-            on(doc, 'DOMContentLoaded', mb.events.update);
-            on(win, 'load', mb.events.update);
+            on(doc, 'DOMContentLoaded', ev.update);
+            on(win, 'load', ev.update);
 
             mb.initialised = true;
         }
@@ -452,7 +452,7 @@
                 return;
             }
 
-            // Scroll the content
+            // Update scroll position
             t.content[scrollPos[axis]] = easing(ct, position, amount, duration);
 
             // requestAnimationFrame
@@ -574,7 +574,6 @@
             classList.remove(mb.container, o.hoverClass + "-y");
         }
 
-        mb.origin = {};
         mb.currentAxis = null;
         mb.down = false;
 
@@ -588,7 +587,7 @@
      * @return {Void}
      */
     proto.update = function() {
-        var mb = this, o = mb.config, ct = mb.content;
+        var mb = this, o = mb.config, ct = mb.content, s = mb.size;
 
         // Cache the dimensions
         mb.rect = rect(mb.container);
@@ -611,10 +610,10 @@
         style(ct, {
             overflowX: sx ? "auto" : "",
             overflowY: sy ? "auto" : "",
-            marginBottom: sx ? -mb.size : "",
-            paddingBottom: sx ? mb.size : "",
-            marginRight: sy ? -mb.size : "",
-            paddingRight: sy ? mb.size : ""
+            marginBottom: sx ? -s : "",
+            paddingBottom: sx ? s : "",
+            marginRight: sy ? -s : "",
+            paddingRight: sy ? s : ""
         });
 
         mb.scrollX = sx;
