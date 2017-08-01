@@ -718,11 +718,6 @@
             // Remove manual positioning
             if ( mb.manualPosition ) {
                 ct.style.position = "";
-
-                // IE returns null for empty style attribute
-                if ( ct.getAttribute("style") === null || !ct.getAttribute("style").length ) {
-                    ct.removeAttribute("style");
-                }
             }
 
             // Clear node references
