@@ -152,7 +152,7 @@
      * @param  {Boolean} now
      * @return {Function}
      */
-    function debounce(n, t, u) {
+    var debounce = function(n, t, u) {
         var e;
         return function() {
             var i = this,
@@ -164,18 +164,16 @@
         }
     }
 
-    /**
-     * requestAnimationFrame shim
-     */
     var raf=win.requestAnimationFrame||function(){
         var e=0;return win.webkitRequestAnimationFrame||win.mozRequestAnimationFrame||function(n){var t,i=(new Date).getTime();return t=Math.max(0,16-(i-e)),e=i+t,setTimeout(function(){n(i+t)},t)}
     }();
+    var caf=win.cancelAnimationFrame||function(id) { clearTimeout(id); }();
 
     /**
      * Get native scrollbar width
      * @return {Number} Scrollbar width
      */
-    var getScrollBarWidth = function() {
+    var scrollWidth = function() {
         var t = 0,
             e = doc.createElement("div");
         return e.style.cssText = "width: 100; height: 100; overflow: scroll; position: absolute; top: -9999;", doc.body.appendChild(e), t = e.offsetWidth - e.clientWidth, doc.body.removeChild(e), t
@@ -220,7 +218,7 @@
 
         this.css = win.getComputedStyle(this.container);
 
-        this.size = getScrollBarWidth();
+        this.size = scrollWidth();
         this.textarea = this.container.nodeName.toLowerCase() === "textarea";
 
         this.bars = { x: {}, y: {} };
@@ -300,9 +298,9 @@
                 // Add nav buttons
                 if ( o.navButtons ) {
                     var dec = doc.createElement("button"),
-                            inc = doc.createElement("button"),
-                            wrap = doc.createElement("div"),
-                            amount = o.scrollAmount;
+                        inc = doc.createElement("button"),
+                        wrap = doc.createElement("div"),
+                        amount = o.scrollAmount;
 
                     dec.className = o.btnClass + " " + o.decreaseClass;
                     inc.className = o.btnClass + " " + o.increaseClass;
@@ -320,7 +318,7 @@
                     on(wrap, "mousedown", function(e) {
                         var el = e.target;
 
-                        cancelAnimationFrame(mb.frame);
+                        caf(mb.frame);
 
                         if ( el === inc || el === dec ) {
 
@@ -346,7 +344,7 @@
                     on(wrap, "mouseup", function(e) {
                         var c = e.target,
                             m = 5 * amount;
-                        cancelAnimationFrame(mb.frame), c !== inc && c !== dec || mb.scrollBy(c === dec ? -m : m, axis)
+                        caf(mb.frame), c !== inc && c !== dec || mb.scrollBy(c === dec ? -m : m, axis)
                     });
 
                 } else {
@@ -448,7 +446,7 @@
 
             // Cancel after allotted interval
             if ( ct > duration ) {
-                cancelAnimationFrame(t.frame);
+                caf(t.frame);
                 return;
             }
 
@@ -532,17 +530,12 @@
         var mb = this, o = this.origin, axis = this.currentAxis,
             track = mb.tracks[axis],
             ts = track[trackSize[axis]],
-            offset, ratio, scroll;
+            offset, ratio, scroll,
+            progress = mb.config.barType === "progress";
 
-        if ( mb.config.barType === "progress" ) {
-            offset = e[mAxis[axis]] - track[axis];
-            ratio = offset / ts;
-            scroll = ratio * (mb.content[scrollSize[axis]] -  mb.rect[trackSize[axis]]);
-        } else {
-            offset = e[mAxis[axis]] - o[axis] - track[axis];
-            ratio = offset / ts;
-            scroll = ratio * mb[scrollSize[axis]];
-        }
+        offset = progress ? e[mAxis[axis]] - track[axis] : e[mAxis[axis]] - o[axis] - track[axis];
+        ratio = offset / ts;
+        scroll = progress ? ratio * (mb.content[scrollSize[axis]] -  mb.rect[trackSize[axis]]) : ratio * mb[scrollSize[axis]];
 
         // Update scroll position
         raf(function () {
@@ -556,7 +549,7 @@
      * @return {Void}
      */
     proto.mouseup = function(e) {
-        var mb = this, o = mb.config, evts = mb.events;
+        var mb = this, o = mb.config, ev = mb.events;
 
         classList.toggle(mb.container, o.visibleClass, o.alwaysShowBars);
         classList.remove(mb.container, o.scrollingClass + "-" + mb.currentAxis);
@@ -569,8 +562,8 @@
         mb.currentAxis = null;
         mb.down = false;
 
-        off(doc, "mousemove", evts.mousemove);
-        off(doc, "mouseup", evts.mouseup);
+        off(doc, "mousemove", ev.mousemove);
+        off(doc, "mouseup", ev.mouseup);
     };
 
     /**
@@ -624,6 +617,7 @@
         if ( mb.textarea ) {
             var css = style(mb.wrapper);
 
+            // Textarea wrapper has added padding
             mb.wrapperPadding = parseInt(css.paddingTop, 10) + parseInt(css.paddingBottom, 10);
 
             // Only scroll to bottom if the cursor is at the end of the content and we're not dragging
