@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.2.1
+ * MiniBar 0.2.2
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -13,11 +13,26 @@
         body = doc.body,
 
         // Dimension terms
-        trackPos = { x: "left" , y: "top" },
-        trackSize = { x: "width" , y: "height" },
-        scrollPos = { x: "scrollLeft" , y: "scrollTop" },
-        scrollSize = { x: "scrollWidth" , y: "scrollHeight" },
-        mAxis = { x: "pageX" , y: "pageY" };
+        trackPos = {
+            x: "left",
+            y: "top"
+        },
+        trackSize = {
+            x: "width",
+            y: "height"
+        },
+        scrollPos = {
+            x: "scrollLeft",
+            y: "scrollTop"
+        },
+        scrollSize = {
+            x: "scrollWidth",
+            y: "scrollHeight"
+        },
+        mAxis = {
+            x: "pageX",
+            y: "pageY"
+        };
 
     /**
      * Default configuration properties
@@ -35,21 +50,23 @@
         navButtons: false,
         scrollAmount: 10,
 
-        containerClass: "mb-container",
-        contentClass: "mb-content",
-        trackClass: "mb-track",
-        barClass: "mb-bar",
-        visibleClass: "mb-visible",
-        progressClass: "mb-progress",
-        hoverClass: "mb-hover",
-        scrollingClass: "mb-scrolling",
-        textareaClass: "mb-textarea",
-        wrapperClass: "mb-wrapper",
-        navClass: "mb-nav",
-        btnClass: "mb-button",
-        btnsClass: "mb-buttons",
-        increaseClass: "mb-increase",
-        decreaseClass: "mb-decrease",
+        classes: {
+            container: "mb-container",
+            content: "mb-content",
+            track: "mb-track",
+            bar: "mb-bar",
+            visible: "mb-visible",
+            progress: "mb-progress",
+            hover: "mb-hover",
+            scrolling: "mb-scrolling",
+            textarea: "mb-textarea",
+            wrapper: "mb-wrapper",
+            nav: "mb-nav",
+            btn: "mb-button",
+            btns: "mb-buttons",
+            increase: "mb-increase",
+            decrease: "mb-decrease",
+        }
     };
 
     /**
@@ -164,10 +181,18 @@
         }
     }
 
-    var raf=win.requestAnimationFrame||function(){
-        var e=0;return win.webkitRequestAnimationFrame||win.mozRequestAnimationFrame||function(n){var t,i=(new Date).getTime();return t=Math.max(0,16-(i-e)),e=i+t,setTimeout(function(){n(i+t)},t)}
+    var raf = win.requestAnimationFrame || function() {
+        var e = 0;
+        return win.webkitRequestAnimationFrame || win.mozRequestAnimationFrame || function(n) {
+            var t, i = (new Date).getTime();
+            return t = Math.max(0, 16 - (i - e)), e = i + t, setTimeout(function() {
+                n(i + t)
+            }, t)
+        }
     }();
-    var caf=win.cancelAnimationFrame||function(id) { clearTimeout(id); }();
+    var caf = win.cancelAnimationFrame || function(id) {
+        clearTimeout(id);
+    }();
 
     /**
      * Get native scrollbar width
@@ -210,9 +235,9 @@
         this.config = config;
 
         // User options
-        if ( options ) {
+        if (options) {
             this.config = extend({}, config, options);
-        } else if ( win.MiniBarOptions ) {
+        } else if (win.MiniBarOptions) {
             this.config = extend({}, config, win.MiniBarOptions);
         }
 
@@ -221,8 +246,14 @@
         this.size = scrollWidth();
         this.textarea = this.container.nodeName.toLowerCase() === "textarea";
 
-        this.bars = { x: {}, y: {} };
-        this.tracks = { x: {}, y: {} };
+        this.bars = {
+            x: {},
+            y: {}
+        };
+        this.tracks = {
+            x: {},
+            y: {}
+        };
 
         // Events
         this.events = {};
@@ -245,19 +276,21 @@
      * @return {Void}
      */
     proto.init = function() {
-        var mb = this, o = mb.config, ev = mb.events;
+        var mb = this,
+            o = mb.config,
+            ev = mb.events;
 
-        if ( !mb.initialised ) {
+        if (!mb.initialised) {
 
             // We need a seperate wrapper for the textarea that we can pad
             // otherwise the text will be up against the container edges
-            if ( mb.textarea ) {
+            if (mb.textarea) {
                 mb.content = mb.container;
                 mb.container = doc.createElement("div");
-                classList.add(mb.container, o.textareaClass);
+                classList.add(mb.container, o.classes.textarea);
 
                 mb.wrapper = doc.createElement("div");
-                classList.add(mb.wrapper, o.wrapperClass);
+                classList.add(mb.wrapper, o.classes.wrapper);
                 mb.container.appendChild(mb.wrapper);
 
                 mb.content.parentNode.insertBefore(mb.container, mb.content);
@@ -271,40 +304,39 @@
                 mb.content = doc.createElement("div");
 
                 // Move all nodes to the the new content node
-                while(mb.container.firstChild) {
+                while (mb.container.firstChild) {
                     mb.content.appendChild(mb.container.firstChild);
                 }
             }
 
-            classList.add(mb.container, o.containerClass);
-            classList.add(mb.content, o.contentClass);
+            classList.add(mb.container, o.classes.container);
+            classList.add(mb.content, o.classes.content);
 
             if (o.alwaysShowBars) {
-                classList.add(mb.container, o.visibleClass);
+                classList.add(mb.container, o.classes.visible);
             }
 
             // Set the tracks and bars and append them to the container
-            each(mb.tracks, function (axis, track) {
+            each(mb.tracks, function(axis, track) {
                 mb.bars[axis].node = doc.createElement("div");
                 track.node = doc.createElement("div");
 
-                // IE10 can't do multiple args
-                classList.add(track.node, o.trackClass);
-                classList.add(track.node, o.trackClass + "-" + axis);
+                classList.add(track.node, o.classes.track);
+                classList.add(track.node, o.classes.track + "-" + axis);
 
-                classList.add(mb.bars[axis].node, o.barClass);
+                classList.add(mb.bars[axis].node, o.classes.bar);
                 track.node.appendChild(mb.bars[axis].node);
 
                 // Add nav buttons
-                if ( o.navButtons ) {
+                if (o.navButtons) {
                     var dec = doc.createElement("button"),
                         inc = doc.createElement("button"),
                         wrap = doc.createElement("div"),
                         amount = o.scrollAmount;
 
-                    dec.className = o.btnClass + " " + o.decreaseClass;
-                    inc.className = o.btnClass + " " + o.increaseClass;
-                    wrap.className = o.btnsClass + " " + o.btnsClass + "-" + axis;
+                    dec.className = o.classes.btn + " " + o.classes.decrease;
+                    inc.className = o.classes.btn + " " + o.classes.increase;
+                    wrap.className = o.classes.btn + " " + o.classes.btn + "-" + axis;
 
                     wrap.appendChild(dec);
                     wrap.appendChild(track.node);
@@ -312,7 +344,7 @@
 
                     mb.container.appendChild(wrap);
 
-                    classList.add(mb.container, o.navClass);
+                    classList.add(mb.container, o.classes.nav);
 
                     // Mousedown on buttons
                     on(wrap, "mousedown", function(e) {
@@ -320,7 +352,7 @@
 
                         caf(mb.frame);
 
-                        if ( el === inc || el === dec ) {
+                        if (el === inc || el === dec) {
 
                             var scroll = mb.content[scrollPos[axis]];
 
@@ -351,8 +383,8 @@
                     mb.container.appendChild(track.node);
                 }
 
-                if ( o.barType === "progress" ) {
-                    classList.add(track.node, o.progressClass);
+                if (o.barType === "progress") {
+                    classList.add(track.node, o.classes.progress);
 
                     on(track.node, "mousedown", ev.mousedown);
                 } else {
@@ -360,24 +392,24 @@
                 }
 
                 on(track.node, "mouseenter", function(e) {
-                    classList.add(mb.container, o.hoverClass + "-" + axis);
+                    classList.add(mb.container, o.classes.hover + "-" + axis);
                 });
 
                 on(track.node, "mouseleave", function(e) {
-                    if ( !mb.down ) {
-                        classList.remove(mb.container, o.hoverClass + "-" + axis);
+                    if (!mb.down) {
+                        classList.remove(mb.container, o.classes.hover + "-" + axis);
                     }
                 });
             });
 
             // Append the content
-            if ( mb.textarea ) {
+            if (mb.textarea) {
                 mb.wrapper.appendChild(mb.content);
             } else {
                 mb.container.appendChild(mb.content);
             }
 
-            if ( mb.css.position === "static" ) {
+            if (mb.css.position === "static") {
                 mb.manualPosition = true;
                 mb.container.style.position = "relative";
             }
@@ -387,7 +419,7 @@
             on(mb.content, "scroll", ev.scroll);
             on(mb.container, "mouseenter", ev.mouseenter);
 
-            if ( o.horizontalMouseScroll ) {
+            if (o.horizontalMouseScroll) {
                 on(mb.content, "wheel", ev.wheel);
             }
 
@@ -402,7 +434,7 @@
 
     /**
      * Scroll callback
-    * @param  {Object} e Event interface
+     * @param  {Object} e Event interface
      * @return {Void}
      */
     proto.scroll = function(e) {
@@ -422,30 +454,33 @@
         axis = axis || "y";
 
         // No animation
-        if ( duration === 0 ) {
+        if (duration === 0) {
             this.content[scrollPos[axis]] += amount;
             return;
         }
 
         // Duration of scroll
-        if ( duration === undefined ) {
+        if (duration === undefined) {
             duration = 250;
         }
 
         // Easing function
-        easing = easing || function (t, b, c, d) {
+        easing = easing || function(t, b, c, d) {
             t /= d;
-            return -c * t*(t-2) + b;
+            return -c * t * (t - 2) + b;
         };
 
-        var t = this, st = Date.now(), pos = t.content[scrollPos[axis]];
+        var t = this,
+            st = Date.now(),
+            pos = t.content[scrollPos[axis]];
 
         // Scroll function
         var scroll = function() {
-            var now = Date.now(), ct = now - st;
+            var now = Date.now(),
+                ct = now - st;
 
             // Cancel after allotted interval
-            if ( ct > duration ) {
+            if (ct > duration) {
                 caf(t.frame);
                 return;
             }
@@ -488,11 +523,12 @@
     proto.mousedown = function(e) {
         e.preventDefault();
 
-        this.down = true;
+        var mb = this,
+            o = mb.config,
+            type = o.barType === "progress" ? "tracks" : "bars",
+            axis = e.target === mb[type].x.node ? "x" : "y";
 
-        var mb = this, o = mb.config,
-                type = o.barType === "progress" ? "tracks" : "bars",
-                axis = e.target === mb[type].x.node ? "x" : "y";
+        mb.down = true;
 
         mb.currentAxis = axis;
 
@@ -501,8 +537,8 @@
         mb.update();
 
         // Keep the tracks visible during drag
-        classList.add(mb.container, o.visibleClass);
-        classList.add(mb.container, o.scrollingClass + "-" + axis);
+        classList.add(mb.container, o.classes.visible);
+        classList.add(mb.container, o.classes.scrolling + "-" + axis);
 
         // Save data for use during mousemove
         o.barType === "progress" ? (mb.origin = {
@@ -527,7 +563,9 @@
     proto.mousemove = function(e) {
         e.preventDefault();
 
-        var mb = this, o = this.origin, axis = this.currentAxis,
+        var mb = this,
+            o = this.origin,
+            axis = this.currentAxis,
             track = mb.tracks[axis],
             ts = track[trackSize[axis]],
             offset, ratio, scroll,
@@ -535,10 +573,10 @@
 
         offset = progress ? e[mAxis[axis]] - track[axis] : e[mAxis[axis]] - o[axis] - track[axis];
         ratio = offset / ts;
-        scroll = progress ? ratio * (mb.content[scrollSize[axis]] -  mb.rect[trackSize[axis]]) : ratio * mb[scrollSize[axis]];
+        scroll = progress ? ratio * (mb.content[scrollSize[axis]] - mb.rect[trackSize[axis]]) : ratio * mb[scrollSize[axis]];
 
         // Update scroll position
-        raf(function () {
+        raf(function() {
             mb.content[scrollPos[axis]] = scroll;
         });
     };
@@ -549,14 +587,16 @@
      * @return {Void}
      */
     proto.mouseup = function(e) {
-        var mb = this, o = mb.config, ev = mb.events;
+        var mb = this,
+            o = mb.config,
+            ev = mb.events;
 
-        classList.toggle(mb.container, o.visibleClass, o.alwaysShowBars);
-        classList.remove(mb.container, o.scrollingClass + "-" + mb.currentAxis);
+        classList.toggle(mb.container, o.classes.visible, o.alwaysShowBars);
+        classList.remove(mb.container, o.classes.scrolling + "-" + mb.currentAxis);
 
-        if ( !classList.contains(e.target, o.barClass) ) {
-            classList.remove(mb.container, o.hoverClass + "-x");
-            classList.remove(mb.container, o.hoverClass + "-y");
+        if (!classList.contains(e.target, o.classes.bar)) {
+            classList.remove(mb.container, o.classes.hover + "-x");
+            classList.remove(mb.container, o.classes.hover + "-y");
         }
 
         mb.currentAxis = null;
@@ -572,7 +612,10 @@
      * @return {Void}
      */
     proto.update = function() {
-        var mb = this, o = mb.config, ct = mb.content, s = mb.size;
+        var mb = this,
+            o = mb.config,
+            ct = mb.content,
+            s = mb.size;
 
         // Cache the dimensions
         mb.rect = rect(mb.container);
@@ -604,7 +647,7 @@
         mb.scrollX = sx;
         mb.scrollY = sy;
 
-        each(mb.tracks, function (i, track) {
+        each(mb.tracks, function(i, track) {
             extend(track, rect(track.node));
             extend(mb.bars[i], rect(mb.bars[i].node));
         });
@@ -614,14 +657,14 @@
 
         mb.wrapperPadding = 0;
 
-        if ( mb.textarea ) {
+        if (mb.textarea) {
             var css = style(mb.wrapper);
 
             // Textarea wrapper has added padding
             mb.wrapperPadding = parseInt(css.paddingTop, 10) + parseInt(css.paddingBottom, 10);
 
             // Only scroll to bottom if the cursor is at the end of the content and we're not dragging
-            if ( !mb.down && mb.content.selectionStart >= mb.content.value.length ) {
+            if (!mb.down && mb.content.selectionStart >= mb.content.value.length) {
                 mb.content.scrollTop = mb.scrollHeight + 1000;
             }
         }
@@ -634,7 +677,8 @@
      */
     proto.updateBar = function(axis) {
 
-        var mb = this, css = {},
+        var mb = this,
+            css = {},
             ts = trackSize,
             ss = scrollSize,
             o = mb.config,
@@ -651,7 +695,7 @@
             br = tsize / mb[ss[axis]],
             sr = so / (mb[ss[axis]] - cs);
 
-        if ( o.barType === "progress" ) {
+        if (o.barType === "progress") {
             // Only need to set the size of a progress bar
             css[ts[axis]] = Math.floor(tsize * sr);
         } else {
@@ -662,7 +706,7 @@
             css[trackPos[axis]] = Math.floor((tsize - css[ts[axis]]) * sr);
         }
 
-        raf(function () {
+        raf(function() {
             style(mb.bars[axis].node, css);
         });
     };
@@ -682,27 +726,29 @@
      * @return {Void}
      */
     proto.destroy = function() {
-        var mb = this, o = mb.config, ct = mb.container;
+        var mb = this,
+            o = mb.config,
+            ct = mb.container;
 
-        if ( mb.initialised ) {
+        if (mb.initialised) {
 
             // Remove the event listeners
             off(ct, "mouseenter", mb.events.mouseenter);
             off(win, "resize", mb.events.debounce);
 
             // Remove the main classes from the container
-            classList.remove(ct, o.visibleClass);
-            classList.remove(ct, o.containerClass);
-            classList.remove(ct, o.navClass);
+            classList.remove(ct, o.classes.visible);
+            classList.remove(ct, o.classes.container);
+            classList.remove(ct, o.classes.nav);
 
             // Remove the tracks and / or buttons
             each(mb.tracks, function(i, track) {
-                ct.removeChild( o.navButtons ? track.node.parentNode : track.node);
+                ct.removeChild(o.navButtons ? track.node.parentNode : track.node);
                 classList.remove(ct, "mb-scroll-" + i);
             });
 
             // Move the nodes back to their original container
-            while(mb.content.firstChild) {
+            while (mb.content.firstChild) {
                 ct.appendChild(mb.content.firstChild);
             }
 
@@ -710,13 +756,19 @@
             ct.removeChild(mb.content);
 
             // Remove manual positioning
-            if ( mb.manualPosition ) {
+            if (mb.manualPosition) {
                 ct.style.position = "";
             }
 
             // Clear node references
-            mb.bars = { x: {}, y: {} };
-            mb.tracks = { x: {}, y: {} };
+            mb.bars = {
+                x: {},
+                y: {}
+            };
+            mb.tracks = {
+                x: {},
+                y: {}
+            };
             mb.content = null;
 
             mb.initialised = false;
