@@ -1,10 +1,12 @@
 ![MiniBar](/docs/img/minibar_logo_medium.png?raw=true "MiniBar")
 
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/Mobius1/MiniBar/blob/master/LICENSE)
-[![release](https://img.shields.io/badge/release-0.2.2-orange.svg?style=flat)](https://github.com/Mobius1/MiniBar/releases)
+[![npm](https://img.shields.io/npm/dt/minibarjs.svg)](https://www.npmjs.com/package/minibarjs)
 [![npm version](https://badge.fury.io/js/minibarjs.svg)](https://badge.fury.io/js/minibarjs)
-![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js)
-![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?compression=gzip&label=gzipped)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/Mobius1/MiniBar/blob/master/LICENSE)
+[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/Mobius1/MiniBar.svg)](http://isitmaintained.com/project/Mobius1/MiniBar "Average time to resolve an issue")
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/Mobius1/MiniBar.svg)](http://isitmaintained.com/project/Mobius1/MiniBar "Percentage of issues still open")
+![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js) ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?compression=gzip&label=gzipped)
+
 
 A lightweight, dependency-free scrollbar library written in vanilla javascript.
 
