@@ -76,10 +76,11 @@ function add(index) {
 			f.appendChild(f.firstElementChild.cloneNode(true));
 			updateWidth();
 		} else {
-			if ( !s.observer )
-				s.content.appendChild(f.cloneNode(true));
+			s.content.appendChild(f.cloneNode(true));
 		}
-		s.update();
+		
+		if ( !s.observer )
+			s.update();
 	}
 }
 
