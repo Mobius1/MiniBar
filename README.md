@@ -146,7 +146,7 @@ Initialise the instance after destroying.
 
 ### `update()`
 
-Recalculate scollbar sizes / positions. This method is called automatically when the content and window are resized. You can call this method manually if you add or remove content.
+Recalculate scollbar sizes / positions. This method is called automatically when the content and window are resized or if content is added / removed. You can call this method manually if you add or remove content.
 
 
 
@@ -172,6 +172,6 @@ The default easing used is `easeOutQuad`, but you can pass your own easing funct
 ## To Do
 
 * Add touch / mobile support
-* Implement Mutation Observers to detect DOM changes?
+* ~~Implement Mutation Observers to detect DOM changes?~~ Added in [v0.3.0](https://github.com/Mobius1/MiniBar/releases/tag/0.3.0)
 
 Copyright © 2017 Karl Saunders | MIT license
