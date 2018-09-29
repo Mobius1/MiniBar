@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.2.2
+ * MiniBar 0.3.0
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -49,6 +49,12 @@
 
         navButtons: false,
         scrollAmount: 10,
+        
+        mutationObserver: {
+            attributes: false,
+            childList: true,
+            subtree: true
+        },
 
         classes: {
             container: "mb-container",
@@ -428,6 +434,22 @@
             on(doc, 'DOMContentLoaded', ev.update);
             on(win, 'load', ev.update);
 
+            // check for MutationObserver support
+            if ( "MutationObserver" in window ) {
+                var mb = this, callback = function(mutationsList, observer) {
+                    for(var mutation of mutationsList) {
+                        // update the instance if content changes
+                        if (mutation.type == 'childList') {
+                            mb.update();
+                        }
+                    }
+                };
+
+                this.observer = new MutationObserver(callback);
+
+                this.observer.observe(this.content, this.config.mutationObserver);
+            }                    
+                    
             mb.initialised = true;
         }
     };
