@@ -24,6 +24,10 @@ MiniBar is currently in a pre-release state so is not yet suitable for productio
 
 Horizontal scrolling with mousewheel and textarea support are experimental and may not work in certain browsers.
 
+MiniBar utilizes the [MutationObserver](https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver) API to automatically detect changes in content so the dimensions can be updated.
+
+If your browser doesn't support the API, MiniBar will not use it and therefore you must call the `update()` method when adding / removing / updating the containers content.
+
 ---
 
 ## Install
