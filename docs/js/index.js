@@ -76,7 +76,8 @@ function add(index) {
 			f.appendChild(f.firstElementChild.cloneNode(true));
 			updateWidth();
 		} else {
-			s.content.appendChild(f.cloneNode(true));
+			if ( !s.observer )
+				s.content.appendChild(f.cloneNode(true));
 		}
 		s.update();
 	}
