@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.3.0
+ * MiniBar 0.3.1
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -342,7 +342,7 @@
 
                     dec.className = o.classes.btn + " " + o.classes.decrease;
                     inc.className = o.classes.btn + " " + o.classes.increase;
-                    wrap.className = o.classes.btn + " " + o.classes.btn + "-" + axis;
+                    wrap.className = o.classes.btns + " " + o.classes.btns + "-" + axis;
 
                     wrap.appendChild(dec);
                     wrap.appendChild(track.node);
