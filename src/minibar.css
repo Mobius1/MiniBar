@@ -42,9 +42,9 @@
 }
 
 .mb-track-x {
-  left: 0;
-  bottom: 0;
-  width: 100%;
+  left: 5px;
+  bottom: 5px;
+  width: calc(100% - 10px);
   height: 10px;
   opacity: 0;
 }
@@ -57,9 +57,9 @@
 }
 
 .mb-track-y {
-  right: 0;
-  top: 0;
-  height: 100%;
+  right: 5px;
+  top: 5px;
+  height: calc(100% - 10px);
   width: 10px;
   opacity: 0;
 }
