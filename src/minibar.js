@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.3.2
+ * MiniBar 0.3.3
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -646,12 +646,14 @@
         mb.scrollLeft = ct.scrollLeft;
         mb.scrollHeight = ct.scrollHeight;
         mb.scrollWidth = ct.scrollWidth;
+        mb.offsetWidth = ct.offsetWidth;
+        mb.offsetHeight = ct.offsetHeight;
 
         // Do we need horizontal scrolling?
-        var sx = mb.scrollWidth > mb.rect.width && !mb.textarea;
+        var sx = mb.scrollWidth > mb.offsetWidth && !mb.textarea;
 
         // Do we need vertical scrolling?
-        var sy = mb.scrollHeight > mb.rect.height;
+        var sy = mb.scrollHeight > mb.offsetHeight;
 
         classList.toggle(mb.container, "mb-scroll-x", sx && o.scrollX);
         classList.toggle(mb.container, "mb-scroll-y", sy && o.scrollY);
