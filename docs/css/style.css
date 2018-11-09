@@ -215,3 +215,15 @@ body > .mb-container > .mb-track {
   height: 100%;
   width: auto;
 }
+
+.horizontal .mb-track-x {
+    left: 5px;
+    bottom: 5px;
+    width: calc(100% - 20px);
+}
+
+.horizontal .mb-track-y {
+    top: 5px;
+    right: 5px;
+    height: calc(100% - 20px);
+}
