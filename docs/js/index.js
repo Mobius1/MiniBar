@@ -45,6 +45,7 @@ function init() {
 
 		if ( i === 7 ) {
 			options.hideBars = true;
+			options.observableItems = ".item";
 		}
 
 		if ( i === 9 ) {
