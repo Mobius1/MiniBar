@@ -1,5 +1,5 @@
 /*!
- * MiniBar 0.3.3
+ * MiniBar 0.4.0
  * http://mobius.ovh/
  *
  * Released under the MIT license
@@ -29,6 +29,10 @@
             x: "scrollWidth",
             y: "scrollHeight"
         },
+        offsetSize = {
+            x: "offsetWidth",
+            y: "offsetHeight"
+        },				
         mAxis = {
             x: "pageX",
             y: "pageY"
@@ -38,7 +42,7 @@
      * Default configuration properties
      * @type {Object}
      */
-    var config = {
+    var mbConfig = {
         barType: "default",
         minBarSize: 10,
         alwaysShowBars: false,
@@ -56,6 +60,12 @@
             subtree: true
         },
 
+        onInit: function() {},
+        onUpdate: function() {},
+        onStart: function() {},
+        onScroll: function() {},
+        onEnd: function() {},
+
         classes: {
             container: "mb-container",
             content: "mb-content",
@@ -72,6 +82,10 @@
             btns: "mb-buttons",
             increase: "mb-increase",
             decrease: "mb-decrease",
+            item: "mb-item",
+            itemVisible: "mb-item-visible",
+            itemPartial: "mb-item-partial",
+            itemHidden: "mb-item-hidden"
         }
     };
 
@@ -109,7 +123,16 @@
     var off = function(el, e, fn) {
         el.removeEventListener(e, fn);
     };
-
+	
+    /**
+     * Check is item array or array-like
+     * @param  {Mixed} arr
+     * @return {Boolean}
+     */
+    var isCollection = function(arr) {
+        return Array.isArray(arr) || arr instanceof HTMLCollection || arr instanceof NodeList;
+	};
+	
     /**
      * Iterator helper
      * @param  {(Array|Object)}   arr Any object, array or array-like collection.
@@ -163,6 +186,8 @@
         return {
             x: o.left + d,
             y: o.top + n,
+            x2: o.left + o.width + d,
+            y2: o.top + o.height + n,					
             height: Math.round(o.height),
             width: Math.round(o.width)
         }
@@ -238,13 +263,13 @@
     var MiniBar = function(container, options) {
         this.container = typeof container === "string" ? doc.querySelector(container) : container;
 
-        this.config = config;
+        this.config = mbConfig;
 
         // User options
         if (options) {
-            this.config = extend({}, config, options);
+            this.config = extend({}, mbConfig, options);
         } else if (win.MiniBarOptions) {
-            this.config = extend({}, config, win.MiniBarOptions);
+            this.config = extend({}, mbConfig, win.MiniBarOptions);
         }
 
         this.css = win.getComputedStyle(this.container);
@@ -260,6 +285,11 @@
             x: {},
             y: {}
         };
+			
+        this.lastX = 0;
+        this.lastY = 0;
+    
+        this.scrollDirection = {x: 0, y: 0};
 
         // Events
         this.events = {};
@@ -419,6 +449,53 @@
                 mb.manualPosition = true;
                 mb.container.style.position = "relative";
             }
+					
+            if ( o.observableItems ) {
+                const items = this.getItems();
+                
+                if ( items.length ) {
+                    // check for IntersectionObserver support
+                    if ( "IntersectionObserver" in window ) {
+                        mb.items = items;
+                        
+                        var threshold = [];
+
+                        // Increase / decrease to set granularity
+                        var increment = 0.01
+
+                        // Don't want to have to type all of them...
+                        for (var i=0; i<1; i+=increment) {
+                            threshold.push(i);
+                        }									
+                        
+                        var callback = function(entries, observer) { 
+                            entries.forEach(entry => {
+                                var node = entry.target;
+                                var ratio = entry.intersectionRatio;
+                                var intersecting = entry.isIntersecting;
+                                var visible = intersecting && ratio >= 1;
+                                var hidden = !intersecting && ratio <= 0;
+                                var partial = intersecting && ratio > 0 && ratio < 1;
+                                
+                                node.classList.toggle(o.classes.itemVisible, visible);
+                                node.classList.toggle(o.classes.itemPartial, partial);
+                                node.classList.toggle(o.classes.itemHidden, hidden);
+                            });
+                        };
+                        
+                        this.intersectionObserver = new IntersectionObserver(callback, {
+                            root: null,
+                            rootMargin: '0px',
+                            threshold: threshold
+                        });
+                        
+                        each(items, function(i, item) {
+                            mb.intersectionObserver.observe(item);
+                        });
+                        
+                    }
+                }
+            }					
 
             mb.update();
 
@@ -436,21 +513,41 @@
 
             // check for MutationObserver support
             if ( "MutationObserver" in window ) {
-                var mb = this, callback = function(mutationsList, observer) {
+                var callback = function(mutationsList, observer) {
                     for(var mutation of mutationsList) {
                         // update the instance if content changes
                         if (mutation.type == 'childList') {
-                            mb.update();
+                            // if the IntersectionObserver API is used, we need to observe / unobserve items
+                            if ( mb.intersectionObserver ) {
+                                for(var node of mutation.addedNodes) {
+                                    mb.intersectionObserver.observe(node);
+                                }
+                            
+                                for(var node of mutation.removedNodes) {
+                                    mb.intersectionObserver.unobserve(node);
+                                }
+                            }
                         }
                     }
+									
+                    if ( mb.intersectionObserver ) {
+                        mb.items = mb.getItems();
+                    }
+                
+                    // setTimeout(mb.update.bind(mb), 500);
+                    mb.update();
                 };
 
-                this.observer = new MutationObserver(callback);
+                this.mutationObserver = new MutationObserver(callback);
 
-                this.observer.observe(this.content, this.config.mutationObserver);
-            }                    
+                this.mutationObserver.observe(this.content, this.config.mutationObserver);
+            } 
                     
             mb.initialised = true;
+					
+            setTimeout(function() {
+                mb.config.onInit.call(mb, mb.getData());
+            }, 10);
         }
     };
 
@@ -460,7 +557,92 @@
      * @return {Void}
      */
     proto.scroll = function(e) {
+        const data = this.getData(true);
+
+        if ( data.scrollLeft > this.lastX ) {
+            this.scrollDirection.x = 1;
+        } else if ( data.scrollLeft < this.lastX ) {
+            this.scrollDirection.x = -1;
+        }
+
+        if ( data.scrollTop > this.lastY ) {
+            this.scrollDirection.y = 1;
+        } else if ( data.scrollTop < this.lastY ) {
+            this.scrollDirection.y = -1;
+        }
+			
         this.updateBars();
+	
+        this.config.onScroll.call(this, data);
+			
+				this.lastX = data.scrollLeft;
+				this.lastY = data.scrollTop;
+    };
+	
+    proto.getItems = function() {
+        const o = this.config;
+        let items;
+        if ( typeof o.observableItems === "string" ) {
+            items = this.content.querySelectorAll(o.observableItems);
+        }
+
+        if ( o.observableItems instanceof HTMLCollection || o.observableItems instanceof NodeList ) {
+            items = [].slice.call(o.observableItems);
+        }
+        
+        return items;
+    };
+		
+    /**
+     * Get instance data
+     * @return {Object}
+     */
+    proto.getData = function(scrolling) {
+        var c = this.content;
+        const scrollTop = c.scrollTop;
+        const scrollLeft = c.scrollLeft;
+        const scrollHeight = c.scrollHeight;
+        const scrollWidth = c.scrollWidth;
+        const offsetWidth = c.offsetWidth;
+        const offsetHeight = c.offsetHeight;			
+        const barSize = this.size;
+        const containerRect = this.rect;
+        
+        return {
+            scrollTop,
+            scrollLeft,
+            scrollHeight,
+            scrollWidth,
+            offsetWidth,
+            offsetHeight,
+            containerRect,
+            barSize
+        }
+    };
+	
+    /**
+     * Scroll content by amount
+     * @param  {Number|String}     position   Position to scroll to
+     * @param  {String}     axis     Scroll axis
+     * @return {Void}
+     */
+    proto.scrollTo = function(position, axis) {
+        
+        axis = axis || "y";
+        
+        var data = this.getData(), amount;
+        
+        if ( typeof position === "string" ) {
+            if ( position === "start" ) {
+                amount = -data[scrollPos[axis]];
+            } else if ( position === "end" ) {
+                amount = data[scrollSize[axis]] - data[offsetSize[axis]] - data[scrollPos[axis]];
+            }
+        } else {
+            amount = position - data[scrollPos[axis]];
+        }
+        
+        this.scrollBy(amount, axis);
     };
 
     /**
@@ -492,9 +674,9 @@
             return -c * t * (t - 2) + b;
         };
 
-        var t = this,
+        var mb = this,
             st = Date.now(),
-            pos = t.content[scrollPos[axis]];
+            pos = mb.content[scrollPos[axis]];
 
         // Scroll function
         var scroll = function() {
@@ -503,18 +685,19 @@
 
             // Cancel after allotted interval
             if (ct > duration) {
-                caf(t.frame);
+                caf(mb.frame);
+				mb.content[scrollPos[axis]] = Math.ceil(pos + amount);	
                 return;
             }
-
+					
             // Update scroll position
-            t.content[scrollPos[axis]] = easing(ct, pos, amount, duration);
+            mb.content[scrollPos[axis]] = Math.ceil(easing(ct, pos, amount, duration));					
 
             // requestAnimationFrame
-            t.frame = raf(scroll);
+            mb.frame = raf(scroll);
         };
 
-        scroll();
+        mb.frame = scroll();
     };
 
     /**
@@ -648,6 +831,8 @@
         mb.scrollWidth = ct.scrollWidth;
         mb.offsetWidth = ct.offsetWidth;
         mb.offsetHeight = ct.offsetHeight;
+        mb.clientWidth = ct.clientWidth;
+        mb.clientHeight = ct.clientHeight;
 
         // Do we need horizontal scrolling?
         var sx = mb.scrollWidth > mb.offsetWidth && !mb.textarea;
@@ -655,8 +840,8 @@
         // Do we need vertical scrolling?
         var sy = mb.scrollHeight > mb.offsetHeight;
 
-        classList.toggle(mb.container, "mb-scroll-x", sx && o.scrollX);
-        classList.toggle(mb.container, "mb-scroll-y", sy && o.scrollY);
+        classList.toggle(mb.container, "mb-scroll-x", sx && o.scrollX && !o.hideBars);
+        classList.toggle(mb.container, "mb-scroll-y", sy && o.scrollY && !o.hideBars);
 
         // Style the content
         style(ct, {
@@ -665,7 +850,7 @@
             marginBottom: sx ? -s : "",
             paddingBottom: sx ? s : "",
             marginRight: sy ? -s : "",
-            paddingRight: sy ? s : ""
+            paddingRight: sy && !o.hideBars ? s : ""
         });
 
         mb.scrollX = sx;
@@ -692,6 +877,8 @@
                 mb.content.scrollTop = mb.scrollHeight + 1000;
             }
         }
+
+		this.config.onUpdate.call(this, this.getData());
     };
 
     /**
@@ -795,11 +982,26 @@
             };
             mb.content = null;
 
-            if ( mb.observer ) {
-                mb.observer.disconnect();
-                mb.observer = false;
+            if ( mb.mutationObserver ) {
+                mb.mutationObserver.disconnect();
+                mb.mutationObserver = false;
             }
-
+					
+            if ( o.observableItems ) {
+                if ( mb.intersectionObserver ) {
+                    mb.intersectionObserver.disconnect();
+                    mb.intersectionObserver = false;
+                }
+                
+                each(mb.items, function(i, item) {
+                    const node = item.node || item;
+                    node.classList.remove(o.classes.item);
+                    node.classList.remove(o.classes.itemVisible);
+                    node.classList.remove(o.classes.itemPartial);
+                    node.classList.remove(o.classes.itemHidden);								
+                });							
+            }
+					
             mb.initialised = false;
         }
     };

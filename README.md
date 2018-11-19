@@ -91,6 +91,12 @@ MiniBarOptions = {
 
 ## Options
 
+### `hideBars` (v0.4.0 and above)
+#### Type: `Boolean`
+#### Default: `false`
+
+When set to `true` the scrollbars will be hidden.
+
 ### `minBarSize`
 #### Type: `Integer`
 #### Default: `50`
@@ -111,6 +117,19 @@ By default the scrollbars aren't visible until hovering over the content. Set th
 
 Set to `progress` to display the scrollbars as progress bars.
 
+### `observableItems` (v0.4.0 and above)
+#### Type: `Mixed`
+#### Default: `false`
+
+Allows `MiniBar` to observe descendents and determine whether they're fully or partially visible within the scrolling container or completely out of view.
+
+To use you must pass a CSS3 selector string of the scrolling containers descendents that you want to monitor. When monitored, each descendant will have a `className` added depending on it's visibility:
+
+* `.mb-item-visible` - item boundaries are completely within the scrolling container.
+* `.mb-item-partial` - item is visible, but it's boundaries are not completely within the scrolling container.
+* `.mb-item-hidden` - item is not visible.
+
+NOTE: Your browser must support the [`IntersectionObserver`](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) API for this to work. The only code run in it's callback is the `className` changes, so latency is kept to a minimum.
 
 ### `horizontalMouseScroll`
 #### Type: `Boolean`
@@ -150,7 +169,16 @@ Initialise the instance after destroying.
 
 Recalculate scollbar sizes / positions. This method is called automatically when the content and window are resized or if content is added / removed. You can call this method manually if you add or remove content.
 
+### `scrollTo(position, axis)` (v0.4.0 and above)
 
+```javascript
+/**
+ * @param  {Number|String} 	position   | Position to scroll to
+ * @param  {String} 	    axis       | Scroll axis
+ */
+```
+
+Scroll the content to the defined position. This can either be an `integer` to represent the position in `pixels` to scroll to or `"start"` / `"end"` to scroll to the start / end position.
 
 ### `scrollBy(amount, axis, duration, easing)`
 
