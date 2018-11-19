@@ -201,7 +201,7 @@ body > .mb-container > .mb-track {
 }
 
 .container:nth-child(8) .item {
-  background-color: #F44336;
+  background-color: 1px solid #4C9689;
   width: 100%;
   height: 50px;
   margin: 0 0 10px 0;
@@ -226,7 +226,7 @@ body > .mb-container > .mb-track {
   opacity: 1;
   -webkit-transform: scale(1);
           transform: scale(1);
-  background-color: #00b0ff;
+  background-color: 1px solid #4C9689;
 }
 
 .container:nth-child(9) .main-title {
