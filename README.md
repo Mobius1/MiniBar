@@ -71,9 +71,49 @@ MiniBar also accepts an object as a second parameter of the constructor for user
 
 ```javascript
 new MiniBar('#myContent', {
-    minBarSize: 75,
-    alwaysShowBars: true,
-    ...
+        barType: "default",
+        minBarSize: 10,
+        hideBars: false,
+        alwaysShowBars: false,
+        horizontalMouseScroll: false,
+
+        scrollX: true,
+        scrollY: true,
+
+        navButtons: false,
+        scrollAmount: 10,
+        
+        mutationObserver: {
+            attributes: false,
+            childList: true,
+            subtree: true
+        },
+
+        onInit: function() { /* do something on init */ },
+        onUpdate: function() { /* do something on update */ },
+        onScroll: function() { /* do something on init */ },
+
+        classes: {
+            container: "mb-container",
+            content: "mb-content",
+            track: "mb-track",
+            bar: "mb-bar",
+            visible: "mb-visible",
+            progress: "mb-progress",
+            hover: "mb-hover",
+            scrolling: "mb-scrolling",
+            textarea: "mb-textarea",
+            wrapper: "mb-wrapper",
+            nav: "mb-nav",
+            btn: "mb-button",
+            btns: "mb-buttons",
+            increase: "mb-increase",
+            decrease: "mb-decrease",
+            item: "mb-item",
+            itemVisible: "mb-item-visible",
+            itemPartial: "mb-item-partial",
+            itemHidden: "mb-item-hidden"
+        }
 });
 ```
 
@@ -81,8 +121,9 @@ You can also define global options with the `MiniBarOptions` object:
 
 ```javascript
 MiniBarOptions = {
-    minBarSize: 75,
-    alwaysShowBars: true,
+    barType: "default",
+    minBarSize: 10,
+    hideBars: false,
     ...
 };
 ```
