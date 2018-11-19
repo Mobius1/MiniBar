@@ -73,7 +73,7 @@ MiniBar also accepts an object as a second parameter of the constructor for user
 new MiniBar('#myContent', {
     barType: "default",
     minBarSize: 10,
-    hideBars: false,
+    hideBars: false,  /* v0.4.0 and above */
     alwaysShowBars: false,
     horizontalMouseScroll: false,
 
@@ -89,9 +89,20 @@ new MiniBar('#myContent', {
         subtree: true
     },
 
-    onInit: function() { /* do something on init */ },
-    onUpdate: function() { /* do something on update */ },
-    onScroll: function() { /* do something on init */ },
+     /* v0.4.0 and above */
+    onInit: function() {
+    /* do something on init */
+    },
+
+     /* v0.4.0 and above */
+    onUpdate: function() {
+    /* do something on update */
+    },
+
+     /* v0.4.0 and above */
+    onScroll: function() {
+    /* do something on init */
+    },
 
     classes: {
         container: "mb-container",
@@ -109,10 +120,10 @@ new MiniBar('#myContent', {
         btns: "mb-buttons",
         increase: "mb-increase",
         decrease: "mb-decrease",
-        item: "mb-item",
-        itemVisible: "mb-item-visible",
-        itemPartial: "mb-item-partial",
-        itemHidden: "mb-item-hidden"
+        item: "mb-item", /* v0.4.0 and above */
+        itemVisible: "mb-item-visible", /* v0.4.0 and above */
+        itemPartial: "mb-item-partial", /* v0.4.0 and above */
+        itemHidden: "mb-item-hidden" /* v0.4.0 and above */
     }
 });
 ```
