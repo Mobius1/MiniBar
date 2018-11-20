@@ -1,11 +1,15 @@
 ![MiniBar](/docs/img/minibar_logo_medium.png?raw=true "MiniBar")
 
-[![npm](https://img.shields.io/npm/dt/minibarjs.svg)](https://www.npmjs.com/package/minibarjs)
-[![npm version](https://badge.fury.io/js/minibarjs.svg)](https://badge.fury.io/js/minibarjs)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/Mobius1/MiniBar/blob/master/LICENSE)
-[![Average time to resolve an issue](http://isitmaintained.com/badge/resolution/Mobius1/MiniBar.svg)](http://isitmaintained.com/project/Mobius1/MiniBar "Average time to resolve an issue")
-[![Percentage of issues still open](http://isitmaintained.com/badge/open/Mobius1/MiniBar.svg)](http://isitmaintained.com/project/Mobius1/MiniBar "Percentage of issues still open")
-![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js) ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?compression=gzip&label=gzipped)
+[![Maintenance](https://img.shields.io/maintenance/yes/2018.svg?style=for-the-badge)](https://github.com/Mobius1/MiniBar/)
+[![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/Mobius1/MiniBar.svg?style=for-the-badge)](https://codeclimate.com/github/Mobius1/MiniBar/maintainability)
+![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?style=for-the-badge) 
+![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?compression=gzip&label=gzipped&style=for-the-badge)
+[![npm](https://img.shields.io/npm/dt/minibarjs.svg?style=for-the-badge)](https://www.npmjs.com/package/minibarjs)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=for-the-badge)](https://github.com/Mobius1/MiniBar/blob/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/Mobius1/MiniBar.svg?style=for-the-badge)](https://github.com/Mobius1/MiniBar/releases)
+[![npm](https://img.shields.io/npm/v/minibarjs.svg?style=for-the-badge)](https://www.npmjs.com/package/minibarjs)
+[![GitHub issues](https://img.shields.io/github/issues-raw/Mobius1/MiniBar.svg?style=for-the-badge)](https://github.com/Mobius1/MiniBar)
+[![GitHub issues](https://img.shields.io/github/issues-closed-raw/Mobius1/MiniBar.svg?style=for-the-badge)](https://github.com/Mobius1/MiniBar)
 
 
 A lightweight, dependency-free scrollbar library written in vanilla javascript.
