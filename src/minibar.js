@@ -277,14 +277,8 @@
         this.size = scrollWidth();
         this.textarea = this.container.nodeName.toLowerCase() === "textarea";
 
-        this.bars = {
-            x: {},
-            y: {}
-        };
-        this.tracks = {
-            x: {},
-            y: {}
-        };
+        this.bars = { x: {}, y: {} };
+        this.tracks = { x: {},  y: {} };
 			
         this.lastX = 0;
         this.lastY = 0;
@@ -453,47 +447,44 @@
             if ( o.observableItems ) {
                 const items = this.getItems();
                 
-                if ( items.length ) {
-                    // check for IntersectionObserver support
-                    if ( "IntersectionObserver" in window ) {
-                        mb.items = items;
-                        
-                        var threshold = [];
+                if ( items.length && "IntersectionObserver" in window ) {
+                    mb.items = items;
+                    
+                    var threshold = [];
 
-                        // Increase / decrease to set granularity
-                        var increment = 0.01
+                    // Increase / decrease to set granularity
+                    var increment = 0.01
 
-                        // Don't want to have to type all of them...
-                        for (var i=0; i<1; i+=increment) {
-                            threshold.push(i);
-                        }									
-                        
-                        var callback = function(entries, observer) { 
-                            entries.forEach(entry => {
-                                var node = entry.target;
-                                var ratio = entry.intersectionRatio;
-                                var intersecting = entry.isIntersecting;
-                                var visible = intersecting && ratio >= 1;
-                                var hidden = !intersecting && ratio <= 0;
-                                var partial = intersecting && ratio > 0 && ratio < 1;
-                                
-                                node.classList.toggle(o.classes.itemVisible, visible);
-                                node.classList.toggle(o.classes.itemPartial, partial);
-                                node.classList.toggle(o.classes.itemHidden, hidden);
-                            });
-                        };
-                        
-                        this.intersectionObserver = new IntersectionObserver(callback, {
-                            root: null,
-                            rootMargin: '0px',
-                            threshold: threshold
+                    // Don't want to have to type all of them...
+                    for (var i=0; i<1; i+=increment) {
+                        threshold.push(i);
+                    }									
+                    
+                    var callback = function(entries, observer) { 
+                        entries.forEach(entry => {
+                            var node = entry.target;
+                            var ratio = entry.intersectionRatio;
+                            var intersecting = entry.isIntersecting;
+                            var visible = intersecting && ratio >= 1;
+                            var hidden = !intersecting && ratio <= 0;
+                            var partial = intersecting && ratio > 0 && ratio < 1;
+                            
+                            node.classList.toggle(o.classes.itemVisible, visible);
+                            node.classList.toggle(o.classes.itemPartial, partial);
+                            node.classList.toggle(o.classes.itemHidden, hidden);
                         });
-                        
-                        each(items, function(i, item) {
-                            mb.intersectionObserver.observe(item);
-                        });
-                        
-                    }
+                    };
+                    
+                    this.intersectionObserver = new IntersectionObserver(callback, {
+                        root: null,
+                        rootMargin: '0px',
+                        threshold: threshold
+                    });
+                    
+                    each(items, function(i, item) {
+                        mb.intersectionObserver.observe(item);
+                    });
+                    
                 }
             }					
 
@@ -670,13 +661,10 @@
 
         // Easing function
         easing = easing || function(t, b, c, d) {
-            t /= d;
-            return -c * t * (t - 2) + b;
+            t /= d;  return -c * t * (t - 2) + b;
         };
 
-        var mb = this,
-            st = Date.now(),
-            pos = mb.content[scrollPos[axis]];
+        var mb = this,  st = Date.now(),  pos = mb.content[scrollPos[axis]];
 
         // Scroll function
         var scroll = function() {
