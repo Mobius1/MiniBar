@@ -2,7 +2,7 @@
 
 [![Maintenance](https://img.shields.io/maintenance/yes/2018.svg?style=for-the-badge)](https://github.com/Mobius1/MiniBar/)
 [![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/Mobius1/MiniBar.svg?style=for-the-badge)](https://codeclimate.com/github/Mobius1/MiniBar/maintainability)
-![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?style=for-the-badge) 
+![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?style=for-the-badge)
 ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?compression=gzip&label=gzipped&style=for-the-badge)
 [![npm](https://img.shields.io/npm/dt/minibarjs.svg?style=for-the-badge)](https://www.npmjs.com/package/minibarjs)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?style=for-the-badge)](https://github.com/Mobius1/MiniBar/blob/master/LICENSE)
@@ -33,6 +33,8 @@ MiniBar utilizes the [MutationObserver](https://developer.mozilla.org/en-US/docs
 ---
 
 ## Install
+
+These methods install original MiniBar from Moebius1
 
 ### bower
 
@@ -86,7 +88,7 @@ new MiniBar('#myContent', {
 
     navButtons: false,
     scrollAmount: 10,
-    
+
     mutationObserver: {
         attributes: false,
         childList: true,
@@ -206,6 +208,12 @@ Enable scrollbars with navigation buttons.
 #### Default: `10`
 
 Increase or decrease the amount scrolled when clicking a nav button.
+
+### `wheelScrollAmount`
+#### Type: `Integer`
+#### Default: `100`
+
+Increase or decrease the amount scrolled when rolling mouse wheel.
 
 ---
 
