@@ -700,7 +700,7 @@
         var mb = this,
             o = mb.config,
             factor = e.deltaMode !== 0 ? 100 : 1,
-            way = (e.deltaY/Math.abs(e.deltaY),
+            way = e.deltaY/Math.abs(e.deltaY),
             amount = o.wheelScrollAmount === undefined ? e.deltaY * factor : o.wheelScrollAmount * way;
 
         this.scrollBy(amount, "x");
