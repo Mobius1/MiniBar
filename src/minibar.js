@@ -1,9 +1,9 @@
 /*!
- * MiniBar 0.4.0
- * http://mobius.ovh/
- *
- * Released under the MIT license
- */
+* MiniBar 0.4.0
+* http://mobius.ovh/
+*
+* Released under the MIT license
+*/
 (function(root) {
 
     "use strict";
@@ -32,16 +32,16 @@
         offsetSize = {
             x: "offsetWidth",
             y: "offsetHeight"
-        },
+        },				
         mAxis = {
             x: "pageX",
             y: "pageY"
         };
 
     /**
-     * Default configuration properties
-     * @type {Object}
-     */
+    * Default configuration properties
+    * @type {Object}
+    */
     var mbConfig = {
         barType: "default",
         minBarSize: 10,
@@ -53,8 +53,7 @@
 
         navButtons: false,
         scrollAmount: 10,
-        wheelScrollAmount: 100,
-
+        
         mutationObserver: {
             attributes: false,
             childList: true,
@@ -91,11 +90,11 @@
     };
 
     /**
-     * Object.assign polyfill
-     * @param  {Object} target
-     * @param  {Object} args
-     * @return {Object}
-     */
+    * Object.assign polyfill
+    * @param  {Object} target
+    * @param  {Object} args
+    * @return {Object}
+    */
     var extend = function(r, t) {
         for (var e = Object(r), n = 1; n < arguments.length; n++) {
             var a = arguments[n];
@@ -106,41 +105,41 @@
     };
 
     /**
-     * Add event listener to target
-     * @param  {Object} el
-     * @param  {String} e
-     * @param  {Function} fn
-     */
+    * Add event listener to target
+    * @param  {Object} el
+    * @param  {String} e
+    * @param  {Function} fn
+    */
     var on = function(el, e, fn) {
         el.addEventListener(e, fn, false);
     };
 
     /**
-     * Remove event listener from target
-     * @param  {Object} el
-     * @param  {String} e
-     * @param  {Function} fn
-     */
+    * Remove event listener from target
+    * @param  {Object} el
+    * @param  {String} e
+    * @param  {Function} fn
+    */
     var off = function(el, e, fn) {
         el.removeEventListener(e, fn);
     };
-
+	
     /**
-     * Check is item array or array-like
-     * @param  {Mixed} arr
-     * @return {Boolean}
-     */
+    * Check is item array or array-like
+    * @param  {Mixed} arr
+    * @return {Boolean}
+    */
     var isCollection = function(arr) {
         return Array.isArray(arr) || arr instanceof HTMLCollection || arr instanceof NodeList;
-	};
-
+    };
+	
     /**
-     * Iterator helper
-     * @param  {(Array|Object)}   arr Any object, array or array-like collection.
-     * @param  {Function} f   The callback function
-     * @param  {Object}   s      Change the value of this
-     * @return {Void}
-     */
+    * Iterator helper
+    * @param  {(Array|Object)}   arr Any object, array or array-like collection.
+    * @param  {Function} f   The callback function
+    * @param  {Object}   s      Change the value of this
+    * @return {Void}
+    */
     var each = function(arr, fn, s) {
         if ("[object Object]" === Object.prototype.toString.call(arr)) {
             for (var d in arr) {
@@ -156,11 +155,11 @@
     };
 
     /**
-     * Mass assign style properties
-     * @param  {Object} t
-     * @param  {(String|Object)} e
-     * @param  {String|Object}
-     */
+    * Mass assign style properties
+    * @param  {Object} t
+    * @param  {(String|Object)} e
+    * @param  {String|Object}
+    */
     var style = function(t, e) {
         var i = t && t.style,
             n = "[object Object]" === Object.prototype.toString.call(e);
@@ -173,11 +172,11 @@
     };
 
     /**
-     * Get an element's DOMRect relative to the document instead of the viewport.
-     * @param  {Object} t   HTMLElement
-     * @param  {Boolean} e  Include margins
-     * @return {Object}     Formatted DOMRect copy
-     */
+    * Get an element's DOMRect relative to the document instead of the viewport.
+    * @param  {Object} t   HTMLElement
+    * @param  {Boolean} e  Include margins
+    * @return {Object}     Formatted DOMRect copy
+    */
     var rect = function(e) {
         var t = win,
             o = e.getBoundingClientRect(),
@@ -188,19 +187,19 @@
             x: o.left + d,
             y: o.top + n,
             x2: o.left + o.width + d,
-            y2: o.top + o.height + n,
+            y2: o.top + o.height + n,					
             height: Math.round(o.height),
             width: Math.round(o.width)
         }
     };
 
     /**
-     * Returns a function, that, as long as it continues to be invoked, will not be triggered.
-     * @param  {Function} fn
-     * @param  {Number} wait
-     * @param  {Boolean} now
-     * @return {Function}
-     */
+    * Returns a function, that, as long as it continues to be invoked, will not be triggered.
+    * @param  {Function} fn
+    * @param  {Number} wait
+    * @param  {Boolean} now
+    * @return {Function}
+    */
     var debounce = function(n, t, u) {
         var e;
         return function() {
@@ -227,9 +226,9 @@
     }();
 
     /**
-     * Get native scrollbar width
-     * @return {Number} Scrollbar width
-     */
+    * Get native scrollbar width
+    * @return {Number} Scrollbar width
+    */
     var scrollWidth = function() {
         var t = 0,
             e = doc.createElement("div");
@@ -237,9 +236,9 @@
     };
 
     /**
-     * classList shim
-     * @type {Object}
-     */
+    * classList shim
+    * @type {Object}
+    */
     var classList = {
         contains: function(s, a) {
             if (s) return s.classList ? s.classList.contains(a) : !!s.className && !!s.className.match(new RegExp("(\\s|^)" + a + "(\\s|$)"))
@@ -257,10 +256,10 @@
     };
 
     /**
-     * Main Library
-     * @param {(String|Object)} content CSS3 selector string or node reference
-     * @param {Object} options          User defined options
-     */
+    * Main Library
+    * @param {(String|Object)} content CSS3 selector string or node reference
+    * @param {Object} options          User defined options
+    */
     var MiniBar = function(container, options) {
         this.container = typeof container === "string" ? doc.querySelector(container) : container;
 
@@ -280,10 +279,10 @@
 
         this.bars = { x: {}, y: {} };
         this.tracks = { x: {},  y: {} };
-
+			
         this.lastX = 0;
         this.lastY = 0;
-
+    
         this.scrollDirection = {x: 0, y: 0};
 
         // Events
@@ -303,9 +302,9 @@
     var proto = MiniBar.prototype;
 
     /**
-     * Init instance
-     * @return {Void}
-     */
+    * Init instance
+    * @return {Void}
+    */
     proto.init = function() {
         var mb = this,
             o = mb.config,
@@ -419,7 +418,7 @@
 
                     on(track.node, "mousedown", ev.mousedown);
                 } else {
-                    on(mb.bars[axis].node, "mousedown", ev.mousedown);
+                    on(track.node, "mousedown", ev.mousedown);
                 }
 
                 on(track.node, "mouseenter", function(e) {
@@ -444,13 +443,13 @@
                 mb.manualPosition = true;
                 mb.container.style.position = "relative";
             }
-
+					
             if ( o.observableItems ) {
                 const items = this.getItems();
-
+                
                 if ( items.length && "IntersectionObserver" in window ) {
                     mb.items = items;
-
+                    
                     var threshold = [];
 
                     // Increase / decrease to set granularity
@@ -459,9 +458,9 @@
                     // Don't want to have to type all of them...
                     for (var i=0; i<1; i+=increment) {
                         threshold.push(i);
-                    }
-
-                    var callback = function(entries, observer) {
+                    }									
+                    
+                    var callback = function(entries, observer) { 
                         entries.forEach(entry => {
                             var node = entry.target;
                             var ratio = entry.intersectionRatio;
@@ -469,25 +468,25 @@
                             var visible = intersecting && ratio >= 1;
                             var hidden = !intersecting && ratio <= 0;
                             var partial = intersecting && ratio > 0 && ratio < 1;
-
+                            
                             node.classList.toggle(o.classes.itemVisible, visible);
                             node.classList.toggle(o.classes.itemPartial, partial);
                             node.classList.toggle(o.classes.itemHidden, hidden);
                         });
                     };
-
+                    
                     this.intersectionObserver = new IntersectionObserver(callback, {
                         root: null,
                         rootMargin: '0px',
                         threshold: threshold
                     });
-
+                    
                     each(items, function(i, item) {
                         mb.intersectionObserver.observe(item);
                     });
-
+                    
                 }
-            }
+            }					
 
             mb.update();
 
@@ -514,18 +513,18 @@
                                 for(var node of mutation.addedNodes) {
                                     mb.intersectionObserver.observe(node);
                                 }
-
+                            
                                 for(var node of mutation.removedNodes) {
                                     mb.intersectionObserver.unobserve(node);
                                 }
                             }
                         }
                     }
-
+									
                     if ( mb.intersectionObserver ) {
                         mb.items = mb.getItems();
                     }
-
+                
                     // setTimeout(mb.update.bind(mb), 500);
                     mb.update();
                 };
@@ -533,10 +532,10 @@
                 this.mutationObserver = new MutationObserver(callback);
 
                 this.mutationObserver.observe(this.content, this.config.mutationObserver);
-            }
-
+            } 
+                    
             mb.initialised = true;
-
+					
             setTimeout(function() {
                 mb.config.onInit.call(mb, mb.getData());
             }, 10);
@@ -544,10 +543,10 @@
     };
 
     /**
-     * Scroll callback
-     * @param  {Object} e Event interface
-     * @return {Void}
-     */
+    * Scroll callback
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
     proto.scroll = function(e) {
         const data = this.getData(true);
 
@@ -562,15 +561,15 @@
         } else if ( data.scrollTop < this.lastY ) {
             this.scrollDirection.y = -1;
         }
-
+			
         this.updateBars();
-
+	
         this.config.onScroll.call(this, data);
-
-				this.lastX = data.scrollLeft;
-				this.lastY = data.scrollTop;
+			
+                this.lastX = data.scrollLeft;
+                this.lastY = data.scrollTop;
     };
-
+	
     proto.getItems = function() {
         const o = this.config;
         let items;
@@ -581,14 +580,14 @@
         if ( o.observableItems instanceof HTMLCollection || o.observableItems instanceof NodeList ) {
             items = [].slice.call(o.observableItems);
         }
-
+        
         return items;
     };
-
+		
     /**
-     * Get instance data
-     * @return {Object}
-     */
+    * Get instance data
+    * @return {Object}
+    */
     proto.getData = function(scrolling) {
         var c = this.content;
         const scrollTop = c.scrollTop;
@@ -596,10 +595,10 @@
         const scrollHeight = c.scrollHeight;
         const scrollWidth = c.scrollWidth;
         const offsetWidth = c.offsetWidth;
-        const offsetHeight = c.offsetHeight;
+        const offsetHeight = c.offsetHeight;			
         const barSize = this.size;
         const containerRect = this.rect;
-
+        
         return {
             scrollTop,
             scrollLeft,
@@ -611,19 +610,19 @@
             barSize
         }
     };
-
+	
     /**
-     * Scroll content by amount
-     * @param  {Number|String}     position   Position to scroll to
-     * @param  {String}     axis     Scroll axis
-     * @return {Void}
-     */
+    * Scroll content by amount
+    * @param  {Number|String}     position   Position to scroll to
+    * @param  {String}     axis     Scroll axis
+    * @return {Void}
+    */
     proto.scrollTo = function(position, axis) {
-
+        
         axis = axis || "y";
-
+        
         var data = this.getData(), amount;
-
+        
         if ( typeof position === "string" ) {
             if ( position === "start" ) {
                 amount = -data[scrollPos[axis]];
@@ -633,18 +632,18 @@
         } else {
             amount = position - data[scrollPos[axis]];
         }
-
+        
         this.scrollBy(amount, axis);
     };
 
     /**
-     * Scroll content by amount
-     * @param  {Number}     amount   Number of pixels to scroll
-     * @param  {String}     axis     Scroll axis
-     * @param  {Number}     duration Duration of scroll animation in ms
-     * @param  {Function}   easing   Easing function
-     * @return {Void}
-     */
+    * Scroll content by amount
+    * @param  {Number}     amount   Number of pixels to scroll
+    * @param  {String}     axis     Scroll axis
+    * @param  {Number}     duration Duration of scroll animation in ms
+    * @param  {Function}   easing   Easing function
+    * @return {Void}
+    */
     proto.scrollBy = function(amount, axis, duration, easing) {
 
         axis = axis || "y";
@@ -675,12 +674,12 @@
             // Cancel after allotted interval
             if (ct > duration) {
                 caf(mb.frame);
-				mb.content[scrollPos[axis]] = Math.ceil(pos + amount);
+                mb.content[scrollPos[axis]] = Math.ceil(pos + amount);	
                 return;
             }
-
+					
             // Update scroll position
-            mb.content[scrollPos[axis]] = Math.ceil(easing(ct, pos, amount, duration));
+            mb.content[scrollPos[axis]] = Math.ceil(easing(ct, pos, amount, duration));					
 
             // requestAnimationFrame
             mb.frame = raf(scroll);
@@ -690,36 +689,30 @@
     };
 
     /**
-     * Mousewheel callback
-     * @param  {Object} e Event interface
-     * @return {Void}
-     */
+    * Mousewheel callback
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
     proto.wheel = function(e) {
         e.preventDefault();
 
-        var mb = this,
-            o = mb.config,
-            factor = e.deltaMode !== 0 ? 100 : 1,
-            way = e.deltaY/Math.abs(e.deltaY),
-            amount = o.wheelScrollAmount === undefined ? e.deltaY * factor : o.wheelScrollAmount * way;
-
-        this.scrollBy(amount, "x");
+        this.scrollBy(e.deltaY * 100, "x");
     };
 
     /**
-     * Mouseenter callack
-     * @param  {Object} e Event interface
-     * @return {Void}
-     */
+    * Mouseenter callack
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
     proto.mouseenter = function(e) {
         this.updateBars();
     };
 
     /**
-     * Mousedown callack
-     * @param  {Object} e Event interface
-     * @return {Void}
-     */
+    * Mousedown callack
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
     proto.mousedown = function(e) {
         e.preventDefault();
 
@@ -727,6 +720,16 @@
             o = mb.config,
             type = o.barType === "progress" ? "tracks" : "bars",
             axis = e.target === mb[type].x.node ? "x" : "y";
+			
+                if ( e.target.classList.contains("mb-track") ) {
+                    var track = mb.tracks[axis];
+                    var ts = track[trackSize[axis]];
+            var offset = e[mAxis[axis]] - track[axis];
+            var ratio = offset / ts;
+            var scroll = ratio * (mb.content[scrollSize[axis]] - mb.rect[trackSize[axis]]);
+					
+                    return this.scrollTo(scroll);
+                }
 
         mb.down = true;
 
@@ -756,10 +759,10 @@
     };
 
     /**
-     * Mousemove callack
-     * @param  {Object} e Event interface
-     * @return {Void}
-     */
+    * Mousemove callack
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
     proto.mousemove = function(e) {
         e.preventDefault();
 
@@ -782,10 +785,10 @@
     };
 
     /**
-     * Mouseup callack
-     * @param  {Object} e Event interface
-     * @return {Void}
-     */
+    * Mouseup callack
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
     proto.mouseup = function(e) {
         var mb = this,
             o = mb.config,
@@ -807,10 +810,10 @@
     };
 
     /**
-     * Update cached values and recalculate sizes / positions
-     * @param  {Object} e Event interface
-     * @return {Void}
-     */
+    * Update cached values and recalculate sizes / positions
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
     proto.update = function() {
         var mb = this,
             o = mb.config,
@@ -873,14 +876,14 @@
             }
         }
 
-		this.config.onUpdate.call(this, this.getData());
+        this.config.onUpdate.call(this, this.getData());
     };
 
     /**
-     * Update a scrollbar's size and position
-     * @param  {String} axis
-     * @return {Void}
-     */
+    * Update a scrollbar's size and position
+    * @param  {String} axis
+    * @return {Void}
+    */
     proto.updateBar = function(axis) {
 
         var mb = this,
@@ -918,9 +921,9 @@
     };
 
     /**
-     * Update all scrollbars
-     * @return {Void}
-     */
+    * Update all scrollbars
+    * @return {Void}
+    */
     proto.updateBars = function() {
         each(this.bars, function(i, v) {
             this.updateBar(i);
@@ -928,9 +931,9 @@
     };
 
     /**
-     * Destroy instance
-     * @return {Void}
-     */
+    * Destroy instance
+    * @return {Void}
+    */
     proto.destroy = function() {
         var mb = this,
             o = mb.config,
@@ -981,22 +984,22 @@
                 mb.mutationObserver.disconnect();
                 mb.mutationObserver = false;
             }
-
+					
             if ( o.observableItems ) {
                 if ( mb.intersectionObserver ) {
                     mb.intersectionObserver.disconnect();
                     mb.intersectionObserver = false;
                 }
-
+                
                 each(mb.items, function(i, item) {
                     const node = item.node || item;
                     node.classList.remove(o.classes.item);
                     node.classList.remove(o.classes.itemVisible);
                     node.classList.remove(o.classes.itemPartial);
-                    node.classList.remove(o.classes.itemHidden);
-                });
+                    node.classList.remove(o.classes.itemHidden);								
+                });							
             }
-
+					
             mb.initialised = false;
         }
     };
