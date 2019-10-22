@@ -1,5 +1,5 @@
 /*!
-* MiniBar 0.4.1
+* MiniBar 0.4.2
 * http://mobius.ovh/
 *
 * Released under the MIT license
@@ -735,13 +735,14 @@
             axis = e.target === mb[type].x.node ? "x" : "y";
 
         if (DOM.classList.contains(e.target, "mb-track")) {
+            axis = e.target === mb.tracks.x.node ? "x" : "y"
             var track = mb.tracks[axis];
             var ts = track[trackSize[axis]];
             var offset = e[mAxis[axis]] - track[axis];
             var ratio = offset / ts;
             var scroll = ratio * (mb.content[scrollSize[axis]] - mb.rect[trackSize[axis]]);
 
-            return this.scrollTo(scroll);
+            return this.scrollTo(scroll, axis);
         }
 
         mb.down = true;
