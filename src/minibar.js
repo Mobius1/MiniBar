@@ -1,5 +1,5 @@
 /*!
-* MiniBar 0.4.0
+* MiniBar 0.4.1
 * http://mobius.ovh/
 *
 * Released under the MIT license
@@ -32,62 +32,12 @@
         offsetSize = {
             x: "offsetWidth",
             y: "offsetHeight"
-        },				
+        },
         mAxis = {
             x: "pageX",
             y: "pageY"
         };
 
-    /**
-    * Default configuration properties
-    * @type {Object}
-    */
-    var mbConfig = {
-        barType: "default",
-        minBarSize: 10,
-        alwaysShowBars: false,
-        horizontalMouseScroll: false,
-
-        scrollX: true,
-        scrollY: true,
-
-        navButtons: false,
-        scrollAmount: 10,
-        
-        mutationObserver: {
-            attributes: false,
-            childList: true,
-            subtree: true
-        },
-
-        onInit: function() {},
-        onUpdate: function() {},
-        onStart: function() {},
-        onScroll: function() {},
-        onEnd: function() {},
-
-        classes: {
-            container: "mb-container",
-            content: "mb-content",
-            track: "mb-track",
-            bar: "mb-bar",
-            visible: "mb-visible",
-            progress: "mb-progress",
-            hover: "mb-hover",
-            scrolling: "mb-scrolling",
-            textarea: "mb-textarea",
-            wrapper: "mb-wrapper",
-            nav: "mb-nav",
-            btn: "mb-button",
-            btns: "mb-buttons",
-            increase: "mb-increase",
-            decrease: "mb-decrease",
-            item: "mb-item",
-            itemVisible: "mb-item-visible",
-            itemPartial: "mb-item-partial",
-            itemHidden: "mb-item-hidden"
-        }
-    };
 
     /**
     * Object.assign polyfill
@@ -104,35 +54,107 @@
         return e
     };
 
-    /**
-    * Add event listener to target
-    * @param  {Object} el
-    * @param  {String} e
-    * @param  {Function} fn
-    */
-    var on = function(el, e, fn) {
-        el.addEventListener(e, fn, false);
+    var DOM = {
+        /**
+        * Mass assign style properties
+        * @param  {Object} t
+        * @param  {(String|Object)} e
+        * @param  {String|Object}
+        */
+        css: function(t, e) {
+            var i = t && t.style,
+                n = "[object Object]" === Object.prototype.toString.call(e);
+            if (i) {
+                if (!e) return win.getComputedStyle(t);
+                n && each(e, function(t, e) {
+                    t in i || (t = "-webkit-" + t), i[t] = e + ("string" == typeof e ? "" : "opacity" === t ? "" : "px")
+                })
+            }
+        },
+
+        /**
+        * Get an element's DOMRect relative to the document instead of the viewport.
+        * @param  {Object} t   HTMLElement
+        * @param  {Boolean} e  Include margins
+        * @return {Object}     Formatted DOMRect copy
+        */
+        rect: function(e) {
+            var t = win,
+                o = e.getBoundingClientRect(),
+                b = doc.documentElement || body.parentNode || body,
+                d = (void 0 !== t.pageXOffset) ? t.pageXOffset : b.scrollLeft,
+                n = (void 0 !== t.pageYOffset) ? t.pageYOffset : b.scrollTop;
+            return {
+                x: o.left + d,
+                y: o.top + n,
+                x2: o.left + o.width + d,
+                y2: o.top + o.height + n,
+                height: Math.round(o.height),
+                width: Math.round(o.width)
+            }
+        },
+
+        /**
+        * classList shim
+        * @type {Object}
+        */
+        classList: {
+            contains: function(s, a) {
+                if (s) return s.classList ? s.classList.contains(a) : !!s.className && !!s.className.match(new RegExp("(\\s|^)" + a + "(\\s|$)"))
+            },
+            add: function(s, a) {
+                DOM.classList.contains(s, a) || (s.classList ? s.classList.add(a) : s.className = s.className.trim() + " " + a)
+            },
+            remove: function(s, a) {
+                DOM.classList.contains(s, a) && (s.classList ? s.classList.remove(a) : s.className = s.className.replace(new RegExp("(^|\\s)" + a.split(" ").join("|") + "(\\s|$)", "gi"), " "))
+            },
+            toggle: function(s, a, c) {
+                var i = this.contains(s, a) ? !0 !== c && "remove" : !1 !== c && "add";
+                i && this[i](s, a)
+            }
+        },
+
+        /**
+        * Add event listener to target
+        * @param  {Object} el
+        * @param  {String} e
+        * @param  {Function} fn
+        */
+        on: function(el, e, fn) {
+            el.addEventListener(e, fn, false);
+        },
+
+        /**
+        * Remove event listener from target
+        * @param  {Object} el
+        * @param  {String} e
+        * @param  {Function} fn
+        */
+        off: function(el, e, fn) {
+            el.removeEventListener(e, fn);
+        },
+
+        /**
+        * Check is item array or array-like
+        * @param  {Mixed} arr
+        * @return {Boolean}
+        */
+        isCollection: function(arr) {
+            return Array.isArray(arr) || arr instanceof HTMLCollection || arr instanceof NodeList;
+        },
+
+        /**
+        * Get native scrollbar width
+        * @return {Number} Scrollbar width
+        */
+        scrollWidth: function() {
+            var t = 0,
+                e = doc.createElement("div");
+            return e.style.cssText = "width: 100; height: 100; overflow: scroll; position: absolute; top: -9999;", doc.body.appendChild(e), t = e.offsetWidth - e.clientWidth, doc.body.removeChild(e), t
+        },
     };
 
-    /**
-    * Remove event listener from target
-    * @param  {Object} el
-    * @param  {String} e
-    * @param  {Function} fn
-    */
-    var off = function(el, e, fn) {
-        el.removeEventListener(e, fn);
-    };
-	
-    /**
-    * Check is item array or array-like
-    * @param  {Mixed} arr
-    * @return {Boolean}
-    */
-    var isCollection = function(arr) {
-        return Array.isArray(arr) || arr instanceof HTMLCollection || arr instanceof NodeList;
-    };
-	
+
     /**
     * Iterator helper
     * @param  {(Array|Object)}   arr Any object, array or array-like collection.
@@ -151,45 +173,6 @@
             for (var e = 0, f = arr.length; e < f; e++) {
                 fn.call(s, e, arr[e]);
             }
-        }
-    };
-
-    /**
-    * Mass assign style properties
-    * @param  {Object} t
-    * @param  {(String|Object)} e
-    * @param  {String|Object}
-    */
-    var style = function(t, e) {
-        var i = t && t.style,
-            n = "[object Object]" === Object.prototype.toString.call(e);
-        if (i) {
-            if (!e) return win.getComputedStyle(t);
-            n && each(e, function(t, e) {
-                t in i || (t = "-webkit-" + t), i[t] = e + ("string" == typeof e ? "" : "opacity" === t ? "" : "px")
-            })
-        }
-    };
-
-    /**
-    * Get an element's DOMRect relative to the document instead of the viewport.
-    * @param  {Object} t   HTMLElement
-    * @param  {Boolean} e  Include margins
-    * @return {Object}     Formatted DOMRect copy
-    */
-    var rect = function(e) {
-        var t = win,
-            o = e.getBoundingClientRect(),
-            b = doc.documentElement || body.parentNode || body,
-            d = (void 0 !== t.pageXOffset) ? t.pageXOffset : b.scrollLeft,
-            n = (void 0 !== t.pageYOffset) ? t.pageYOffset : b.scrollTop;
-        return {
-            x: o.left + d,
-            y: o.top + n,
-            x2: o.left + o.width + d,
-            y2: o.top + o.height + n,					
-            height: Math.round(o.height),
-            width: Math.round(o.width)
         }
     };
 
@@ -221,39 +204,10 @@
             }, t)
         }
     }();
+
     var caf = win.cancelAnimationFrame || function(id) {
         clearTimeout(id);
     }();
-
-    /**
-    * Get native scrollbar width
-    * @return {Number} Scrollbar width
-    */
-    var scrollWidth = function() {
-        var t = 0,
-            e = doc.createElement("div");
-        return e.style.cssText = "width: 100; height: 100; overflow: scroll; position: absolute; top: -9999;", doc.body.appendChild(e), t = e.offsetWidth - e.clientWidth, doc.body.removeChild(e), t
-    };
-
-    /**
-    * classList shim
-    * @type {Object}
-    */
-    var classList = {
-        contains: function(s, a) {
-            if (s) return s.classList ? s.classList.contains(a) : !!s.className && !!s.className.match(new RegExp("(\\s|^)" + a + "(\\s|$)"))
-        },
-        add: function(s, a) {
-            classList.contains(s, a) || (s.classList ? s.classList.add(a) : s.className = s.className.trim() + " " + a)
-        },
-        remove: function(s, a) {
-            classList.contains(s, a) && (s.classList ? s.classList.remove(a) : s.className = s.className.replace(new RegExp("(^|\\s)" + a.split(" ").join("|") + "(\\s|$)", "gi"), " "))
-        },
-        toggle: function(s, a, c) {
-            var i = this.contains(s, a) ? !0 !== c && "remove" : !1 !== c && "add";
-            i && this[i](s, a)
-        }
-    };
 
     /**
     * Main Library
@@ -263,35 +217,90 @@
     var MiniBar = function(container, options) {
         this.container = typeof container === "string" ? doc.querySelector(container) : container;
 
-        this.config = mbConfig;
+        this.config = {
+            barType: "default",
+            minBarSize: 10,
+            alwaysShowBars: false,
+            horizontalMouseScroll: false,
+
+            scrollX: true,
+            scrollY: true,
+
+            navButtons: false,
+            scrollAmount: 10,
+
+            mutationObserver: {
+                attributes: false,
+                childList: true,
+                subtree: true
+            },
+
+            onInit: function() {},
+            onUpdate: function() {},
+            onStart: function() {},
+            onScroll: function() {},
+            onEnd: function() {},
+
+            classes: {
+                container: "mb-container",
+                content: "mb-content",
+                track: "mb-track",
+                bar: "mb-bar",
+                visible: "mb-visible",
+                progress: "mb-progress",
+                hover: "mb-hover",
+                scrolling: "mb-scrolling",
+                textarea: "mb-textarea",
+                wrapper: "mb-wrapper",
+                nav: "mb-nav",
+                btn: "mb-button",
+                btns: "mb-buttons",
+                increase: "mb-increase",
+                decrease: "mb-decrease",
+                item: "mb-item",
+                itemVisible: "mb-item-visible",
+                itemPartial: "mb-item-partial",
+                itemHidden: "mb-item-hidden"
+            }
+        };
 
         // User options
         if (options) {
-            this.config = extend({}, mbConfig, options);
+            this.config = extend({}, this.config, options);
         } else if (win.MiniBarOptions) {
-            this.config = extend({}, mbConfig, win.MiniBarOptions);
+            this.config = extend({}, this.config, win.MiniBarOptions);
         }
 
         this.css = win.getComputedStyle(this.container);
 
-        this.size = scrollWidth();
+        this.size = DOM.scrollWidth();
         this.textarea = this.container.nodeName.toLowerCase() === "textarea";
 
-        this.bars = { x: {}, y: {} };
-        this.tracks = { x: {},  y: {} };
-			
+        this.bars = {
+            x: {},
+            y: {}
+        };
+        this.tracks = {
+            x: {},
+            y: {}
+        };
+
         this.lastX = 0;
         this.lastY = 0;
-    
-        this.scrollDirection = {x: 0, y: 0};
+
+        this.scrollDirection = {
+            x: 0,
+            y: 0
+        };
 
         // Events
         this.events = {};
 
         // Bind events
-        each(["update", "scroll", "mouseenter", "mousedown", "mousemove", "mouseup", "wheel"], function(i, evt) {
-            this.events[evt] = this[evt].bind(this);
-        }, this);
+        var events = ["update", "scroll", "mouseenter", "mousedown", "mousemove", "mouseup", "wheel"];
+        for (var i = 0; i < events.length; i++) {
+            this.events[events[i]] = this[events[i]].bind(this);
+        }
 
         // Debounce win resize
         this.events.debounce = debounce(this.events.update, 50);
@@ -317,10 +326,10 @@
             if (mb.textarea) {
                 mb.content = mb.container;
                 mb.container = doc.createElement("div");
-                classList.add(mb.container, o.classes.textarea);
+                DOM.classList.add(mb.container, o.classes.textarea);
 
                 mb.wrapper = doc.createElement("div");
-                classList.add(mb.wrapper, o.classes.wrapper);
+                DOM.classList.add(mb.wrapper, o.classes.wrapper);
                 mb.container.appendChild(mb.wrapper);
 
                 mb.content.parentNode.insertBefore(mb.container, mb.content);
@@ -339,11 +348,11 @@
                 }
             }
 
-            classList.add(mb.container, o.classes.container);
-            classList.add(mb.content, o.classes.content);
+            DOM.classList.add(mb.container, o.classes.container);
+            DOM.classList.add(mb.content, o.classes.content);
 
             if (o.alwaysShowBars) {
-                classList.add(mb.container, o.classes.visible);
+                DOM.classList.add(mb.container, o.classes.visible);
             }
 
             // Set the tracks and bars and append them to the container
@@ -351,10 +360,10 @@
                 mb.bars[axis].node = doc.createElement("div");
                 track.node = doc.createElement("div");
 
-                classList.add(track.node, o.classes.track);
-                classList.add(track.node, o.classes.track + "-" + axis);
+                DOM.classList.add(track.node, o.classes.track);
+                DOM.classList.add(track.node, o.classes.track + "-" + axis);
 
-                classList.add(mb.bars[axis].node, o.classes.bar);
+                DOM.classList.add(mb.bars[axis].node, o.classes.bar);
                 track.node.appendChild(mb.bars[axis].node);
 
                 // Add nav buttons
@@ -374,10 +383,10 @@
 
                     mb.container.appendChild(wrap);
 
-                    classList.add(mb.container, o.classes.nav);
+                    DOM.classList.add(mb.container, o.classes.nav);
 
                     // Mousedown on buttons
-                    on(wrap, "mousedown", function(e) {
+                    DOM.on(wrap, "mousedown", function(e) {
                         var el = e.target;
 
                         caf(mb.frame);
@@ -403,7 +412,7 @@
                     });
 
                     // Mouseup on buttons
-                    on(wrap, "mouseup", function(e) {
+                    DOM.on(wrap, "mouseup", function(e) {
                         var c = e.target,
                             m = 5 * amount;
                         caf(mb.frame), c !== inc && c !== dec || mb.scrollBy(c === dec ? -m : m, axis)
@@ -414,20 +423,20 @@
                 }
 
                 if (o.barType === "progress") {
-                    classList.add(track.node, o.classes.progress);
+                    DOM.classList.add(track.node, o.classes.progress);
 
-                    on(track.node, "mousedown", ev.mousedown);
+                    DOM.on(track.node, "mousedown", ev.mousedown);
                 } else {
-                    on(track.node, "mousedown", ev.mousedown);
+                    DOM.on(track.node, "mousedown", ev.mousedown);
                 }
 
-                on(track.node, "mouseenter", function(e) {
-                    classList.add(mb.container, o.classes.hover + "-" + axis);
+                DOM.on(track.node, "mouseenter", function(e) {
+                    DOM.classList.add(mb.container, o.classes.hover + "-" + axis);
                 });
 
-                on(track.node, "mouseleave", function(e) {
+                DOM.on(track.node, "mouseleave", function(e) {
                     if (!mb.down) {
-                        classList.remove(mb.container, o.classes.hover + "-" + axis);
+                        DOM.classList.remove(mb.container, o.classes.hover + "-" + axis);
                     }
                 });
             });
@@ -443,24 +452,24 @@
                 mb.manualPosition = true;
                 mb.container.style.position = "relative";
             }
-					
-            if ( o.observableItems ) {
+
+            if (o.observableItems) {
                 const items = this.getItems();
-                
-                if ( items.length && "IntersectionObserver" in window ) {
+
+                if (items.length && "IntersectionObserver" in window) {
                     mb.items = items;
-                    
+
                     var threshold = [];
 
                     // Increase / decrease to set granularity
                     var increment = 0.01
 
                     // Don't want to have to type all of them...
-                    for (var i=0; i<1; i+=increment) {
+                    for (var i = 0; i < 1; i += increment) {
                         threshold.push(i);
-                    }									
-                    
-                    var callback = function(entries, observer) { 
+                    }
+
+                    var callback = function(entries, observer) {
                         entries.forEach(entry => {
                             var node = entry.target;
                             var ratio = entry.intersectionRatio;
@@ -468,63 +477,63 @@
                             var visible = intersecting && ratio >= 1;
                             var hidden = !intersecting && ratio <= 0;
                             var partial = intersecting && ratio > 0 && ratio < 1;
-                            
-                            node.classList.toggle(o.classes.itemVisible, visible);
-                            node.classList.toggle(o.classes.itemPartial, partial);
-                            node.classList.toggle(o.classes.itemHidden, hidden);
+
+                            DOM.classList.toggle(node, o.classes.itemVisible, visible);
+                            DOM.classList.toggle(node, o.classes.itemPartial, partial);
+                            DOM.classList.toggle(node, o.classes.itemHidden, hidden);
                         });
                     };
-                    
+
                     this.intersectionObserver = new IntersectionObserver(callback, {
                         root: null,
                         rootMargin: '0px',
                         threshold: threshold
                     });
-                    
+
                     each(items, function(i, item) {
                         mb.intersectionObserver.observe(item);
                     });
-                    
+
                 }
-            }					
+            }
 
             mb.update();
 
-            on(mb.content, "scroll", ev.scroll);
-            on(mb.container, "mouseenter", ev.mouseenter);
+            DOM.on(mb.content, "scroll", ev.scroll);
+            DOM.on(mb.container, "mouseenter", ev.mouseenter);
 
             if (o.horizontalMouseScroll) {
-                on(mb.content, "wheel", ev.wheel);
+                DOM.on(mb.content, "wheel", ev.wheel);
             }
 
-            on(win, "resize", ev.debounce);
+            DOM.on(win, "resize", ev.debounce);
 
-            on(doc, 'DOMContentLoaded', ev.update);
-            on(win, 'load', ev.update);
+            DOM.on(doc, 'DOMContentLoaded', ev.update);
+            DOM.on(win, 'load', ev.update);
 
             // check for MutationObserver support
-            if ( "MutationObserver" in window ) {
+            if ("MutationObserver" in window) {
                 var callback = function(mutationsList, observer) {
-                    if ( mb.intersectionObserver ) {
-                        for(var mutation of mutationsList) {
+                    if (mb.intersectionObserver) {
+                        for (var mutation of mutationsList) {
                             // update the instance if content changes
                             if (mutation.type == 'childList') {
                                 //  observe / unobserve items
-                                for(var node of mutation.addedNodes) {
+                                for (var node of mutation.addedNodes) {
                                     mb.intersectionObserver.observe(node);
                                 }
-                            
-                                for(var node of mutation.removedNodes) {
+
+                                for (var node of mutation.removedNodes) {
                                     mb.intersectionObserver.unobserve(node);
                                 }
                             }
                         }
                     }
-									
-                    if ( mb.intersectionObserver ) {
+
+                    if (mb.intersectionObserver) {
                         mb.items = mb.getItems();
                     }
-                
+
                     // setTimeout(mb.update.bind(mb), 500);
                     mb.update();
                 };
@@ -532,10 +541,10 @@
                 this.mutationObserver = new MutationObserver(callback);
 
                 this.mutationObserver.observe(this.content, this.config.mutationObserver);
-            } 
-                    
+            }
+
             mb.initialised = true;
-					
+
             setTimeout(function() {
                 mb.config.onInit.call(mb, mb.getData());
             }, 10);
@@ -550,40 +559,40 @@
     proto.scroll = function(e) {
         const data = this.getData(true);
 
-        if ( data.scrollLeft > this.lastX ) {
+        if (data.scrollLeft > this.lastX) {
             this.scrollDirection.x = 1;
-        } else if ( data.scrollLeft < this.lastX ) {
+        } else if (data.scrollLeft < this.lastX) {
             this.scrollDirection.x = -1;
         }
 
-        if ( data.scrollTop > this.lastY ) {
+        if (data.scrollTop > this.lastY) {
             this.scrollDirection.y = 1;
-        } else if ( data.scrollTop < this.lastY ) {
+        } else if (data.scrollTop < this.lastY) {
             this.scrollDirection.y = -1;
         }
-			
+
         this.updateBars();
-	
+
         this.config.onScroll.call(this, data);
-			
-                this.lastX = data.scrollLeft;
-                this.lastY = data.scrollTop;
+
+        this.lastX = data.scrollLeft;
+        this.lastY = data.scrollTop;
     };
-	
+
     proto.getItems = function() {
         const o = this.config;
         let items;
-        if ( typeof o.observableItems === "string" ) {
+        if (typeof o.observableItems === "string") {
             items = this.content.querySelectorAll(o.observableItems);
         }
 
-        if ( o.observableItems instanceof HTMLCollection || o.observableItems instanceof NodeList ) {
+        if (o.observableItems instanceof HTMLCollection || o.observableItems instanceof NodeList) {
             items = [].slice.call(o.observableItems);
         }
-        
+
         return items;
     };
-		
+
     /**
     * Get instance data
     * @return {Object}
@@ -595,10 +604,10 @@
         const scrollHeight = c.scrollHeight;
         const scrollWidth = c.scrollWidth;
         const offsetWidth = c.offsetWidth;
-        const offsetHeight = c.offsetHeight;			
+        const offsetHeight = c.offsetHeight;
         const barSize = this.size;
         const containerRect = this.rect;
-        
+
         return {
             scrollTop,
             scrollLeft,
@@ -610,7 +619,7 @@
             barSize
         }
     };
-	
+
     /**
     * Scroll content by amount
     * @param  {Number|String}     position   Position to scroll to
@@ -618,21 +627,22 @@
     * @return {Void}
     */
     proto.scrollTo = function(position, axis) {
-        
+
         axis = axis || "y";
-        
-        var data = this.getData(), amount;
-        
-        if ( typeof position === "string" ) {
-            if ( position === "start" ) {
+
+        var data = this.getData(),
+            amount;
+
+        if (typeof position === "string") {
+            if (position === "start") {
                 amount = -data[scrollPos[axis]];
-            } else if ( position === "end" ) {
+            } else if (position === "end") {
                 amount = data[scrollSize[axis]] - data[offsetSize[axis]] - data[scrollPos[axis]];
             }
         } else {
             amount = position - data[scrollPos[axis]];
         }
-        
+
         this.scrollBy(amount, axis);
     };
 
@@ -661,10 +671,13 @@
 
         // Easing function
         easing = easing || function(t, b, c, d) {
-            t /= d;  return -c * t * (t - 2) + b;
+            t /= d;
+            return -c * t * (t - 2) + b;
         };
 
-        var mb = this,  st = Date.now(),  pos = mb.content[scrollPos[axis]];
+        var mb = this,
+            st = Date.now(),
+            pos = mb.content[scrollPos[axis]];
 
         // Scroll function
         var scroll = function() {
@@ -674,12 +687,12 @@
             // Cancel after allotted interval
             if (ct > duration) {
                 caf(mb.frame);
-                mb.content[scrollPos[axis]] = Math.ceil(pos + amount);	
+                mb.content[scrollPos[axis]] = Math.ceil(pos + amount);
                 return;
             }
-					
+
             // Update scroll position
-            mb.content[scrollPos[axis]] = Math.ceil(easing(ct, pos, amount, duration));					
+            mb.content[scrollPos[axis]] = Math.ceil(easing(ct, pos, amount, duration));
 
             // requestAnimationFrame
             mb.frame = raf(scroll);
@@ -720,16 +733,16 @@
             o = mb.config,
             type = o.barType === "progress" ? "tracks" : "bars",
             axis = e.target === mb[type].x.node ? "x" : "y";
-			
-                if ( e.target.classList.contains("mb-track") ) {
-                    var track = mb.tracks[axis];
-                    var ts = track[trackSize[axis]];
+
+        if (DOM.classList.contains(e.target, "mb-track")) {
+            var track = mb.tracks[axis];
+            var ts = track[trackSize[axis]];
             var offset = e[mAxis[axis]] - track[axis];
             var ratio = offset / ts;
             var scroll = ratio * (mb.content[scrollSize[axis]] - mb.rect[trackSize[axis]]);
-					
-                    return this.scrollTo(scroll);
-                }
+
+            return this.scrollTo(scroll);
+        }
 
         mb.down = true;
 
@@ -740,8 +753,8 @@
         mb.update();
 
         // Keep the tracks visible during drag
-        classList.add(mb.container, o.classes.visible);
-        classList.add(mb.container, o.classes.scrolling + "-" + axis);
+        DOM.classList.add(mb.container, o.classes.visible);
+        DOM.classList.add(mb.container, o.classes.scrolling + "-" + axis);
 
         // Save data for use during mousemove
         o.barType === "progress" ? (mb.origin = {
@@ -754,8 +767,8 @@
 
         // Attach the mousemove and mouseup listeners now
         // instead of permanently having them on
-        on(doc, "mousemove", mb.events.mousemove);
-        on(doc, "mouseup", mb.events.mouseup);
+        DOM.on(doc, "mousemove", mb.events.mousemove);
+        DOM.on(doc, "mouseup", mb.events.mouseup);
     };
 
     /**
@@ -794,19 +807,19 @@
             o = mb.config,
             ev = mb.events;
 
-        classList.toggle(mb.container, o.classes.visible, o.alwaysShowBars);
-        classList.remove(mb.container, o.classes.scrolling + "-" + mb.currentAxis);
+        DOM.classList.toggle(mb.container, o.classes.visible, o.alwaysShowBars);
+        DOM.classList.remove(mb.container, o.classes.scrolling + "-" + mb.currentAxis);
 
-        if (!classList.contains(e.target, o.classes.bar)) {
-            classList.remove(mb.container, o.classes.hover + "-x");
-            classList.remove(mb.container, o.classes.hover + "-y");
+        if (!DOM.classList.contains(e.target, o.classes.bar)) {
+            DOM.classList.remove(mb.container, o.classes.hover + "-x");
+            DOM.classList.remove(mb.container, o.classes.hover + "-y");
         }
 
         mb.currentAxis = null;
         mb.down = false;
 
-        off(doc, "mousemove", ev.mousemove);
-        off(doc, "mouseup", ev.mouseup);
+        DOM.off(doc, "mousemove", ev.mousemove);
+        DOM.off(doc, "mouseup", ev.mouseup);
     };
 
     /**
@@ -821,7 +834,7 @@
             s = mb.size;
 
         // Cache the dimensions
-        mb.rect = rect(mb.container);
+        mb.rect = DOM.rect(mb.container);
 
         mb.scrollTop = ct.scrollTop;
         mb.scrollLeft = ct.scrollLeft;
@@ -838,11 +851,11 @@
         // Do we need vertical scrolling?
         var sy = mb.scrollHeight > mb.offsetHeight;
 
-        classList.toggle(mb.container, "mb-scroll-x", sx && o.scrollX && !o.hideBars);
-        classList.toggle(mb.container, "mb-scroll-y", sy && o.scrollY && !o.hideBars);
+        DOM.classList.toggle(mb.container, "mb-scroll-x", sx && o.scrollX && !o.hideBars);
+        DOM.classList.toggle(mb.container, "mb-scroll-y", sy && o.scrollY && !o.hideBars);
 
         // Style the content
-        style(ct, {
+        DOM.css(ct, {
             overflowX: sx ? "auto" : "",
             overflowY: sy ? "auto" : "",
             marginBottom: sx ? -s : "",
@@ -855,8 +868,8 @@
         mb.scrollY = sy;
 
         each(mb.tracks, function(i, track) {
-            extend(track, rect(track.node));
-            extend(mb.bars[i], rect(mb.bars[i].node));
+            extend(track, DOM.rect(track.node));
+            extend(mb.bars[i], DOM.rect(mb.bars[i].node));
         });
 
         // Update scrollbars
@@ -865,7 +878,7 @@
         mb.wrapperPadding = 0;
 
         if (mb.textarea) {
-            var css = style(mb.wrapper);
+            var css = DOM.css(mb.wrapper);
 
             // Textarea wrapper has added padding
             mb.wrapperPadding = parseInt(css.paddingTop, 10) + parseInt(css.paddingBottom, 10);
@@ -916,7 +929,7 @@
         }
 
         raf(function() {
-            style(mb.bars[axis].node, css);
+            DOM.css(mb.bars[axis].node, css);
         });
     };
 
@@ -942,18 +955,18 @@
         if (mb.initialised) {
 
             // Remove the event listeners
-            off(ct, "mouseenter", mb.events.mouseenter);
-            off(win, "resize", mb.events.debounce);
+            DOM.off(ct, "mouseenter", mb.events.mouseenter);
+            DOM.off(win, "resize", mb.events.debounce);
 
             // Remove the main classes from the container
-            classList.remove(ct, o.classes.visible);
-            classList.remove(ct, o.classes.container);
-            classList.remove(ct, o.classes.nav);
+            DOM.classList.remove(ct, o.classes.visible);
+            DOM.classList.remove(ct, o.classes.container);
+            DOM.classList.remove(ct, o.classes.nav);
 
             // Remove the tracks and / or buttons
             each(mb.tracks, function(i, track) {
                 ct.removeChild(o.navButtons ? track.node.parentNode : track.node);
-                classList.remove(ct, "mb-scroll-" + i);
+                DOM.classList.remove(ct, "mb-scroll-" + i);
             });
 
             // Move the nodes back to their original container
@@ -980,26 +993,26 @@
             };
             mb.content = null;
 
-            if ( mb.mutationObserver ) {
+            if (mb.mutationObserver) {
                 mb.mutationObserver.disconnect();
                 mb.mutationObserver = false;
             }
-					
-            if ( o.observableItems ) {
-                if ( mb.intersectionObserver ) {
+
+            if (o.observableItems) {
+                if (mb.intersectionObserver) {
                     mb.intersectionObserver.disconnect();
                     mb.intersectionObserver = false;
                 }
-                
+
                 each(mb.items, function(i, item) {
                     const node = item.node || item;
-                    node.classList.remove(o.classes.item);
-                    node.classList.remove(o.classes.itemVisible);
-                    node.classList.remove(o.classes.itemPartial);
-                    node.classList.remove(o.classes.itemHidden);								
-                });							
+                    DOM.classList.remove(node, o.classes.item);
+                    DOM.classList.remove(node, o.classes.itemVisible);
+                    DOM.classList.remove(node, o.classes.itemPartial);
+                    DOM.classList.remove(node, o.classes.itemHidden);
+                });
             }
-					
+
             mb.initialised = false;
         }
     };
