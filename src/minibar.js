@@ -505,11 +505,11 @@
             // check for MutationObserver support
             if ( "MutationObserver" in window ) {
                 var callback = function(mutationsList, observer) {
-                    for(var mutation of mutationsList) {
-                        // update the instance if content changes
-                        if (mutation.type == 'childList') {
-                            // if the IntersectionObserver API is used, we need to observe / unobserve items
-                            if ( mb.intersectionObserver ) {
+                    if ( mb.intersectionObserver ) {
+                        for(var mutation of mutationsList) {
+                            // update the instance if content changes
+                            if (mutation.type == 'childList') {
+                                //  observe / unobserve items
                                 for(var node of mutation.addedNodes) {
                                     mb.intersectionObserver.observe(node);
                                 }
