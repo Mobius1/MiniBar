@@ -32,7 +32,7 @@
         offsetSize = {
             x: "offsetWidth",
             y: "offsetHeight"
-        },				
+        },
         mAxis = {
             x: "pageX",
             y: "pageY"
@@ -53,7 +53,8 @@
 
         navButtons: false,
         scrollAmount: 10,
-        
+        wheelScrollAmount: 100,
+
         mutationObserver: {
             attributes: false,
             childList: true,
@@ -123,7 +124,7 @@
     var off = function(el, e, fn) {
         el.removeEventListener(e, fn);
     };
-	
+
     /**
      * Check is item array or array-like
      * @param  {Mixed} arr
@@ -132,7 +133,7 @@
     var isCollection = function(arr) {
         return Array.isArray(arr) || arr instanceof HTMLCollection || arr instanceof NodeList;
 	};
-	
+
     /**
      * Iterator helper
      * @param  {(Array|Object)}   arr Any object, array or array-like collection.
@@ -187,7 +188,7 @@
             x: o.left + d,
             y: o.top + n,
             x2: o.left + o.width + d,
-            y2: o.top + o.height + n,					
+            y2: o.top + o.height + n,
             height: Math.round(o.height),
             width: Math.round(o.width)
         }
@@ -279,10 +280,10 @@
 
         this.bars = { x: {}, y: {} };
         this.tracks = { x: {},  y: {} };
-			
+
         this.lastX = 0;
         this.lastY = 0;
-    
+
         this.scrollDirection = {x: 0, y: 0};
 
         // Events
@@ -443,13 +444,13 @@
                 mb.manualPosition = true;
                 mb.container.style.position = "relative";
             }
-					
+
             if ( o.observableItems ) {
                 const items = this.getItems();
-                
+
                 if ( items.length && "IntersectionObserver" in window ) {
                     mb.items = items;
-                    
+
                     var threshold = [];
 
                     // Increase / decrease to set granularity
@@ -458,9 +459,9 @@
                     // Don't want to have to type all of them...
                     for (var i=0; i<1; i+=increment) {
                         threshold.push(i);
-                    }									
-                    
-                    var callback = function(entries, observer) { 
+                    }
+
+                    var callback = function(entries, observer) {
                         entries.forEach(entry => {
                             var node = entry.target;
                             var ratio = entry.intersectionRatio;
@@ -468,25 +469,25 @@
                             var visible = intersecting && ratio >= 1;
                             var hidden = !intersecting && ratio <= 0;
                             var partial = intersecting && ratio > 0 && ratio < 1;
-                            
+
                             node.classList.toggle(o.classes.itemVisible, visible);
                             node.classList.toggle(o.classes.itemPartial, partial);
                             node.classList.toggle(o.classes.itemHidden, hidden);
                         });
                     };
-                    
+
                     this.intersectionObserver = new IntersectionObserver(callback, {
                         root: null,
                         rootMargin: '0px',
                         threshold: threshold
                     });
-                    
+
                     each(items, function(i, item) {
                         mb.intersectionObserver.observe(item);
                     });
-                    
+
                 }
-            }					
+            }
 
             mb.update();
 
@@ -513,18 +514,18 @@
                                 for(var node of mutation.addedNodes) {
                                     mb.intersectionObserver.observe(node);
                                 }
-                            
+
                                 for(var node of mutation.removedNodes) {
                                     mb.intersectionObserver.unobserve(node);
                                 }
                             }
                         }
                     }
-									
+
                     if ( mb.intersectionObserver ) {
                         mb.items = mb.getItems();
                     }
-                
+
                     // setTimeout(mb.update.bind(mb), 500);
                     mb.update();
                 };
@@ -532,10 +533,10 @@
                 this.mutationObserver = new MutationObserver(callback);
 
                 this.mutationObserver.observe(this.content, this.config.mutationObserver);
-            } 
-                    
+            }
+
             mb.initialised = true;
-					
+
             setTimeout(function() {
                 mb.config.onInit.call(mb, mb.getData());
             }, 10);
@@ -561,15 +562,15 @@
         } else if ( data.scrollTop < this.lastY ) {
             this.scrollDirection.y = -1;
         }
-			
+
         this.updateBars();
-	
+
         this.config.onScroll.call(this, data);
-			
+
 				this.lastX = data.scrollLeft;
 				this.lastY = data.scrollTop;
     };
-	
+
     proto.getItems = function() {
         const o = this.config;
         let items;
@@ -580,10 +581,10 @@
         if ( o.observableItems instanceof HTMLCollection || o.observableItems instanceof NodeList ) {
             items = [].slice.call(o.observableItems);
         }
-        
+
         return items;
     };
-		
+
     /**
      * Get instance data
      * @return {Object}
@@ -595,10 +596,10 @@
         const scrollHeight = c.scrollHeight;
         const scrollWidth = c.scrollWidth;
         const offsetWidth = c.offsetWidth;
-        const offsetHeight = c.offsetHeight;			
+        const offsetHeight = c.offsetHeight;
         const barSize = this.size;
         const containerRect = this.rect;
-        
+
         return {
             scrollTop,
             scrollLeft,
@@ -610,7 +611,7 @@
             barSize
         }
     };
-	
+
     /**
      * Scroll content by amount
      * @param  {Number|String}     position   Position to scroll to
@@ -618,11 +619,11 @@
      * @return {Void}
      */
     proto.scrollTo = function(position, axis) {
-        
+
         axis = axis || "y";
-        
+
         var data = this.getData(), amount;
-        
+
         if ( typeof position === "string" ) {
             if ( position === "start" ) {
                 amount = -data[scrollPos[axis]];
@@ -632,7 +633,7 @@
         } else {
             amount = position - data[scrollPos[axis]];
         }
-        
+
         this.scrollBy(amount, axis);
     };
 
@@ -674,12 +675,12 @@
             // Cancel after allotted interval
             if (ct > duration) {
                 caf(mb.frame);
-				mb.content[scrollPos[axis]] = Math.ceil(pos + amount);	
+				mb.content[scrollPos[axis]] = Math.ceil(pos + amount);
                 return;
             }
-					
+
             // Update scroll position
-            mb.content[scrollPos[axis]] = Math.ceil(easing(ct, pos, amount, duration));					
+            mb.content[scrollPos[axis]] = Math.ceil(easing(ct, pos, amount, duration));
 
             // requestAnimationFrame
             mb.frame = raf(scroll);
@@ -696,7 +697,13 @@
     proto.wheel = function(e) {
         e.preventDefault();
 
-        this.scrollBy(e.deltaY * 100, "x");
+        var mb = this,
+            o = mb.config,
+            factor = e.deltaMode !== 0 ? 100 : 1,
+            way = e.deltaY/Math.abs(e.deltaY),
+            amount = o.wheelScrollAmount === undefined ? e.deltaY * factor : o.wheelScrollAmount * way;
+
+        this.scrollBy(amount, "x");
     };
 
     /**
@@ -974,22 +981,22 @@
                 mb.mutationObserver.disconnect();
                 mb.mutationObserver = false;
             }
-					
+
             if ( o.observableItems ) {
                 if ( mb.intersectionObserver ) {
                     mb.intersectionObserver.disconnect();
                     mb.intersectionObserver = false;
                 }
-                
+
                 each(mb.items, function(i, item) {
                     const node = item.node || item;
                     node.classList.remove(o.classes.item);
                     node.classList.remove(o.classes.itemVisible);
                     node.classList.remove(o.classes.itemPartial);
-                    node.classList.remove(o.classes.itemHidden);								
-                });							
+                    node.classList.remove(o.classes.itemHidden);
+                });
             }
-					
+
             mb.initialised = false;
         }
     };
