@@ -1,6 +1,6 @@
 ![MiniBar](/docs/img/minibar_logo_medium.png?raw=true "MiniBar")
 
-[![Maintenance](https://img.shields.io/maintenance/yes/2018.svg?style=for-the-badge)](https://github.com/Mobius1/MiniBar/)
+[![Maintenance](https://img.shields.io/maintenance/yes/2020.svg?style=for-the-badge)](https://github.com/Mobius1/MiniBar/graphs/commit-activity)
 [![Code Climate maintainability](https://img.shields.io/codeclimate/maintainability/Mobius1/MiniBar.svg?style=for-the-badge)](https://codeclimate.com/github/Mobius1/MiniBar/maintainability)
 ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?style=for-the-badge)
 ![](http://img.badgesize.io/Mobius1/MiniBar/master/dist/minibar.min.js?compression=gzip&label=gzipped&style=for-the-badge)
