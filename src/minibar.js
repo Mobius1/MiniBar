@@ -1,5 +1,5 @@
 /*!
-* MiniBar 0.4.2
+* MiniBar 0.5.0
 * http://mobius.ovh/
 *
 * Released under the MIT license
@@ -297,10 +297,12 @@
         this.events = {};
 
         // Bind events
-        var events = ["update", "scroll", "mouseenter", "mousedown", "mousemove", "mouseup", "wheel"];
+        var events = ["scroll", "mouseenter", "mousedown", "mousemove", "mouseup", "wheel"];
         for (var i = 0; i < events.length; i++) {
-            this.events[events[i]] = this[events[i]].bind(this);
+            this.events[events[i]] = this["_"+events[i]].bind(this);
         }
+			
+                this.events.update = this.update.bind(this);
 
         // Debounce win resize
         this.events.debounce = debounce(this.events.update, 50);
@@ -551,34 +553,6 @@
         }
     };
 
-    /**
-    * Scroll callback
-    * @param  {Object} e Event interface
-    * @return {Void}
-    */
-    proto.scroll = function(e) {
-        const data = this.getData(true);
-
-        if (data.scrollLeft > this.lastX) {
-            this.scrollDirection.x = 1;
-        } else if (data.scrollLeft < this.lastX) {
-            this.scrollDirection.x = -1;
-        }
-
-        if (data.scrollTop > this.lastY) {
-            this.scrollDirection.y = 1;
-        } else if (data.scrollTop < this.lastY) {
-            this.scrollDirection.y = -1;
-        }
-
-        this.updateBars();
-
-        this.config.onScroll.call(this, data);
-
-        this.lastX = data.scrollLeft;
-        this.lastY = data.scrollTop;
-    };
-
     proto.getItems = function() {
         const o = this.config;
         let items;
@@ -628,7 +602,9 @@
     */
     proto.scrollTo = function(position, axis) {
 
-        axis = axis || "y";
+        if (axis === undefined ) {
+                    axis = "y";
+                }
 
         var data = this.getData(),
             amount;
@@ -656,7 +632,9 @@
     */
     proto.scrollBy = function(amount, axis, duration, easing) {
 
-        axis = axis || "y";
+        if (axis === undefined ) {
+                    axis = "y";
+                }
 
         // No animation
         if (duration === 0) {
@@ -700,128 +678,24 @@
 
         mb.frame = scroll();
     };
-
+	
     /**
-    * Mousewheel callback
-    * @param  {Object} e Event interface
+    * Scroll to top
     * @return {Void}
     */
-    proto.wheel = function(e) {
-        e.preventDefault();
-
-        this.scrollBy(e.deltaY * 100, "x");
-    };
-
-    /**
-    * Mouseenter callack
-    * @param  {Object} e Event interface
-    * @return {Void}
-    */
-    proto.mouseenter = function(e) {
-        this.updateBars();
-    };
-
-    /**
-    * Mousedown callack
-    * @param  {Object} e Event interface
-    * @return {Void}
-    */
-    proto.mousedown = function(e) {
-        e.preventDefault();
-
-        var mb = this,
-            o = mb.config,
-            type = o.barType === "progress" ? "tracks" : "bars",
-            axis = e.target === mb[type].x.node ? "x" : "y";
-
-        if (DOM.classList.contains(e.target, "mb-track")) {
-            axis = e.target === mb.tracks.x.node ? "x" : "y"
-            var track = mb.tracks[axis];
-            var ts = track[trackSize[axis]];
-            var offset = e[mAxis[axis]] - track[axis];
-            var ratio = offset / ts;
-            var scroll = ratio * (mb.content[scrollSize[axis]] - mb.rect[trackSize[axis]]);
-
-            return this.scrollTo(scroll, axis);
-        }
-
-        mb.down = true;
-
-        mb.currentAxis = axis;
-
-        // Lets do all the nasty reflow-triggering stuff now
-        // otherwise it'll be a shit-show during mousemove
-        mb.update();
-
-        // Keep the tracks visible during drag
-        DOM.classList.add(mb.container, o.classes.visible);
-        DOM.classList.add(mb.container, o.classes.scrolling + "-" + axis);
-
-        // Save data for use during mousemove
-        o.barType === "progress" ? (mb.origin = {
-            x: e.pageX - mb.tracks[axis].x,
-            y: e.pageY - mb.tracks[axis].y
-        }, mb.mousemove(e)) : mb.origin = {
-            x: e.pageX - mb.bars[axis].x,
-            y: e.pageY - mb.bars[axis].y
+        proto.scrollToTop = function() {
+            this.scrollTo(0)
         };
-
-        // Attach the mousemove and mouseup listeners now
-        // instead of permanently having them on
-        DOM.on(doc, "mousemove", mb.events.mousemove);
-        DOM.on(doc, "mouseup", mb.events.mouseup);
-    };
-
+	
     /**
-    * Mousemove callack
-    * @param  {Object} e Event interface
+    * Scroll to bottom
     * @return {Void}
     */
-    proto.mousemove = function(e) {
-        e.preventDefault();
-
-        var mb = this,
-            o = this.origin,
-            axis = this.currentAxis,
-            track = mb.tracks[axis],
-            ts = track[trackSize[axis]],
-            offset, ratio, scroll,
-            progress = mb.config.barType === "progress";
-
-        offset = progress ? e[mAxis[axis]] - track[axis] : e[mAxis[axis]] - o[axis] - track[axis];
-        ratio = offset / ts;
-        scroll = progress ? ratio * (mb.content[scrollSize[axis]] - mb.rect[trackSize[axis]]) : ratio * mb[scrollSize[axis]];
-
-        // Update scroll position
-        raf(function() {
-            mb.content[scrollPos[axis]] = scroll;
-        });
-    };
-
-    /**
-    * Mouseup callack
-    * @param  {Object} e Event interface
-    * @return {Void}
-    */
-    proto.mouseup = function(e) {
-        var mb = this,
-            o = mb.config,
-            ev = mb.events;
-
-        DOM.classList.toggle(mb.container, o.classes.visible, o.alwaysShowBars);
-        DOM.classList.remove(mb.container, o.classes.scrolling + "-" + mb.currentAxis);
-
-        if (!DOM.classList.contains(e.target, o.classes.bar)) {
-            DOM.classList.remove(mb.container, o.classes.hover + "-x");
-            DOM.classList.remove(mb.container, o.classes.hover + "-y");
-        }
-
-        mb.currentAxis = null;
-        mb.down = false;
-
-        DOM.off(doc, "mousemove", ev.mousemove);
-        DOM.off(doc, "mouseup", ev.mouseup);
-    };
+        proto.scrollToBottom = function() {
+            var data = this.getData();
+			
+            this.scrollTo(data.scrollHeight - data.offsetHeight)
+        };
 
     /**
     * Update cached values and recalculate sizes / positions
@@ -886,7 +760,7 @@
 
             // Only scroll to bottom if the cursor is at the end of the content and we're not dragging
             if (!mb.down && mb.content.selectionStart >= mb.content.value.length) {
-                mb.content.scrollTop = mb.scrollHeight + 1000;
+                mb.content.scrollTop = mb.scrollToBottom();
             }
         }
 
@@ -1017,7 +891,162 @@
             mb.initialised = false;
         }
     };
+	
+	
+        /* PRIVATE METHODS */
+	
+    /**
+    * Scroll callback
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
+    proto._scroll = function(e) {
+        const data = this.getData(true);
+
+        if (data.scrollLeft > this.lastX) {
+            this.scrollDirection.x = 1;
+        } else if (data.scrollLeft < this.lastX) {
+            this.scrollDirection.x = -1;
+        }
+
+        if (data.scrollTop > this.lastY) {
+            this.scrollDirection.y = 1;
+        } else if (data.scrollTop < this.lastY) {
+            this.scrollDirection.y = -1;
+        }
+
+        this.updateBars();
+
+        this.config.onScroll.call(this, data);
+
+        this.lastX = data.scrollLeft;
+        this.lastY = data.scrollTop;
+    };
+	
+    /**
+    * Mousewheel callback
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
+    proto._wheel = function(e) {
+        e.preventDefault();
+
+        this.scrollBy(e.deltaY * 100, "x");
+    };
+
+    /**
+    * Mouseenter callack
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
+    proto._mouseenter = function(e) {
+        this.updateBars();
+    };
+
+    /**
+    * Mousedown callack
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
+    proto._mousedown = function(e) {
+        e.preventDefault();
+
+        var mb = this,
+            o = mb.config,
+            type = o.barType === "progress" ? "tracks" : "bars",
+            axis = e.target === mb[type].x.node ? "x" : "y";
+
+        if (DOM.classList.contains(e.target, "mb-track")) {
+            axis = e.target === mb.tracks.x.node ? "x" : "y"
+            var track = mb.tracks[axis];
+            var ts = track[trackSize[axis]];
+            var offset = e[mAxis[axis]] - track[axis];
+            var ratio = offset / ts;
+            var scroll = ratio * (mb.content[scrollSize[axis]] - mb.rect[trackSize[axis]]);
+
+            return this.scrollTo(scroll, axis);
+        }
+
+        mb.down = true;
+
+        mb.currentAxis = axis;
+
+        // Lets do all the nasty reflow-triggering stuff now
+        // otherwise it'll be a shit-show during mousemove
+        mb.update();
+
+        // Keep the tracks visible during drag
+        DOM.classList.add(mb.container, o.classes.visible);
+        DOM.classList.add(mb.container, o.classes.scrolling + "-" + axis);
+
+        // Save data for use during mousemove
+        o.barType === "progress" ? (mb.origin = {
+            x: e.pageX - mb.tracks[axis].x,
+            y: e.pageY - mb.tracks[axis].y
+        }, mb._mousemove(e)) : mb.origin = {
+            x: e.pageX - mb.bars[axis].x,
+            y: e.pageY - mb.bars[axis].y
+        };
+
+        // Attach the mousemove and mouseup listeners now
+        // instead of permanently having them on
+        DOM.on(doc, "mousemove", mb.events.mousemove);
+        DOM.on(doc, "mouseup", mb.events.mouseup);
+    };
+
+    /**
+    * Mousemove callack
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
+    proto._mousemove = function(e) {
+        e.preventDefault();
+
+        var mb = this,
+            o = this.origin,
+            axis = this.currentAxis,
+            track = mb.tracks[axis],
+            ts = track[trackSize[axis]],
+            offset, ratio, scroll,
+            progress = mb.config.barType === "progress";
+
+        offset = progress ? e[mAxis[axis]] - track[axis] : e[mAxis[axis]] - o[axis] - track[axis];
+        ratio = offset / ts;
+        scroll = progress ? ratio * (mb.content[scrollSize[axis]] - mb.rect[trackSize[axis]]) : ratio * mb[scrollSize[axis]];
+
+        // Update scroll position
+        raf(function() {
+            mb.content[scrollPos[axis]] = scroll;
+        });
+    };
+
+    /**
+    * Mouseup callack
+    * @param  {Object} e Event interface
+    * @return {Void}
+    */
+    proto._mouseup = function(e) {
+        var mb = this,
+            o = mb.config,
+            ev = mb.events;
+
+        DOM.classList.toggle(mb.container, o.classes.visible, o.alwaysShowBars);
+        DOM.classList.remove(mb.container, o.classes.scrolling + "-" + mb.currentAxis);
+
+        if (!DOM.classList.contains(e.target, o.classes.bar)) {
+            DOM.classList.remove(mb.container, o.classes.hover + "-x");
+            DOM.classList.remove(mb.container, o.classes.hover + "-y");
+        }
+
+        mb.currentAxis = null;
+        mb.down = false;
+
+        DOM.off(doc, "mousemove", ev.mousemove);
+        DOM.off(doc, "mouseup", ev.mouseup);
+    };	
 
     root.MiniBar = MiniBar;
 
 }(this));
+
+const instance = new MiniBar("#scrollable");
