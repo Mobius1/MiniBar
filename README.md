@@ -261,6 +261,14 @@ By default this method animates the scrolling. To control the duration of the an
 
 The default easing used is `easeOutQuad`, but you can pass your own easing function with the `easing` parameter.
 
+### `scrollToTop()` (`0.5.0` and above)
+
+Scroll the container to the top
+
+### `scrollToBottom()` (`0.5.0` and above)
+
+Scroll the container to the bottom
+
 ---
 
 ## To Do
