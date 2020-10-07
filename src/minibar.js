@@ -1,5 +1,5 @@
 /*!
-* MiniBar 0.5.0
+* MiniBar 0.5.1
 * http://mobius.ovh/
 *
 * Released under the MIT license
@@ -1048,5 +1048,3 @@
     root.MiniBar = MiniBar;
 
 }(this));
-
-const instance = new MiniBar("#scrollable");
