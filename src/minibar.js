@@ -229,6 +229,8 @@
             navButtons: false,
             scrollAmount: 10,
 
+            wheelScrollAmount: 100,
+
             mutationObserver: {
                 attributes: false,
                 childList: true,
@@ -931,7 +933,10 @@
     proto._wheel = function(e) {
         e.preventDefault();
 
-        this.scrollBy(e.deltaY * 100, "x");
+        var mb = this,
+            o = mb.config;
+  
+        this.scrollBy(e.deltaY * o.wheelScrollAmount, "x");
     };
 
     /**
