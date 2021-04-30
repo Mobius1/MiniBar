@@ -936,7 +936,7 @@
         var mb = this,
             o = mb.config;
   
-        this.scrollBy(e.deltaY * o.wheelScrollAmount, "x");
+        this.scrollBy((e.deltaY + e.deltaX) * o.wheelScrollAmount, "x");
     };
 
     /**
