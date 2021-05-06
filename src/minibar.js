@@ -936,7 +936,8 @@
         var mb = this,
             o = mb.config;
   
-        this.scrollBy((e.deltaY + e.deltaX) * o.wheelScrollAmount, "x");
+            /* Louis: use deltaY and deltaX for trackpads, and reverse deltaX */
+        this.scrollBy((e.deltaY - e.deltaX) * o.wheelScrollAmount, "x");
     };
 
     /**
