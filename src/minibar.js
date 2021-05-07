@@ -229,6 +229,8 @@
             navButtons: false,
             scrollAmount: 10,
 
+            wheelScrollAmount: 100,
+
             mutationObserver: {
                 attributes: false,
                 childList: true,
@@ -931,7 +933,11 @@
     proto._wheel = function(e) {
         e.preventDefault();
 
-        this.scrollBy(e.deltaY * 100, "x");
+        var mb = this,
+            o = mb.config;
+  
+            /* Louis: use deltaY and deltaX for trackpads, and reverse deltaX */
+        this.scrollBy((e.deltaY - e.deltaX) * o.wheelScrollAmount, "x");
     };
 
     /**
